@@ -1,26 +1,24 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx"
+    "target": "es2022",              // Soporte para características modernas de JavaScript
+    "module": "NodeNext",            // Compatible con los módulos ES y Node.js
+    "moduleResolution": "NodeNext",  // Resuelve los módulos de acuerdo a Node.js
+    "strict": true,                  // Activar chequeo estricto de tipos para evitar errores
+    "esModuleInterop": true,         // Permite interoperabilidad con módulos CommonJS
+    "skipLibCheck": true,            // Omite la verificación de archivos .d.ts para mejorar el rendimiento
+    "isolatedModules": true,         // Transpilación aislada para mejorar la compatibilidad
+    "resolveJsonModule": true,       // Soporta la importación de archivos JSON
+    "noImplicitOverride": true,      // Requiere el uso de la palabra clave `override`
+    "outDir": "./dist",              // Salida de archivos compilados
+    "rootDir": "./src",              // Carpeta de archivos fuente
+    "lib": ["es2022", "dom"],        // Incluye bibliotecas para ES2022 y DOM (si usas React)
+    "allowJs": true                  // Permite la importación de archivos JavaScript
   },
   "include": [
-    "src"
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
