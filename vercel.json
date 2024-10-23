@@ -15,16 +15,5 @@
       "dest": "/index.html",
       "status": 200
     }
-  ],
-  "headers": [
-    {
-      "source": "/dist/(.*).js",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/javascript"
-        }
-      ]
-    }
   ]
 }
