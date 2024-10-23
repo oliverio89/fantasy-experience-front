@@ -9,7 +9,7 @@ import HomeV from "./pages/Home";
 import CrearPartida from "./pages/CrearPartida";
 import PartidasDetalles from "./pages/PartidasDetalles";
 import Register from "./pages/Register";
-import LogIn from "./pages/LogIn";  
+import LogIn from "./pages/LogIn";
 import Contact from "./pages/Contact";
 import UserDetail from "./pages/UserDetail";
 import MasterDetail from "./pages/MasterDetail";
@@ -65,6 +65,7 @@ function App() {
       <Route path="/master" element={<MasterDetail />} />
       <Route path="/nextgames" element={<NextGames />} />
       <Route path="/ourmasters" element={<OurMasters />} />
+      <Route path="*" element={<div>404 Not Found</div>} />
     </Routes>
   );
 }
