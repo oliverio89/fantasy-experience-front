@@ -8,9 +8,13 @@ export default defineConfig({
     outDir: "dist",
   },
   server: {
+    port: 3000,
     watch: {
       usePolling: true, // Esto puede ayudar si hay problemas con hot-reload en ciertos sistemas de archivos
     },
   },
   plugins: [react()],
+  resolve: {
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
+  },
 });
