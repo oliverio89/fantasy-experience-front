@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
 const container = document.getElementById("root");
+console.log(container + "aqui estoy");
 const root = createRoot(container!);
 
 root.render(
