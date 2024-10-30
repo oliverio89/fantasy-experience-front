@@ -1,4 +1,11 @@
-import { FunctionComponent, memo, useMemo, type CSSProperties } from "react";
+import {
+  FunctionComponent,
+  memo,
+  useMemo,
+  useCallback,
+  type CSSProperties,
+} from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export type Slide2Type = {
   className?: string;
@@ -10,20 +17,22 @@ export type Slide2Type = {
 };
 
 const GameCard: FunctionComponent<Slide2Type> = memo(
-  ({
-    className = "",
-    propBackgroundImage,
-    cedericVandenbergheDPhytVHw,
-  }) => {
+  ({ className = "", propBackgroundImage, cedericVandenbergheDPhytVHw }) => {
     const frameDivStyle: CSSProperties = useMemo(() => {
       return {
         backgroundImage: propBackgroundImage,
       };
     }, [propBackgroundImage]);
 
+    const navigate = useNavigate(); // Hook para redireccionar
+    const onSlide1ContainerClick = useCallback(() => {
+      navigate("/nextgames");
+    }, [navigate]);
+
     return (
       <div
-        className={`w-[360px] shrink-0 flex flex-col items-start justify-start min-h-[480px] max-w-full text-center text-base text-black font-titulo-2 ${className}`}
+        className={`w-[360px] shrink-0 flex flex-col items-start justify-start min-h-[480px] max-w-full cursor-pointer text-center text-base text-black font-titulo-2 ${className}`}
+        onDoubleClick={onSlide1ContainerClick}
       >
         <div className="self-stretch shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-goldenrod flex flex-col items-start justify-start pt-0 px-0 pb-[54px] box-border gap-3.5 max-w-full mq750:pb-[35px] mq750:box-border">
           <div className="self-stretch h-[280px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-goldenrod hidden" />

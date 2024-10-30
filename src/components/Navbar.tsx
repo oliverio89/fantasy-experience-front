@@ -48,22 +48,22 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
 
     return (
       <section
-        className={`self-stretch flex flex-row items-start justify-start pt-0 px-0  box-border top-[0] z-[99] sticky max-w-full ${className}`}
+        className={`self-stretch h-[90px] flex flex-row items-start justify-start pt-0 px-0 box-border top-[0] z-[99] sticky max-w-full ${className}`}
       >
-        <header className="self-stretch flex-1 bg-black overflow-auto flex flex-row items-start justify-between py-0 px-20 box-border gap-5 max-w-full z-[1] text-center text-9xl text-dark-gold font-milonga mq750:pl-10 mq750:pr-10 mq750:box-border">
-          <div className="self-stretch w-[1280px] relative bg-black hidden" />
-          <h3 className="m-1 self-stretch w-[150px] relative text-inherit leading-[76.6%] font-normal font-[inherit] [display:-webkit-inline-box] items-center overflow-hidden text-ellipsis [-webkit-line-clamp:3] [-webkit-box-orient:vertical] shrink-0 z-[1]">
+        <header className="self-stretch flex-1 bg-black overflow-auto flex flex-row items-start justify-between py-1 px-20 box-border gap-5 max-w-full z-[1] text-center text-9xl text-dark-gold font-milonga mq750:pl-10 mq750:pr-10 mq750:box-border">
+          <div className="self-stretch w-full relative bg-black hidden" />
+          <h3 className="m-1 self-stretch w-[150px] p-1 relative text-inherit leading-[76.6%] font-normal font-[inherit] [display:-webkit-inline-box] items-center overflow-hidden text-ellipsis [-webkit-line-clamp:3] [-webkit-box-orient:vertical] shrink-0 z-[1]">
             <span className="[line-break:anywhere] w-full">
               <p className="m-1">Fantasy</p>
               <p className="m-1">Experience</p>
             </span>
           </h3>
 
-          <div className="flex lg:hidden flex-row items-start justify-start gap-[145.3px] max-w-full text-4xs text-white font-titulo-2 mq1050:w-[337px] mq1050:gap-[73px] mq450:gap-9">
+          <div className="flex lg:hidden flex-row items-start justify-start gap-[145px] max-w-full text-4xs text-white font-titulo-2 mq1050:w-[337px] mq1050:gap-[73px] mq450:gap-9">
             <nav className="m-0 flex-1 flex flex-row items-start justify-start gap-[52px] max-w-full text-center text-xl text-oldlace-100 font-titulo-2 mq750:gap-[26px] mq1050:hidden">
               {/* Enlace Inicio */}
               <a
-                className={`[text-decoration:none] h-20 relative font-medium flex items-center justify-center min-w-[52px] cursor-pointer z-[1] ${getLinkClass(
+                className={`[text-decoration:none] h-20 relative font-medium flex items-center justify-center min-w-[52px] font-milonga cursor-pointer z-[1] ${getLinkClass(
                   "/"
                 )}`}
                 onClick={onHomeTextClick}
@@ -73,7 +73,7 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
 
               {/* Enlace Nuestros Másters */}
               <a
-                className={`[text-decoration:none] h-20 w-[143px] relative font-medium flex items-center justify-center shrink-0 cursor-pointer z-[1] ${getLinkClass(
+                className={`[text-decoration:none] h-20 w-[143px] relative font-medium flex items-center font-milonga justify-center shrink-0 cursor-pointer z-[1] ${getLinkClass(
                   "/ourmasters"
                 )}`}
                 onClick={onNuestrosMastersTextClick}
@@ -83,7 +83,7 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
 
               {/* Enlace Partidas */}
               <a
-                className={`[text-decoration:none] h-20 relative font-medium flex items-center justify-center min-w-[70px] cursor-pointer z-[1] ${getLinkClass(
+                className={`[text-decoration:none] h-20 relative font-medium flex items-center font-milonga justify-center min-w-[70px] cursor-pointer z-[1] ${getLinkClass(
                   "/nextgames"
                 )}`}
                 onClick={onPartidasTextClick}
@@ -93,7 +93,7 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
 
               {/* Enlace Contacto */}
               <a
-                className={`[text-decoration:none] h-20 relative font-medium flex items-center justify-center min-w-[72px] cursor-pointer z-[1] ${getLinkClass(
+                className={`[text-decoration:none] h-20 relative font-medium flex items-center justify-center font-milonga min-w-[72px] cursor-pointer z-[1] ${getLinkClass(
                   "/contacto"
                 )}`}
                 onClick={onContactoTextClick}
@@ -145,7 +145,7 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
                   />
                   <div className="flex-1 flex flex-col items-start justify-start pt-px px-0 pb-0">
                     <a
-                      className="[text-decoration:none] self-stretch relative text-lg font-bold font-titulo-2 text-dark-gold text-center"
+                      className="[text-decoration:none] self-stretch relative text-lg font-bold font-titulo-2  text-dark-gold text-center"
                       onClick={onUserDetailTextClick}
                     >
                       Mi cuenta

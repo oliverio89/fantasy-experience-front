@@ -1,5 +1,6 @@
 import { FunctionComponent, memo, useCallback, useRef } from "react";
 import CardMaster from "./CardMaster";
+import { useNavigate } from "react-router-dom";
 
 export type FrameComponent2Type = {
   className?: string;
@@ -7,6 +8,7 @@ export type FrameComponent2Type = {
 
 const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
   ({ className = "" }) => {
+    const navigate = useNavigate(); // Hook para redireccionar
     const cardContainerRef = useRef<HTMLDivElement>(null);
 
     const onSlide1ContainerClick = useCallback(() => {
@@ -14,8 +16,8 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
     }, []);
 
     const onViewAllMastersLinkClick = useCallback(() => {
-      // Please sync "Masters v1.2" to the project
-    }, []);
+      navigate("/ourmasters");
+    }, [navigate]);
 
     // Funciones para desplazar el contenedor lateralmente
     const scrollLeft = () => {
@@ -59,7 +61,9 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
           </button>
 
           {/* Contenedor de las tarjetas */}
-          <div className="relative mx-[70px]"> {/* Márgenes a los lados */}
+          <div className="relative mx-[70px]">
+            {" "}
+            {/* Márgenes a los lados */}
             <div
               className="flex flex-row items-start justify-start pt-0 px-0 pb-[62px] box-border gap-[20.4px] max-w-full overflow-x-auto scroll-hidden scrollbar-hide"
               ref={cardContainerRef}
