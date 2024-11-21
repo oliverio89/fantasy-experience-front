@@ -3,22 +3,22 @@ import { useNavigate } from "react-router-dom";
 import SessionInfoHeader from "../components/session-info-header";
 import Button from "../components/button";
 
-const CrearPartidaV12Login: FunctionComponent = () => {
+const NewGame: FunctionComponent = () => {
   const navigate = useNavigate();
 
   const onFantasyExperienceTextClick = useCallback(() => {
     navigate("/home-v12");
   }, [navigate]);
 
-  const onNuestrosMstersTextClick = useCallback(() => {
+  const onOurMastersTextClick = useCallback(() => {
     // Please sync "Masters v1.2" to the project
   }, []);
 
-  const onPartidasTextClick = useCallback(() => {
-    // Please sync "Partidas v1.2" to the project
+  const onGamesTextClick = useCallback(() => {
+    // Please sync "Games v1.2" to the project
   }, []);
 
-  const onContactoTextClick = useCallback(() => {
+  const onContactTextClick = useCallback(() => {
     // Please sync "Contacto" to the project
   }, []);
 
@@ -26,7 +26,7 @@ const CrearPartidaV12Login: FunctionComponent = () => {
     // Please sync "Crear partida v1.2" to the project
   }, []);
 
-  const onVerMiPerfilClick = useCallback(() => {
+  const onProfileClick = useCallback(() => {
     // Please sync "Perfil usuario normal" to the project
   }, []);
 
@@ -50,19 +50,19 @@ const CrearPartidaV12Login: FunctionComponent = () => {
             </a>
             <a
               className="[text-decoration:none] h-[5rem] w-[8.938rem] relative font-medium text-[inherit] flex items-center justify-center shrink-0 cursor-pointer z-[1]"
-              onClick={onNuestrosMstersTextClick}
+              onClick={onOurMastersTextClick}
             >
               Nuestros Másters
             </a>
             <a
               className="[text-decoration:none] h-[5rem] relative font-medium text-goldenrod flex items-center justify-center min-w-[4.375rem] cursor-pointer z-[1]"
-              onClick={onPartidasTextClick}
+              onClick={onGamesTextClick}
             >
-              Partidas
+              Games
             </a>
             <a
               className="[text-decoration:none] h-[5rem] relative font-medium text-[inherit] flex items-center justify-center min-w-[4.5rem] cursor-pointer z-[1]"
-              onClick={onContactoTextClick}
+              onClick={onContactTextClick}
             >
               Contacto
             </a>
@@ -128,7 +128,7 @@ const CrearPartidaV12Login: FunctionComponent = () => {
             <div className="self-stretch h-[3.25rem] flex flex-col items-start justify-start pt-[0rem] px-[0rem] pb-[0.062rem] box-border">
               <a
                 className="[text-decoration:none] self-stretch relative font-bold text-[inherit] cursor-pointer"
-                onClick={onVerMiPerfilClick}
+                onClick={onProfileClick}
               >
                 Ver mi perfil
               </a>
@@ -529,7 +529,7 @@ const CrearPartidaV12Login: FunctionComponent = () => {
               <Button />
               <button
                 className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-[transparent] h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
-                onClick={onPartidasTextClick}
+                onClick={onGamesTextClick}
               >
                 <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-dark-gold text-center min-w-[4rem]">
                   Cancelar
@@ -543,4 +543,4 @@ const CrearPartidaV12Login: FunctionComponent = () => {
   );
 };
 
-export default CrearPartidaV12Login;
+export default NewGame;

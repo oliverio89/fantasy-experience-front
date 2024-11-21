@@ -10,11 +10,11 @@ const Registerv: FunctionComponent = () => {
     // Please sync "Perfil usuario normal" to the project
   }, []);
 
-  const onVolverAHomeClick = useCallback(() => {
+  const onBackHomeClick = useCallback(() => {
     navigate("/home-v12");
   }, [navigate]);
 
-  const onSiTienesCuentaClick = useCallback(() => {
+  const onAcountClick = useCallback(() => {
     // Please sync "Log in" to the project
   }, []);
 
@@ -30,7 +30,7 @@ const Registerv: FunctionComponent = () => {
         </h1>
         <b
           className="self-stretch h-[3.625rem] relative text-[1.5rem] [text-decoration:underline] flex font-titulo-2 text-nude items-center justify-center shrink-0 cursor-pointer z-[2] mq450:text-[1.188rem]"
-          onClick={onVolverAHomeClick}
+          onClick={onBackHomeClick}
         >
           volver a home
         </b>
@@ -99,7 +99,7 @@ const Registerv: FunctionComponent = () => {
         </div>
         <div
           className="self-stretch relative text-[1.25rem] text-black text-center cursor-pointer z-[2] mq450:text-[1rem]"
-          onClick={onSiTienesCuentaClick}
+          onClick={onAcountClick}
         >
           <span className="font-titulo-2">{`Si tienes cuenta, `}</span>
           <span className="[text-decoration:underline] font-medium font-titulo-2">
@@ -112,4 +112,3 @@ const Registerv: FunctionComponent = () => {
 };
 
 export default Registerv;
-

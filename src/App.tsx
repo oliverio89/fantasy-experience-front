@@ -6,8 +6,8 @@ import {
   useLocation,
 } from "react-router-dom";
 import HomeV from "./pages/Home";
-import CrearPartida from "./pages/CrearPartida";
-import PartidasDetalles from "./pages/PartidasDetalles";
+import CrearPartida from "./pages/NewGame";
+import PartidasDetalles from "./pages/DetailsGame";
 import Register from "./pages/Register";
 import LogIn from "./pages/LogIn";
 import Contact from "./pages/Contact";
