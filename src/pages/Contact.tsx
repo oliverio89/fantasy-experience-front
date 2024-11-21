@@ -3,22 +3,20 @@ import { useNavigate } from "react-router-dom";
 import FormContainer from "../components/form-container";
 import Button from "../components/button";
 
-
 const ContactoV: FunctionComponent = () => {
   const navigate = useNavigate();
 
   const onButtonClick = useCallback(() => {
-    navigate("/home-v12");
+    navigate("/");
   }, [navigate]);
 
   return (
-  
-    <div className="w-full relative bg-white overflow-hidden flex flex-row items-start justify-start leading-[normal] tracking-[normal] [row-gap:20px] text-center text-[6.25rem] text-nude font-titulo-2 mq1025:flex-wrap">
-      <div className="bg-black flex flex-col items-start justify-start pt-[20.375rem] px-[0rem] pb-[10.687rem] box-border gap-[2.343rem] min-w-[38.75rem] max-w-full z-[1] mq725:gap-[1.188rem] mq725:pt-[13.25rem] mq725:pb-[6.938rem] mq725:box-border mq725:min-w-full mq1025:flex-1">
-        <div className="self-stretch h-[52rem] relative bg-black hidden" />
-        <h1 className="m-0 self-stretch h-[11.313rem] relative text-inherit leading-[76.6%] font-normal font-milonga text-dark-gold flex items-center shrink-0 z-[2] mq450:text-[1.875rem] mq450:leading-[1.938rem] mq975:text-[3.125rem] mq975:leading-[2.875rem]">
+    <div className="w-full relative bg-black overflow-hidden flex flex-row items-start justify-start leading-[normal] tracking-[normal] [row-gap:20px] text-center text-[6.25rem] text-nude font-titulo-2 mq1025:flex-wrap">
+      <div className="bg-black flex w-1/2 flex-col items-start justify-start pt-[20.375rem] px-[0rem] pb-[10.687rem] box-border gap-[2.343rem] min-w-[38.75rem] max-w-full z-[1] mq725:gap-[1.188rem] mq725:pt-[13.25rem] mq725:pb-[6.938rem] mq725:box-border mq725:min-w-full mq1025:flex-1">
+        <div className="self-stretch relative h-full bg-black hidden" />
+        <h1 className="m-0 self-stretch h-[11.313rem] relative text-inherit leading-[76.6%] font-normal font-milonga text-dark-gold items-center shrink-0 z-[2] mq450:text-[1.875rem] mq450:leading-[1.938rem] mq975:text-[3.125rem] mq975:leading-[2.875rem]">
           <span>
-            <p className="m-0">{`Fantasy `}</p>
+            <p className="m-0 ">Fantasy</p>
             <p className="m-0">Experience</p>
           </span>
         </h1>
@@ -32,7 +30,7 @@ const ContactoV: FunctionComponent = () => {
           volver a home
         </h3>
       </div>
-      <div className="flex-1 bg-nude flex flex-col items-end justify-start pt-[8.312rem] px-[0.312rem] pb-[8.187rem] box-border gap-[2.062rem] min-w-[26.813rem] max-w-full text-[2.25rem] text-black mq725:gap-[1rem] mq725:pt-[5.375rem] mq725:pb-[5.313rem] mq725:box-border mq725:min-w-full">
+      <div className="flex-1 bg-nude w-1/2 flex flex-col items-end justify-start pt-[8.312rem] px-[0.312rem] pb-[8.187rem] box-border gap-[2.062rem] min-w-[26.813rem] max-w-full text-[2.25rem] text-black mq725:gap-[1rem] mq725:pt-[5.375rem] mq725:pb-[5.313rem] mq725:box-border mq725:min-w-full">
         <div className="self-stretch h-[52rem] relative bg-nude hidden" />
         <div className="self-stretch flex flex-row items-start justify-start pt-[0rem] px-[0rem] pb-[0.687rem] box-border max-w-full">
           <h1 className="m-0 flex-1 relative text-inherit leading-[90%] font-bold font-[inherit] inline-block max-w-full z-[1] mq450:text-[1.375rem] mq450:leading-[1.188rem] mq975:text-[1.813rem] mq975:leading-[1.625rem]">

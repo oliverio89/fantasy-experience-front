@@ -35,7 +35,7 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
             <div className="self-stretch flex flex-row items-start justify-end py-0 pl-[77px] pr-[75px]">
               <div className="flex-1 flex flex-row items-start justify-between gap-5">
                 <img
-                  className="h-[30px] w-[30px] relative z-[1] cursor-pointer"
+                  className="h-[30px] w-[30px] relative z-[1] cursor-pointer pt-[15px]"
                   loading="lazy"
                   alt="Instagram"
                   src="/instagram.svg"
@@ -46,7 +46,7 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
                     )
                   } // Abre Instagram en una nueva pestaña
                 />
-                <div className="flex flex-col items-start justify-start pt-[1.5px] px-0 pb-0">
+                <div className="flex flex-col items-start justify-start pt-[15px] px-0 pb-0">
                   <img
                     className="w-[33px] h-[26.9px] relative z-[1] cursor-pointer"
                     loading="lazy"
