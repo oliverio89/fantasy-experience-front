@@ -5,6 +5,7 @@ import {
   useNavigationType,
   useLocation,
 } from "react-router-dom";
+import Layout from "./components/Layout";
 import HomeV from "./pages/Home";
 import CrearPartida from "./pages/NewGame";
 import PartidasDetalles from "./pages/DetailsGame";
@@ -54,18 +55,19 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<HomeV />} />
-      <Route path="/crearpartida" element={<CrearPartida />} />
-      {/* <Route path="/partidadetalles" element={<PartidasDetalles />} /> */}
-      <Route path="/register" element={<Register />} />
-      <Route path="/login" element={<LogIn />} />
-      <Route path="/contacto" element={<Contact />} />
-      <Route path="/user" element={<UserDetail />} />
-      <Route path="/ourmasters" element={<OurMasters />} />
-      <Route path="/master" element={<MasterDetail />} />
-      <Route path="/nextgames" element={<NextGames />} />
-      <Route path="/ourmasters" element={<OurMasters />} />
-      <Route path="*" element={<div>404 Not Found</div>} />
+      <Route element={<Layout />}>
+        <Route path="/" element={<HomeV />} />
+        <Route path="/crearpartida" element={<CrearPartida />} />
+        {/* <Route path="/partidadetalles" element={<PartidasDetalles />} /> */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<LogIn />} />
+        <Route path="/contacto" element={<Contact />} />
+        <Route path="/user" element={<UserDetail />} />
+        <Route path="/ourmasters" element={<OurMasters />} />
+        <Route path="/master" element={<MasterDetail />} />
+        <Route path="/nextgames" element={<NextGames />} />
+        <Route path="*" element={<div>404 Not Found</div>} />
+      </Route>
     </Routes>
   );
 }
