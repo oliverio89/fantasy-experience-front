@@ -148,57 +148,16 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               showDescription={true}
               description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
             />
-            <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full">
-              <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude hidden" />
-              <GameTypeBadge
-                cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-                star1="/star-1-2.svg"
-                digital="Digital"
-              />
-              <div className="self-stretch flex flex-col items-start justify-start gap-[9px] max-w-full">
-                <div className="self-stretch flex flex-col items-start justify-start gap-px max-w-full">
-                  <h2 className="m-0 self-stretch relative text-inherit font-extrabold font-[inherit] z-[1] mq450:text-lg mq450:leading-[14px] mq1000:text-5xl mq1000:leading-[19px]">
-                    Partida Título
-                  </h2>
-                  <div className="self-stretch flex flex-col items-start justify-start max-w-full text-xl text-darkslategray">
-                    <b className="self-stretch relative z-[1] mq450:text-base">
-                      Master name
-                    </b>
-                    <div className="self-stretch flex flex-row items-start justify-start pt-0 px-0 pb-[7px] box-border max-w-full text-lg">
-                      <div className="flex-1 relative leading-[20px] inline-block max-w-full z-[1]">
-                        Sistema de partida
-                      </div>
-                    </div>
-                    <div className="self-stretch flex flex-row items-start justify-center py-0 pl-5 pr-[21px]">
-                      <img
-                        className="h-5 w-[143px] relative z-[3]"
-                        loading="lazy"
-                        alt=""
-                        src="/group-28.svg"
-                      />
-                    </div>
-                  </div>
-                  <div className="self-stretch flex flex-row items-start justify-start py-0 px-2.5 box-border max-w-full text-lg text-black">
-                    <div className="flex-1 relative leading-[25px] font-light [display:-webkit-inline-box] items-center justify-center overflow-hidden text-ellipsis [-webkit-line-clamp:2] [-webkit-box-orient:vertical] max-w-full z-[1]">{`Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. `}</div>
-                  </div>
-                </div>
-                <div className="flex flex-row items-start justify-start py-0 px-5">
-                  <Button
-                    button1="Ver detalles"
-                    button1Padding="4px 117.5px"
-                    button1Height="30px"
-                    button1Width="320px"
-                    button1Height1="22px"
-                    button1Width1="86px"
-                    button1FontSize="18px"
-                    button1BackgroundColor="#f2ecdd"
-                    button1Border="1px solid #0b0b0b"
-                    button1TextDecoration="unset"
-                    button1FontWeight="unset"
-                  />
-                </div>
-              </div>
-            </div>
+            <GameCard
+              variant="detailed"
+              imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+              badgeIcon="/star-1-2.svg"
+              badgeText="Digital"
+              buttonText="Ver detalles"
+              backgroundColor="#f2ecdd"
+              showDescription={true}
+              description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
+            />
             <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full">
               <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude hidden" />
               <GameTypeBadge

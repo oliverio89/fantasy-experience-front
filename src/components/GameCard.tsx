@@ -137,11 +137,11 @@ const GameCard: FunctionComponent<GameCardProps> = memo(
           style={headerStyle}
         >
           <img
-            className="h-60 w-auto relative rounded-t-xl rounded-b-none object-cover hidden max-w-full"
+            className="h-60 w-full relative rounded-t-xl rounded-b-none object-cover max-w-full"
             alt=""
             src={imageUrl}
           />
-          <div className="h-[100px] w-[100px] shadow-[0px_2px_2px_rgba(0,_0,_0,_0.25)] flex flex-col items-start justify-start relative gap-2.5 z-[2]">
+          <div className="relative z-[2]">
             <img
               className="w-[120px] h-[120px] absolute !m-[0] right-[-20px] bottom-[-20px] rounded-lg"
               loading="lazy"
@@ -190,25 +190,7 @@ const GameCard: FunctionComponent<GameCardProps> = memo(
           {/* Button */}
           {showButton && (
             <div className={`${variant === "simple" ? "self-stretch" : ""} flex flex-row items-start justify-start py-0 ${variant === "simple" ? "pl-4 pr-6 mt-[-45px]" : variant === "flex" ? "pl-[7px] pr-[11px]" : variant === "absolute" ? "pl-2 pr-3" : "px-5"}`}>
-              {useButtonComponent ? (
-                <Button
-                  button1={buttonText}
-                  button1Padding={button1Padding}
-                  button1Height={button1Height}
-                  button1Width={button1Width}
-                  button1Height1={button1Height1}
-                  button1Width1={button1Width1}
-                  button1FontSize={button1FontSize}
-                  button1BackgroundColor={button1BackgroundColor}
-                />
-              ) : (
-                <div className={`${variant === "simple" ? "flex-1" : ""} rounded-xl bg-oldlace-100 flex flex-row items-start justify-start z-[3]`}>
-                  <div className="h-[30px] w-80 relative rounded-xl bg-oldlace-100 hidden" />
-                  <b className={`${variant === "simple" ? "flex-1" : ""} relative inline-block max-w-full z-[1] text-lg text-black1`}>
-                    {buttonText}
-                  </b>
-                </div>
-              )}
+              <Button className="w-[320px]" />
             </div>
           )}
         </div>
