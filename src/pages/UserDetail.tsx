@@ -1,7 +1,7 @@
 import { FunctionComponent, memo, useCallback } from "react";
 import LoginCredentials from "../components/login-credentials";
 import Button from "../components/button";
-import GameCardAbsolute from "../components/GameCardAbsolute";
+import GameCard from "../components/GameCard";
 
 export type RootType = {
   className?: string;
@@ -86,10 +86,11 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
         <h2 className="m-0 absolute top-[24px] left-[0px] text-inherit font-bold font-[inherit] flex items-center justify-center w-[1121px] h-[42px] z-[1] mq450:text-xl mq925:text-8xl">
           Próximas partidas
         </h2>
-        <GameCardAbsolute
-          cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-          matchImportance="/star-1.svg"
-          button1="Ver detalles"
+        <GameCard
+          variant="absolute"
+          imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+          badgeIcon="/star-1.svg"
+          buttonText="Ver detalles"
           button1Padding="6px 117.5px 6.1px"
           button1Height="34.1px"
           button1Width="320px"
@@ -154,12 +155,13 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             </div>
           </div>
         </div>
-        <GameCardAbsolute
-          cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-          matchImportance="/star-1-2.svg"
+        <GameCard
+          variant="absolute"
+          imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+          badgeIcon="/star-1-2.svg"
           propLeft="746px"
           propBackgroundImage="url('/frame-3@3x.png')"
-          button1="Ver detalles"
+          buttonText="Ver detalles"
           button1Padding="6px 117.5px 6.1px"
           button1Height="34.1px"
           button1Width="320px"

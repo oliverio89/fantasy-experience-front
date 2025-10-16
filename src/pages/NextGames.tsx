@@ -1,6 +1,6 @@
 import { FunctionComponent, memo, useCallback } from "react";
 import Button from "../components/button";
-import GameCardDetailed from "../components/GameCardDetailed";
+import GameCard from "../components/GameCard";
 import GameTypeBadge from "../components/GameTypeBadge";
 
 
@@ -127,7 +127,8 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             </div>
           </div>
           <div className="self-stretch flex flex-row items-start justify-start flex-wrap content-start gap-x-[18px] gap-y-[43px] min-h-[1003px] max-w-full text-center text-11xl text-black1">
-            <GameCardDetailed
+            <GameCard
+              variant="detailed"
               imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
               badgeIcon="/star-1.svg"
               badgeText="Presencial"
@@ -136,7 +137,8 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               showDescription={true}
               description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
             />
-            <GameCardDetailed
+            <GameCard
+              variant="detailed"
               imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
               badgeIcon="/star-1-1.svg"
               badgeText="Online"

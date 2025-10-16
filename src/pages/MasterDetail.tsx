@@ -2,7 +2,7 @@ import { FunctionComponent, memo, useCallback } from "react";
 import PreviewTitle from "../components/preview-title";
 import BioInfo from "../components/bio-info";
 import { useNavigate } from "react-router-dom";
-import GameCardFlex from "../components/GameCardFlex";
+import GameCard from "../components/GameCard";
 
 export type RootType = {
   className?: string;
@@ -468,10 +468,11 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
                 className="flex-1 flex flex-row items-start justify-start min-w-[211px] max-w-full cursor-pointer z-[1]"
                 onClick={onGroupContainerClick}
               >
-                <GameCardFlex
-                  cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-                  gameRating="/star-1.svg"
-                  button1="Ver detalles"
+                <GameCard
+                  variant="flex"
+                  imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+                  badgeIcon="/star-1.svg"
+                  buttonText="Ver detalles"
                   button1Padding="6px 109.9px 6.1px 110px"
                   button1Height="34.1px"
                   button1Width="304.9px"
@@ -481,12 +482,13 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
                   button1BackgroundColor="#f2ecdd"
                 />
               </div>
-              <GroupComponent1
-                cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-                gameRating="/star-1-1.svg"
+              <GameCard
+                variant="flex"
+                imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+                badgeIcon="/star-1-1.svg"
                 propMinWidth="211px"
                 propBackgroundImage="url('/frame-2@3x.png')"
-                button1="Ver detalles"
+                buttonText="Ver detalles"
                 button1Padding="6px 109.9px 6.1px 110px"
                 button1Height="34.1px"
                 button1Width="304.9px"
