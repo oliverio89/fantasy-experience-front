@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import FrameComponent7 from "../components/frame-component7";
+import MasterSearchBar from "../components/MasterSearchBar";
 import MasterList from "../components/master-list";
 
 const Root: FunctionComponent = () => {
@@ -65,7 +65,7 @@ const Root: FunctionComponent = () => {
           </div>
         </div>
       </div>
-      <FrameComponent7 />
+      <MasterSearchBar />
       <MasterList />
       <footer className="self-stretch flex flex-row items-start justify-end text-center text-[1.125rem] text-nude font-titulo-2">
         <div className="w-[13.188rem] flex flex-row items-start justify-start">

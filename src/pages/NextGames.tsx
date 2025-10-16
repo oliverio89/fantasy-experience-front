@@ -1,7 +1,7 @@
 import { FunctionComponent, memo, useCallback } from "react";
 import Button from "../components/button";
 import GroupComponent2 from "../components/group-component2";
-import FrameComponent5 from "../components/frame-component5";
+import GameTypeBadge from "../components/GameTypeBadge";
 
 
 export type RootType = {
@@ -162,7 +162,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             />
             <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full">
               <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude hidden" />
-              <FrameComponent5
+              <GameTypeBadge
                 cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
                 star1="/star-1-2.svg"
                 digital="Digital"
@@ -213,7 +213,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             </div>
             <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full">
               <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude hidden" />
-              <FrameComponent5
+              <GameTypeBadge
                 cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
                 star1="/star-1-3.svg"
                 digital="Digital"
@@ -320,7 +320,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             </div>
             <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-light-gold flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full text-lg text-darkslategray">
               <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-light-gold hidden" />
-              <FrameComponent5
+              <GameTypeBadge
                 cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
                 star1="/star-1-5.svg"
                 digital="Online"

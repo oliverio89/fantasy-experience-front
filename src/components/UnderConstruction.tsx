@@ -27,10 +27,13 @@ const UnderConstruction: FunctionComponent<UnderConstructionType> = memo(
           </svg>
           <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
             <p className="m-0 text-sm sm:text-lg font-bold font-titulo-2 text-black text-center">
-              🚧 Sitio web en construcción - Algunas funcionalidades pueden estar limitadas 🚧
+              🚧 Sitio web en construcción - Algunas funcionalidades pueden
+              estar limitadas 🚧
             </p>
             <p className="m-0 text-xs sm:text-sm font-titulo-2 text-black text-center">
-              | ¿Quieres apoyarnos a mejorar este proyecto? Haz clic en el botón de FEEDBACK a la derecha y coméntanos todo lo que se te ocurra. ¡Gracias! 💛
+              | ¿Quieres apoyarnos a mejorar este proyecto? Haz clic en el botón
+              de FEEDBACK a la derecha y coméntanos todo lo que se te ocurra.
+              ¡Gracias! 💛
             </p>
           </div>
         </div>
@@ -40,4 +43,3 @@ const UnderConstruction: FunctionComponent<UnderConstructionType> = memo(
 );
 
 export default UnderConstruction;
-

@@ -1,10 +1,10 @@
 import { FunctionComponent, memo } from "react";
 
-export type FrameComponent7Type = {
+export type MasterSearchBarType = {
   className?: string;
 };
 
-const FrameComponent7: FunctionComponent<FrameComponent7Type> = memo(
+const MasterSearchBar: FunctionComponent<MasterSearchBarType> = memo(
   ({ className = "" }) => {
     return (
       <section
@@ -58,4 +58,5 @@ const FrameComponent7: FunctionComponent<FrameComponent7Type> = memo(
   }
 );
 
-export default FrameComponent7;
+export default MasterSearchBar;
+

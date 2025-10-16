@@ -1,6 +1,6 @@
 import { FunctionComponent, memo, useMemo, type CSSProperties } from "react";
 
-export type FrameComponent5Type = {
+export type GameTypeBadgeType = {
   className?: string;
   cedericVandenbergheDPhytVHw?: string;
   star1?: string;
@@ -10,7 +10,7 @@ export type FrameComponent5Type = {
   propBackgroundImage?: CSSProperties["backgroundImage"];
 };
 
-const FrameComponent5: FunctionComponent<FrameComponent5Type> = memo(
+const GameTypeBadge: FunctionComponent<GameTypeBadgeType> = memo(
   ({
     className = "",
     cedericVandenbergheDPhytVHw,
@@ -50,4 +50,5 @@ const FrameComponent5: FunctionComponent<FrameComponent5Type> = memo(
   }
 );
 
-export default FrameComponent5;
+export default GameTypeBadge;
+
