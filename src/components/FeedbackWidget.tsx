@@ -1,15 +1,33 @@
 import { FunctionComponent, useState } from "react";
-import { useForm } from "@web3forms/react";
+import { useForm } from "react-hook-form";
+import useWeb3Forms from "@web3forms/react";
+
+interface FeedbackFormData {
+  name?: string;
+  email: string;
+  message: string;
+}
 
 const FeedbackWidget: FunctionComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Access Key de Web3Forms configurada
-  const { submit, submitting } = useForm({
+  const {
+    register,
+    handleSubmit: handleFormSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<FeedbackFormData>();
+
+  const { submit } = useWeb3Forms({
     access_key: "defc80b9-eb2b-446c-9e4c-bd4731c6f2d4",
+    settings: {
+      from_name: "Fantasy Experience - Widget de Feedback",
+      subject: "Nuevo Feedback - Fantasy Experience",
+    },
     onSuccess: () => {
       setShowSuccess(true);
+      reset();
       setTimeout(() => {
         setShowSuccess(false);
         setIsOpen(false);
@@ -21,14 +39,8 @@ const FeedbackWidget: FunctionComponent = () => {
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await submit(e);
-
-    // Limpiar el formulario después del envío exitoso
-    if (!submitting) {
-      (e.target as HTMLFormElement).reset();
-    }
+  const onSubmit = async (data: FeedbackFormData) => {
+    await submit(data);
   };
 
   return (
@@ -86,19 +98,7 @@ const FeedbackWidget: FunctionComponent = () => {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Campos ocultos requeridos por Web3Forms */}
-                <input
-                  type="hidden"
-                  name="subject"
-                  value="Nuevo Feedback - Fantasy Experience"
-                />
-                <input
-                  type="hidden"
-                  name="from_name"
-                  value="Fantasy Experience - Widget de Feedback"
-                />
-
+              <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-4">
                 {/* Nombre */}
                 <div>
                   <label
@@ -110,7 +110,7 @@ const FeedbackWidget: FunctionComponent = () => {
                   <input
                     type="text"
                     id="name"
-                    name="name"
+                    {...register("name")}
                     className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors font-titulo-2"
                     placeholder="Escribe tu nombre"
                   />
@@ -127,8 +127,7 @@ const FeedbackWidget: FunctionComponent = () => {
                   <input
                     type="email"
                     id="email"
-                    name="email"
-                    required
+                    {...register("email", { required: true })}
                     className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors font-titulo-2"
                     placeholder="tu@email.com"
                   />
@@ -144,8 +143,7 @@ const FeedbackWidget: FunctionComponent = () => {
                   </label>
                   <textarea
                     id="message"
-                    name="message"
-                    required
+                    {...register("message", { required: true })}
                     rows={6}
                     className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors resize-none font-titulo-2"
                     placeholder="Comparte tu feedback, sugerencias o reporta problemas..."
@@ -163,10 +161,10 @@ const FeedbackWidget: FunctionComponent = () => {
                 {/* Botón enviar */}
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={isSubmitting}
                   className="w-full bg-dark-gold hover:bg-light-gold disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-bold py-4 px-6 rounded-xl transition-colors duration-200 font-titulo-2 text-lg"
                 >
-                  {submitting ? "Enviando..." : "Enviar Feedback"}
+                  {isSubmitting ? "Enviando..." : "Enviar Feedback"}
                 </button>
               </form>
             )}
