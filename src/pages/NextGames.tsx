@@ -1,6 +1,6 @@
 import { FunctionComponent, memo, useCallback } from "react";
 import Button from "../components/button";
-import GroupComponent2 from "../components/group-component2";
+import GameCardDetailed from "../components/GameCardDetailed";
 import GameTypeBadge from "../components/GameTypeBadge";
 
 
@@ -127,38 +127,24 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             </div>
           </div>
           <div className="self-stretch flex flex-row items-start justify-start flex-wrap content-start gap-x-[18px] gap-y-[43px] min-h-[1003px] max-w-full text-center text-11xl text-black1">
-            <GroupComponent2
-              cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-              star1="/star-1.svg"
-              presencial="Presencial"
-              button1="Ver detalles"
-              button1Padding="4px 117.5px"
-              button1Height="30px"
-              button1Width="320px"
-              button1Height1="22px"
-              button1Width1="86px"
-              button1FontSize="18px"
-              button1BackgroundColor="#f2ecdd"
-              button1Border="none"
-              button1TextDecoration="unset"
-              button1FontWeight="unset"
+            <GameCardDetailed
+              imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+              badgeIcon="/star-1.svg"
+              badgeText="Presencial"
+              buttonText="Ver detalles"
+              backgroundColor="#f2ecdd"
+              showDescription={true}
+              description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
             />
-            <GroupComponent2
-              cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-              star1="/star-1-1.svg"
-              presencial="Online"
+            <GameCardDetailed
+              imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+              badgeIcon="/star-1-1.svg"
+              badgeText="Online"
               propBackgroundImage="url('/frame-3@3x.png')"
-              button1="Ver detalles"
-              button1Padding="4px 117.5px"
-              button1Height="30px"
-              button1Width="320px"
-              button1Height1="22px"
-              button1Width1="86px"
-              button1FontSize="18px"
-              button1BackgroundColor="#f2ecdd"
-              button1Border="none"
-              button1TextDecoration="unset"
-              button1FontWeight="unset"
+              buttonText="Ver detalles"
+              backgroundColor="#f2ecdd"
+              showDescription={true}
+              description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
             />
             <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full">
               <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude hidden" />

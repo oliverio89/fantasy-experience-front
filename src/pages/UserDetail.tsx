@@ -1,7 +1,7 @@
 import { FunctionComponent, memo, useCallback } from "react";
 import LoginCredentials from "../components/login-credentials";
 import Button from "../components/button";
-import GroupComponent from "../components/group-component";
+import GameCardAbsolute from "../components/GameCardAbsolute";
 
 export type RootType = {
   className?: string;
@@ -86,7 +86,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
         <h2 className="m-0 absolute top-[24px] left-[0px] text-inherit font-bold font-[inherit] flex items-center justify-center w-[1121px] h-[42px] z-[1] mq450:text-xl mq925:text-8xl">
           Próximas partidas
         </h2>
-        <GroupComponent
+        <GameCardAbsolute
           cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
           matchImportance="/star-1.svg"
           button1="Ver detalles"
@@ -154,7 +154,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             </div>
           </div>
         </div>
-        <GroupComponent
+        <GameCardAbsolute
           cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
           matchImportance="/star-1-2.svg"
           propLeft="746px"

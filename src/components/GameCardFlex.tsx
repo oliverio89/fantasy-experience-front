@@ -1,7 +1,7 @@
 import { FunctionComponent, memo, useMemo, type CSSProperties } from "react";
 import Button from "./button";
 
-export type GroupComponent1Type = {
+export type GameCardFlexType = {
   className?: string;
   cedericVandenbergheDPhytVHw?: string;
   gameRating?: string;
@@ -19,7 +19,7 @@ export type GroupComponent1Type = {
   propBackgroundImage?: CSSProperties["backgroundImage"];
 };
 
-const GroupComponent1: FunctionComponent<GroupComponent1Type> = memo(
+const GameCardFlex: FunctionComponent<GameCardFlexType> = memo(
   ({
     className = "",
     cedericVandenbergheDPhytVHw,
@@ -109,4 +109,5 @@ const GroupComponent1: FunctionComponent<GroupComponent1Type> = memo(
   }
 );
 
-export default GroupComponent1;
+export default GameCardFlex;
+

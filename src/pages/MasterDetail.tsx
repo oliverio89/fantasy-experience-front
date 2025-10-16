@@ -2,7 +2,7 @@ import { FunctionComponent, memo, useCallback } from "react";
 import PreviewTitle from "../components/preview-title";
 import BioInfo from "../components/bio-info";
 import { useNavigate } from "react-router-dom";
-import GroupComponent1 from "../components/group-component1";
+import GameCardFlex from "../components/GameCardFlex";
 
 export type RootType = {
   className?: string;
@@ -468,7 +468,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
                 className="flex-1 flex flex-row items-start justify-start min-w-[211px] max-w-full cursor-pointer z-[1]"
                 onClick={onGroupContainerClick}
               >
-                <GroupComponent1
+                <GameCardFlex
                   cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
                   gameRating="/star-1.svg"
                   button1="Ver detalles"
