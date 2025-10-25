@@ -13,18 +13,89 @@ export type SlideType = {
 };
 
 const CardMaster: FunctionComponent<SlideType> = memo(
-  ({ className = "", onSlide1ContainerClick, masterCard, MasterName, rate = 0, Sistema, Preferencia }) => {
-    const onSlide1ContainerClick1 = useCallback(() => {
-      // Please sync "Master-detalles v1.2" to the project
-    }, []);
+  ({
+    className = "",
+    onSlide1ContainerClick,
+    masterCard,
+    MasterName,
+    rate = 0,
+    Sistema,
+    Preferencia,
+  }) => {
+    const handleClick = useCallback(() => {
+      if (onSlide1ContainerClick) {
+        onSlide1ContainerClick();
+      }
+    }, [onSlide1ContainerClick]);
 
     // Normalizamos el rating entre 1 y 5
     const normalizedRating = Math.min(Math.max(rate, 0), 5);
 
+    // Función para renderizar estrellas con soporte para medias estrellas
+    const renderStars = () => {
+      const stars = [];
+      const fullStars = Math.floor(normalizedRating);
+      const hasHalfStar = normalizedRating % 1 >= 0.5;
+
+      // Estrellas completas
+      for (let i = 0; i < fullStars; i++) {
+        stars.push(
+          <img
+            key={`full-${i}`}
+            className="h-[30px] w-[30px] relative rounded-12xs z-[1]"
+            alt={`Star ${i + 1}`}
+            src="/rating-star.svg"
+          />
+        );
+      }
+
+      // Media estrella
+      if (hasHalfStar) {
+        stars.push(
+          <div
+            key="half-star"
+            className="h-[30px] w-[30px] relative rounded-12xs z-[1] overflow-hidden"
+          >
+            <img
+              className="absolute top-0 left-0 h-[30px] w-[30px]"
+              alt="Half star"
+              src="/rating-star.svg"
+              style={{
+                clipPath: "inset(0 50% 0 0)",
+              }}
+            />
+            <img
+              className="absolute top-0 left-0 h-[30px] w-[30px]"
+              alt="Half star empty"
+              src="/rating-star-empty.svg"
+              style={{
+                clipPath: "inset(0 0 0 50%)",
+              }}
+            />
+          </div>
+        );
+      }
+
+      // Estrellas vacías
+      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+      for (let i = 0; i < emptyStars; i++) {
+        stars.push(
+          <img
+            key={`empty-${i}`}
+            className="h-[30px] w-[30px] relative rounded-12xs z-[1]"
+            alt={`Empty star ${i + 1}`}
+            src="/rating-star-empty.svg"
+          />
+        );
+      }
+
+      return stars;
+    };
+
     return (
       <div
         className={`h-[409px] w-[360px] relative shrink-0 max-w-full cursor-pointer text-center text-13xl text-dark-gold font-titulo-2 ${className}`}
-        onClick={onSlide1ContainerClick}
+        onClick={handleClick}
       >
         <img
           className="absolute top-[0px] left-[80px] rounded-[50%] w-[200px] h-[200px] object-cover z-[1]"
@@ -38,17 +109,10 @@ const CardMaster: FunctionComponent<SlideType> = memo(
             {MasterName}
           </h2>
 
-          {/* Rating dinámico */}
+          {/* Rating dinámico con estrellas parciales */}
           <div className="self-stretch flex flex-row items-start justify-center py-0 pl-[21px] pr-5">
             <div className="flex flex-row items-start justify-start gap-[9.8px]">
-              {[...Array(5)].map((_, index) => (
-                <img
-                  key={index}
-                  className="h-[30px] w-[30px] relative rounded-12xs z-[1]"
-                  alt={`Star ${index + 1}`}
-                  src={index < normalizedRating ? "/rating-star.svg" : "/rating-star-empty.svg"}
-                />
-              ))}
+              {renderStars()}
             </div>
           </div>
 
@@ -56,9 +120,7 @@ const CardMaster: FunctionComponent<SlideType> = memo(
             <b className="self-stretch relative z-[1] mq450:text-base">
               {Preferencia}
             </b>
-            <div className="self-stretch relative text-lg z-[1]">
-              {Sistema}
-            </div>
+            <div className="self-stretch relative text-lg z-[1]">{Sistema}</div>
           </div>
 
           <div className="self-stretch flex flex-row items-start justify-end py-0 px-5 text-lg">

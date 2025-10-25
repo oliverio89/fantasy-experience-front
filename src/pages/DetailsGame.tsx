@@ -1,12 +1,12 @@
 import { FunctionComponent, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PartidaDetails from "../components/GameDetails";
-import FrameComponent4 from "../components/frame-component4";
 import Button from "../components/button";
-import Footer1 from "../components/footer1";
+import Footer from "../components/Footer";
 
 const PartidasDetallesV: FunctionComponent = () => {
   const navigate = useNavigate();
+  const { partidaId } = useParams<{ partidaId?: string }>();
 
   const onInitTextClick = useCallback(() => {
     navigate("/home-v12");
@@ -18,7 +18,6 @@ const PartidasDetallesV: FunctionComponent = () => {
         <div className="w-[80rem] h-[79.938rem] relative bg-black hidden max-w-full" />
         <section className="self-stretch flex flex-col items-start justify-start gap-[2.062rem] max-w-full mq750:gap-[1rem]">
           <PartidaDetails />
-          <FrameComponent4 />
         </section>
         <Button
           button1Padding="1.187rem 5.156rem"
@@ -30,7 +29,7 @@ const PartidasDetallesV: FunctionComponent = () => {
           button1FontSize="1.75rem"
         />
       </main>
-      <Footer1 />
+      <Footer />
     </div>
   );
 };

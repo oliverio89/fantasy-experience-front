@@ -120,7 +120,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
 
     return (
       <div
-        className={`w-[360px] min-h-[520px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-darkslategray shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 max-w-full text-center text-base text-oldlace-100 font-titulo-2 hover:scale-[1.02] transition-transform duration-200 ${className}`}
+        className={`w-[360px] min-h-[536px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-darkslategray shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 max-w-full text-center text-base text-oldlace-100 font-titulo-2 hover:scale-[1.02] transition-transform duration-200 ${className}`}
         onDoubleClick={handleDoubleClick}
         role="button"
         tabIndex={0}
@@ -142,9 +142,9 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
         </div>
 
         {/* Contenido de la tarjeta */}
-        <div className="self-stretch flex flex-col items-center justify-start pt-0 px-4 pb-0 gap-3 relative min-h-[180px]">
+        <div className="self-stretch flex flex-col items-center justify-start pt-0 px-4 pb-0 gap-3 relative min-h-[196px]">
           {/* Título - Máximo 2 líneas */}
-          <h2 className="m-0 self-stretch relative text-13xl font-bold font-[inherit] text-goldenrod z-[1] mq1050:text-7xl mq450:text-lgi overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] h-[64px]">
+          <h2 className="m-0 self-stretch relative text-13xl font-bold font-[inherit] text-goldenrod z-[1] mq1050:text-7xl mq450:text-lgi overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] h-[80px]">
             {partida.titulo}
           </h2>
 

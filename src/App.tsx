@@ -64,7 +64,11 @@ function App() {
         <Route path="/contacto" element={<Contact />} />
         <Route path="/user" element={<UserDetail />} />
         <Route path="/ourmasters" element={<OurMasters />} />
-        <Route path="/master" element={<MasterDetail />} />
+        <Route path="/master/:masterId" element={<MasterDetail />} />
+        <Route
+          path="/partidasdetalles-v12/:partidaId?"
+          element={<PartidasDetalles />}
+        />
         <Route path="/nextgames" element={<NextGames />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Route>

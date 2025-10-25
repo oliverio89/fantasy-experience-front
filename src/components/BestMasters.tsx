@@ -1,6 +1,8 @@
 import { FunctionComponent, memo, useCallback, useRef } from "react";
-import CardMaster from "./CardMaster";
+import UnifiedMasterCard from "./UnifiedMasterCard";
 import { useNavigate } from "react-router-dom";
+import { MASTERS_DATA } from "../data/mastersData";
+import { Master } from "../types/masters";
 
 export type FrameComponent2Type = {
   className?: string;
@@ -11,9 +13,18 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
     const navigate = useNavigate(); // Hook para redireccionar
     const cardContainerRef = useRef<HTMLDivElement>(null);
 
-    const onSlide1ContainerClick = useCallback(() => {
-      // Please sync "Master-detalles v1.2" to the project
-    }, []);
+    // Obtener los mejores masters (top 6 por rating)
+    const bestMasters = MASTERS_DATA.sort((a, b) => b.rating - a.rating).slice(
+      0,
+      6
+    );
+
+    const onSlide1ContainerClick = useCallback(
+      (master: Master) => {
+        navigate(`/master/${master.id}`);
+      },
+      [navigate]
+    );
 
     const onViewAllMastersLinkClick = useCallback(() => {
       navigate("/ourmasters");
@@ -68,54 +79,14 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
               className="flex flex-row items-start justify-start pt-0 px-0 pb-[62px] box-border gap-[20.4px] max-w-full overflow-x-auto scroll-hidden scrollbar-hide"
               ref={cardContainerRef}
             >
-              <CardMaster
-                onSlide1ContainerClick={onSlide1ContainerClick}
-                masterCard="/ellipse-3@2x.png"
-                MasterName="Master Name 1"
-                rate={1}
-                Sistema="Sistema de partida seleccionada"
-                Preferencia="Preferencia de partida del máster"
-              />
-              <CardMaster
-                onSlide1ContainerClick={onSlide1ContainerClick}
-                masterCard="/ellipse-3-1@2x.png"
-                MasterName="Master Name 2"
-                rate={2}
-                Sistema="Sistema de partida seleccionada"
-                Preferencia="Preferencia de partida del máster"
-              />
-              <CardMaster
-                onSlide1ContainerClick={onSlide1ContainerClick}
-                masterCard="/ellipse-3@2x.png"
-                MasterName="Master Name 3"
-                rate={3}
-                Sistema="Sistema de partida seleccionada"
-                Preferencia="Preferencia de partida del máster"
-              />
-              <CardMaster
-                onSlide1ContainerClick={onSlide1ContainerClick}
-                masterCard="/ellipse-3@2x.png"
-                MasterName="Master Name 4"
-                rate={4}
-                Sistema="Sistema de partida seleccionada"
-                Preferencia="Preferencia de partida del máster"
-              />
-              <CardMaster
-                onSlide1ContainerClick={onSlide1ContainerClick}
-                masterCard="/ellipse-3-1@2x.png"
-                MasterName="Master Name 5"
-                rate={5}
-                Sistema="Sistema de partida seleccionada"
-                Preferencia="Preferencia de partida del máster"
-              />
-              <CardMaster
-                onSlide1ContainerClick={onSlide1ContainerClick}
-                masterCard="/ellipse-3@2x.png"
-                MasterName="Master Name 6"
-                rate={4}
-                Sistema="Sistema de partida seleccionada"
-                Preferencia="Preferencia de partida del máster"
-              />
+              {bestMasters.map((master) => (
+                <UnifiedMasterCard
+                  key={master.id}
+                  master={master}
+                  onMasterClick={onSlide1ContainerClick}
+                  useImageFormat={true}
+                />
+              ))}
             </div>
           </div>
 
