@@ -1,62 +1,23 @@
+/**
+ * ARCHIVO DE EJEMPLO - NO USAR EN PRODUCCIÓN (TODAVÍA)
+ *
+ * Este es un ejemplo de cómo se vería NextGames
+ * cuando se integre con la API real.
+ *
+ * Para usar este componente:
+ * 1. Renombrar este archivo eliminando .FUTURE_API
+ * 2. Renombrar el componente actual a .BACKUP
+ * 3. Asegurarse de que la API esté configurada y funcionando
+ */
+
 import { FunctionComponent, memo, useRef, useState, useEffect } from "react";
-import PartidaCard, { Partida } from "./PartidaCard";
+import PartidaCard from "./PartidaCard";
 import { useNavigate } from "react-router-dom";
+import { useProximasPartidas } from "../hooks/usePartidas";
 
 export type UpcomingCarouselType = {
   className?: string;
 };
-
-// Datos de ejemplo hardcodeados (En el futuro vendrán de una API)
-const proximasPartidas: Partida[] = [
-  {
-    id: 7,
-    titulo: "Reinos de Hierro",
-    masterName: "Master Thorin",
-    sistemaJuego: "D&D 5e",
-    fecha: "28 Octubre 2025",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 5,
-    descripcion:
-      "Una campaña épica en un mundo de fantasía medieval lleno de magia, dragones y guerras entre reinos.",
-  },
-  {
-    id: 8,
-    titulo: "Los Horrores de Innsmouth",
-    masterName: "Master Lovecraft",
-    sistemaJuego: "Call of Cthulhu",
-    fecha: "30 Octubre 2025",
-    imagenUrl: "/konradkollerlctjo2d9-2cunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 4,
-    descripcion:
-      "Investigación en un pueblo costero donde nada es lo que parece. Los secretos oscuros aguardan.",
-  },
-  {
-    id: 9,
-    titulo: "Neon Dreams",
-    masterName: "Master Deckard",
-    sistemaJuego: "Shadowrun",
-    fecha: "1 Noviembre 2025",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 4,
-    descripcion:
-      "Corre las sombras en un futuro distópico donde la magia y la tecnología se entrelazan.",
-  },
-  {
-    id: 10,
-    titulo: "La Frontera Salvaje",
-    masterName: "Master Winchester",
-    sistemaJuego: "Deadlands",
-    fecha: "5 Noviembre 2025",
-    imagenUrl: "/konradkollerlctjo2d9-2cunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 3,
-    descripcion:
-      "El Salvaje Oeste como nunca lo has visto: con zombies, hechiceros y tecnología imposible.",
-  },
-];
 
 const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
   ({ className = "" }) => {
@@ -64,8 +25,19 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
     const cardContainerRef = useRef<HTMLDivElement>(null);
     const isScrollingRef = useRef(false);
 
-    // Crear duplicado para bucle infinito
-    const extendedGameCards = [...proximasPartidas, ...proximasPartidas];
+    // Usar el hook personalizado para obtener próximas partidas desde la API
+    const {
+      partidas: proximasPartidas,
+      loading,
+      error,
+      recargar,
+    } = useProximasPartidas(4);
+
+    // Crear duplicado para bucle infinito (solo cuando hay datos)
+    const extendedGameCards =
+      proximasPartidas.length > 0
+        ? [...proximasPartidas, ...proximasPartidas]
+        : [];
 
     // Efecto de desplazamiento infinito
     useEffect(() => {
@@ -90,7 +62,7 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
       return () => {
         if (container) container.removeEventListener("scroll", handleScroll);
       };
-    }, []);
+    }, [proximasPartidas]);
 
     // Manejo de arrastre para desplazamiento manual continuo
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -108,8 +80,51 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isScrollingRef.current || !cardContainerRef.current) return;
-      cardContainerRef.current.scrollLeft += -e.movementX * 1; // Ajusta velocidad aquí
+      cardContainerRef.current.scrollLeft += -e.movementX * 1;
     };
+
+    const handleVerMasPartidas = () => {
+      navigate("/nextgames");
+    };
+
+    // Estados de carga y error
+    if (loading) {
+      return (
+        <section className="self-stretch bg-oldlace-100 flex flex-col items-center justify-center py-20 box-border">
+          <div className="text-2xl font-bold text-black">
+            Cargando próximas partidas...
+          </div>
+          <div className="mt-4 w-16 h-16 border-4 border-goldenrod border-t-transparent rounded-full animate-spin"></div>
+        </section>
+      );
+    }
+
+    if (error) {
+      return (
+        <section className="self-stretch bg-oldlace-100 flex flex-col items-center justify-center py-20 box-border">
+          <div className="text-2xl font-bold text-red-600">
+            Error al cargar partidas
+          </div>
+          <p className="text-lg text-gray-600 mt-2">{error}</p>
+          <button
+            onClick={recargar}
+            className="mt-4 px-6 py-3 bg-goldenrod text-black font-bold rounded-lg hover:bg-darkgoldenrod transition-colors"
+          >
+            Reintentar
+          </button>
+        </section>
+      );
+    }
+
+    if (proximasPartidas.length === 0) {
+      return (
+        <section className="self-stretch bg-oldlace-100 flex flex-col items-center justify-center py-20 box-border">
+          <div className="text-2xl font-bold text-black">
+            No hay próximas partidas disponibles
+          </div>
+        </section>
+      );
+    }
 
     return (
       <section
@@ -142,7 +157,10 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
           </div>
 
           <div className="w-[507px] flex flex-row items-start justify-end py-0 px-20 box-border max-w-full mq750:pl-10 mq750:pr-10 mq750:box-border">
-            <button className="cursor-pointer [border:none] py-[15.5px] pl-[93px] pr-[92px] bg-dark-gold flex-1 shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden flex flex-row items-start justify-center box-border max-w-full z-[2] hover:bg-darkgoldenrod mq450:pl-5 mq450:pr-5 mq450:box-border">
+            <button
+              className="cursor-pointer [border:none] py-[15.5px] pl-[93px] pr-[92px] bg-dark-gold flex-1 shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden flex flex-row items-start justify-center box-border max-w-full z-[2] hover:bg-darkgoldenrod mq450:pl-5 mq450:pr-5 mq450:box-border"
+              onClick={handleVerMasPartidas}
+            >
               <b className="flex-1 relative text-5xl font-titulo-2 text-black text-center">
                 Ver más partidas
               </b>
@@ -153,5 +171,7 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
     );
   }
 );
+
+NextGames.displayName = "NextGames";
 
 export default NextGames;

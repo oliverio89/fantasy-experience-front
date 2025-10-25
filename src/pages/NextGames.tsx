@@ -3,7 +3,6 @@ import Button from "../components/button";
 import GameCard from "../components/GameCard";
 import GameTypeBadge from "../components/GameTypeBadge";
 
-
 export type RootType = {
   className?: string;
 };
@@ -18,11 +17,9 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
   }, []);
 
   return (
-
     <div
       className={`w-[1129px] max-w-full flex flex-col items-end justify-start gap-[55px] leading-[normal] tracking-[normal] text-center text-lg text-nude font-texto mq725:gap-[27px] ${className}`}
     >
-  
       <main className="self-stretch flex flex-row items-start justify-end py-0 pl-0 pr-[7px] box-border max-w-full">
         <section className="flex-1 flex flex-col items-start justify-start gap-9 max-w-full text-left text-lg text-nude font-texto mq725:gap-[18px]">
           <header className="self-stretch flex flex-row items-start justify-end pt-4 px-0 pb-0 sticky top-[0] z-[99] text-left text-81xl text-dark-gold font-texto">
@@ -158,156 +155,39 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               showDescription={true}
               description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
             />
-            <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full">
-              <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-nude hidden" />
-              <GameTypeBadge
-                cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-                star1="/star-1-3.svg"
-                digital="Digital"
-                propBackgroundImage="url('/frame-6@3x.png')"
-              />
-              <div className="self-stretch flex flex-col items-start justify-start gap-[9px] max-w-full">
-                <div className="self-stretch flex flex-col items-start justify-start gap-px max-w-full">
-                  <h2 className="m-0 self-stretch relative text-inherit font-extrabold font-[inherit] z-[1] mq450:text-lg mq450:leading-[14px] mq1000:text-5xl mq1000:leading-[19px]">
-                    Partida Título
-                  </h2>
-                  <div className="self-stretch flex flex-col items-start justify-start gap-[7px] text-xl text-darkslategray">
-                    <div className="self-stretch flex flex-col items-start justify-start">
-                      <b className="self-stretch relative z-[1] mq450:text-base">
-                        Master name
-                      </b>
-                      <div className="self-stretch relative text-lg leading-[20px] z-[1]">
-                        Sistema de partida
-                      </div>
-                    </div>
-                    <div className="self-stretch flex flex-row items-start justify-center py-0 pl-5 pr-[21px]">
-                      <img
-                        className="h-5 w-[143px] relative z-[3]"
-                        loading="lazy"
-                        alt=""
-                        src="/group-28-1.svg"
-                      />
-                    </div>
-                  </div>
-                  <div className="self-stretch flex flex-row items-start justify-start py-0 px-2.5 box-border max-w-full text-lg text-black">
-                    <div className="flex-1 relative leading-[25px] font-light [display:-webkit-inline-box] items-center justify-center overflow-hidden text-ellipsis [-webkit-line-clamp:2] [-webkit-box-orient:vertical] max-w-full z-[1]">{`Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. `}</div>
-                  </div>
-                </div>
-                <div className="flex flex-row items-start justify-start py-0 px-5">
-                  <Button
-                    button1="Ver detalles"
-                    button1Padding="4px 117.5px"
-                    button1Height="30px"
-                    button1Width="320px"
-                    button1Height1="22px"
-                    button1Width1="86px"
-                    button1FontSize="18px"
-                    button1BackgroundColor="#f2ecdd"
-                    button1Border="1px solid #0b0b0b"
-                    button1TextDecoration="unset"
-                    button1FontWeight="unset"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-light-gold flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full text-base text-black">
-              <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-light-gold hidden" />
-              <div className="self-stretch rounded-t-xl rounded-b-none flex flex-row items-start justify-end pt-[7px] px-6 pb-[133px] box-border bg-[url('/public/frame-2@3x.png')] bg-cover bg-no-repeat bg-[top] max-w-full z-[1]">
-                <img
-                  className="h-60 w-[360px] relative rounded-t-xl rounded-b-none object-cover hidden max-w-full"
-                  alt=""
-                  src="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-                />
-                <div className="h-[100px] w-[100px] shadow-[0px_2px_2px_rgba(0,_0,_0,_0.25)] flex flex-col items-start justify-start relative gap-2.5 z-[2]">
-                  <img
-                    className="w-[120px] h-[120px] absolute !m-[0] right-[-20px] bottom-[-20px] rounded-lg"
-                    loading="lazy"
-                    alt=""
-                    src="/star-1-4.svg"
-                  />
-                  <div className="w-[86.8px] h-[42px] absolute !m-[0] right-[3.2px] bottom-[4.24px] [text-decoration:underline] font-extrabold flex items-center justify-center [transform:_rotate(-20.1deg)] [transform-origin:0_0] z-[1]">
-                    Presencial
-                  </div>
-                </div>
-              </div>
-              <div className="self-stretch flex flex-col items-start justify-start max-w-full text-lg text-black1">
-                <h2 className="m-0 self-stretch relative text-11xl font-extrabold font-[inherit] z-[1] mq450:text-lg mq450:leading-[14px] mq1000:text-5xl mq1000:leading-[19px]">
-                  Partida Título
-                </h2>
-                <div className="self-stretch flex flex-col items-start justify-start gap-[1.5px] text-darkslategray">
-                  <b className="self-stretch relative text-xl z-[1] mq450:text-base">
-                    Master name
-                  </b>
-                  <div className="self-stretch relative leading-[20px] z-[1]">
-                    Sistema de partida
-                  </div>
-                  <div className="self-stretch relative leading-[20px] z-[1]">
-                    Fecha
-                  </div>
-                </div>
-                <div className="self-stretch flex flex-row items-start justify-start pt-0 px-2.5 pb-[9px] box-border max-w-full text-black">
-                  <div className="flex-1 relative leading-[25px] font-light [display:-webkit-inline-box] items-center justify-center overflow-hidden text-ellipsis [-webkit-line-clamp:2] [-webkit-box-orient:vertical] max-w-full z-[1]">{`Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. `}</div>
-                </div>
-                <div className="flex flex-row items-start justify-start py-0 px-5">
-                  <Button
-                    button1="Ver detalles"
-                    button1Padding="4px 117.5px"
-                    button1Height="30px"
-                    button1Width="320px"
-                    button1Height1="22px"
-                    button1Width1="86px"
-                    button1FontSize="18px"
-                    button1BackgroundColor="#f2ecdd"
-                    button1Border="none"
-                    button1TextDecoration="unset"
-                    button1FontWeight="unset"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="w-[360px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-light-gold flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 min-w-[342px] max-w-full text-lg text-darkslategray">
-              <div className="self-stretch h-[480px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-light-gold hidden" />
-              <GameTypeBadge
-                cedericVandenbergheDPhytVHw="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
-                star1="/star-1-5.svg"
-                digital="Online"
-                propBackgroundImage="url('/frame-4@3x.png')"
-              />
-              <div className="self-stretch flex flex-col items-start justify-start max-w-full">
-                <h2 className="m-0 self-stretch relative text-11xl font-extrabold font-[inherit] text-black1 z-[1] mq450:text-lg mq450:leading-[14px] mq1000:text-5xl mq1000:leading-[19px]">
-                  Partida Título
-                </h2>
-                <b className="self-stretch relative text-xl z-[1] mq450:text-base">
-                  Master name
-                </b>
-                <div className="self-stretch flex flex-col items-start justify-start gap-[3px]">
-                  <div className="self-stretch relative leading-[20px] z-[1]">
-                    Sistema de partida
-                  </div>
-                  <div className="self-stretch relative leading-[20px] z-[1]">
-                    Fecha
-                  </div>
-                </div>
-                <div className="self-stretch flex flex-row items-start justify-start pt-0 px-2.5 pb-[9px] box-border max-w-full text-black">
-                  <div className="flex-1 relative leading-[25px] font-light [display:-webkit-inline-box] items-center justify-center overflow-hidden text-ellipsis [-webkit-line-clamp:2] [-webkit-box-orient:vertical] max-w-full z-[1]">{`Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. `}</div>
-                </div>
-                <div className="flex flex-row items-start justify-start py-0 px-5">
-                  <Button
-                    button1="Ver detalles"
-                    button1Padding="4px 117.5px"
-                    button1Height="30px"
-                    button1Width="320px"
-                    button1Height1="22px"
-                    button1Width1="86px"
-                    button1FontSize="18px"
-                    button1BackgroundColor="#f2ecdd"
-                    button1Border="none"
-                    button1TextDecoration="unset"
-                    button1FontWeight="unset"
-                  />
-                </div>
-              </div>
-            </div>
+            <GameCard
+              variant="detailed"
+              imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+              badgeIcon="/star-1-3.svg"
+              badgeText="Digital"
+              propBackgroundImage="url('/frame-6@3x.png')"
+              buttonText="Ver detalles"
+              backgroundColor="#f2ecdd"
+              showDescription={true}
+              description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
+            />
+            <GameCard
+              variant="detailed"
+              imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+              badgeIcon="/star-1-4.svg"
+              badgeText="Presencial"
+              propBackgroundImage="url('/frame-2@3x.png')"
+              buttonText="Ver detalles"
+              backgroundColor="#f2ecdd"
+              showDescription={true}
+              description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
+            />
+            <GameCard
+              variant="detailed"
+              imageUrl="/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png"
+              badgeIcon="/star-1-5.svg"
+              badgeText="Online"
+              propBackgroundImage="url('/frame-4@3x.png')"
+              buttonText="Ver detalles"
+              backgroundColor="#f2ecdd"
+              showDescription={true}
+              description="Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
+            />
           </div>
         </section>
       </main>
