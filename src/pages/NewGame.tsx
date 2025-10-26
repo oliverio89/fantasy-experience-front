@@ -1,73 +1,96 @@
-import { FunctionComponent, useCallback } from "react";
+import { FunctionComponent, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SessionInfoHeader from "../components/session-info-header";
-import Button from "../components/button";
 
 const NewGame: FunctionComponent = () => {
   const navigate = useNavigate();
 
-  const onFantasyExperienceTextClick = useCallback(() => {
-    navigate("/home-v12");
+  // Estados para los campos del formulario
+  const [titulo, setTitulo] = useState("");
+  const [tipoPartida, setTipoPartida] = useState("");
+  const [idioma, setIdioma] = useState("");
+  const [edadMinima, setEdadMinima] = useState("");
+  const [jugadores, setJugadores] = useState("");
+  const [temporalidad, setTemporalidad] = useState("");
+  const [imagenUrl, setImagenUrl] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [tags, setTags] = useState("");
+  const [recomendaciones, setRecomendaciones] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [contactoMaster, setContactoMaster] = useState("");
+  const [precio, setPrecio] = useState("");
+  const [horario, setHorario] = useState("");
+  const [herramientas, setHerramientas] = useState("");
+  const [usoTarjetaX, setUsoTarjetaX] = useState(false);
+  const [obligatorioCamara, setObligatorioCamara] = useState(false);
+  const [obligatorioMicrofono, setObligatorioMicrofono] = useState(false);
+
+  const handleCancelar = useCallback(() => {
+    navigate("/nextgames");
   }, [navigate]);
 
-  const onOurMastersTextClick = useCallback(() => {
-    // Please sync "Masters v1.2" to the project
-  }, []);
-
-  const onGamesTextClick = useCallback(() => {
-    // Please sync "Games v1.2" to the project
-  }, []);
-
-  const onContactTextClick = useCallback(() => {
-    // Please sync "Contacto" to the project
-  }, []);
-
-  const onGroupButtonClick = useCallback(() => {
-    // Please sync "Crear partida v1.2" to the project
-  }, []);
-
-  const onProfileClick = useCallback(() => {
-    // Please sync "Perfil usuario normal" to the project
-  }, []);
+  const handleCrear = useCallback(() => {
+    console.log("Crear partida:", {
+      titulo,
+      tipoPartida,
+      idioma,
+      edadMinima,
+      jugadores,
+      temporalidad,
+      imagenUrl,
+      descripcion,
+      tags,
+      recomendaciones,
+      ciudad,
+      contactoMaster,
+      precio,
+      horario,
+      herramientas,
+      usoTarjetaX,
+      obligatorioCamara,
+      obligatorioMicrofono,
+    });
+  }, [
+    titulo,
+    tipoPartida,
+    idioma,
+    edadMinima,
+    jugadores,
+    temporalidad,
+    imagenUrl,
+    descripcion,
+    tags,
+    recomendaciones,
+    ciudad,
+    contactoMaster,
+    precio,
+    horario,
+    herramientas,
+    usoTarjetaX,
+    obligatorioCamara,
+    obligatorioMicrofono,
+  ]);
 
   return (
     <div className="w-full relative bg-white overflow-hidden flex flex-col items-start justify-start leading-[normal] tracking-[normal]">
       <main className="self-stretch bg-black flex flex-col items-end justify-start pt-[0rem] px-[4.875rem] pb-[7.562rem] box-border max-w-full text-center text-[1.125rem] text-black1 font-radio-option lg:pb-[4.938rem] lg:box-border mq1050:pb-[3.188rem] mq1050:box-border mq450:pb-[2.063rem] mq450:box-border mq750:pl-[2.438rem] mq750:pr-[2.438rem] mq750:box-border">
         <div className="w-[80rem] h-[116.25rem] relative bg-black hidden max-w-full z-[1]" />
-        <div className="w-[12.75rem] h-[8.563rem] flex flex-row items-start justify-end py-[0rem] px-[0.125rem] box-border">
-          <div className="self-stretch flex-1 rounded-xl bg-nude border-gray-100 border-[1px] border-solid overflow-hidden flex flex-col items-start justify-start pt-[0.937rem] px-[0rem] pb-[0.875rem] z-[4]">
-            <div className="self-stretch h-[3.25rem] flex flex-col items-start justify-start pt-[0rem] px-[0rem] pb-[0.062rem] box-border">
-              <a
-                className="[text-decoration:none] self-stretch relative font-bold text-[inherit] cursor-pointer"
-                onClick={onProfileClick}
-              >
-                Ver mi perfil
-              </a>
-              <div className="self-stretch flex flex-row items-start justify-start py-[0rem] pl-[1.375rem] pr-[1.687rem]">
-                <div className="h-[0.063rem] flex-1 relative border-goldenrod border-t-[1px] border-solid box-border" />
-              </div>
-            </div>
-            <b
-              className="self-stretch h-[3.25rem] relative flex items-center justify-center shrink-0 cursor-pointer"
-              onClick={onFantasyExperienceTextClick}
-            >
-              Cerrar sesión
-            </b>
-          </div>
-        </div>
+
         <section className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start pt-[4rem] px-[6.062rem] pb-[5.312rem] box-border gap-[2.25rem] max-w-full z-[1] mt-[-1.813rem] text-left text-[2.25rem] text-nude font-radio-option lg:pt-[4rem] lg:px-[3rem] lg:pb-[3.438rem] lg:box-border mq1050:pb-[2.25rem] mq1050:box-border mq450:pb-[1.438rem] mq450:box-border mq750:gap-[1.125rem] mq750:pl-[1.5rem] mq750:pr-[1.5rem] mq750:box-border">
           <div className="w-[70.125rem] h-[101.938rem] relative rounded-xl bg-darkslategray hidden max-w-full" />
+
           <div className="self-stretch flex flex-col items-start justify-start">
             <h1 className="m-0 self-stretch relative text-inherit font-extrabold font-[inherit] z-[2] mq1050:text-[1.813rem] mq1050:leading-[1.75rem] mq450:text-[1.375rem] mq450:leading-[1.313rem]">
-              Crea una nueva partida
+              Crear tu partida
             </h1>
             <div className="self-stretch h-[2.688rem] relative text-[1.125rem] leading-[1.625rem] whitespace-pre-wrap flex items-center shrink-0 z-[2] mt-[-0.625rem]">
               Completa la información necesaria para crear tu partida.
             </div>
           </div>
+
           <div className="self-stretch h-[86.125rem] flex flex-col items-end justify-start gap-[4.375rem] max-w-full mq1050:gap-[2.188rem] mq450:gap-[1.063rem]">
             <div className="self-stretch flex flex-row items-start justify-end py-[0rem] pl-[0rem] pr-[0.062rem] box-border max-w-full">
               <form className="m-0 flex-1 flex flex-col items-start justify-start gap-[4.75rem] max-w-full mq1050:gap-[2.375rem] mq450:gap-[1.188rem]">
+                {/* SECCIÓN 1: Información de la partida */}
                 <div className="self-stretch flex flex-row items-start justify-start gap-[2.5rem] lg:flex-wrap mq450:gap-[1.25rem]">
                   <div className="rounded-xl bg-oldlace-300 flex flex-row items-start justify-start py-[1.125rem] pl-[0.562rem] pr-[0.437rem] gap-[0.187rem] z-[2]">
                     <div className="h-[3.75rem] w-[15.625rem] relative rounded-xl bg-oldlace-300 hidden" />
@@ -81,6 +104,8 @@ const NewGame: FunctionComponent = () => {
                       Información de la partida
                     </b>
                   </div>
+
+                  {/* Columna izquierda */}
                   <div className="w-[18rem] flex flex-col items-start justify-start pt-[0.062rem] px-[0rem] pb-[0rem] box-border">
                     <div className="self-stretch flex flex-col items-start justify-start gap-[2rem] mq450:gap-[1rem]">
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
@@ -107,6 +132,7 @@ const NewGame: FunctionComponent = () => {
                           </div>
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[1.312rem]">
                         <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                           <div className="w-[15.044rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
@@ -117,17 +143,23 @@ const NewGame: FunctionComponent = () => {
                             placeholder="Describe la partida"
                             rows={8}
                             cols={14}
+                            value={descripcion}
+                            onChange={(e) => setDescripcion(e.target.value)}
                           />
                         </div>
+
                         <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                           <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                             Tags
                           </div>
                           <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-end justify-between py-[0rem] pl-[0.562rem] pr-[0.75rem] gap-[1.25rem] z-[2]">
                             <div className="h-[2.5rem] w-[18rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                            <div className="h-[2.5rem] w-[11.763rem] relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3]">
-                              Elige las opciones
-                            </div>
+                            <input
+                              className="h-[2.5rem] w-[11.763rem] relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3] bg-transparent border-none outline-none"
+                              placeholder="Elige las opciones"
+                              value={tags}
+                              onChange={(e) => setTags(e.target.value)}
+                            />
                             <div className="flex flex-col items-start justify-end pt-[0rem] px-[0rem] pb-[0.312rem]">
                               <img
                                 className="w-[1.5rem] h-[1.5rem] relative z-[3]"
@@ -140,6 +172,8 @@ const NewGame: FunctionComponent = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Columna derecha */}
                   <div className="w-[19.25rem] flex flex-col items-start justify-start pt-[0.062rem] px-[0rem] pb-[0rem] box-border">
                     <div className="self-stretch flex flex-col items-start justify-start gap-[2.225rem] mq450:gap-[1.125rem]">
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
@@ -152,18 +186,25 @@ const NewGame: FunctionComponent = () => {
                             className="w-[12.831rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
                             placeholder="Escribe el nombre de la partida"
                             type="text"
+                            value={titulo}
+                            onChange={(e) => setTitulo(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[13.288rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Tipo de partida
                         </div>
                         <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-between py-[0rem] pl-[0.625rem] pr-[0.937rem] gap-[1.25rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <div className="h-[2.5rem] w-[12.581rem] relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3]">
-                            Escoge una opción
-                          </div>
+                          <input
+                            className="h-[2.5rem] w-[12.581rem] relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3] bg-transparent border-none outline-none"
+                            placeholder="Escoge una opción"
+                            type="text"
+                            value={tipoPartida}
+                            onChange={(e) => setTipoPartida(e.target.value)}
+                          />
                           <div className="flex flex-col items-start justify-start pt-[0.5rem] px-[0rem] pb-[0rem]">
                             <div className="w-[1.5rem] h-[1.5rem] relative">
                               <img
@@ -180,6 +221,7 @@ const NewGame: FunctionComponent = () => {
                           </div>
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Idioma
@@ -190,9 +232,12 @@ const NewGame: FunctionComponent = () => {
                             className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
                             placeholder="Escribe el idioma de la partida"
                             type="text"
+                            value={idioma}
+                            onChange={(e) => setIdioma(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Edad mínima
@@ -203,9 +248,12 @@ const NewGame: FunctionComponent = () => {
                             className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
                             placeholder="Escribe la edad mínima"
                             type="text"
+                            value={edadMinima}
+                            onChange={(e) => setEdadMinima(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Número de jugadores
@@ -216,9 +264,12 @@ const NewGame: FunctionComponent = () => {
                             className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
                             placeholder="Escribe el número de jugadores"
                             type="text"
+                            value={jugadores}
+                            onChange={(e) => setJugadores(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Temporalidad
@@ -229,18 +280,31 @@ const NewGame: FunctionComponent = () => {
                             className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
                             placeholder="Escribe la temporalidad"
                             type="text"
+                            value={temporalidad}
+                            onChange={(e) => setTemporalidad(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {/* SECCIÓN 2: Información de la sesión */}
                 <div className="self-stretch flex flex-col items-start justify-start gap-[4.125rem] max-w-full mq1050:gap-[2.063rem] mq450:gap-[1rem]">
                   <div className="self-stretch flex flex-row items-start justify-start gap-[2.437rem] mq1050:flex-wrap mq450:gap-[1.188rem]">
-                    <SessionInfoHeader
-                      settings="/settings.svg"
-                      informacinDeLaSesin="Información  de la sesión"
-                    />
+                    <div className="rounded-xl bg-oldlace-300 flex flex-row items-start justify-start py-[1.125rem] pl-[0.562rem] pr-[0.437rem] gap-[0.187rem] z-[2]">
+                      <div className="h-[3.75rem] w-[15.625rem] relative rounded-xl bg-oldlace-300 hidden" />
+                      <img
+                        className="h-[1.5rem] w-[1.5rem] relative z-[3]"
+                        loading="lazy"
+                        alt=""
+                        src="/settings.svg"
+                      />
+                      <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
+                        Información de la sesión
+                      </b>
+                    </div>
+
                     <div className="w-[18.125rem] flex flex-col items-start justify-start gap-[3.687rem] mq450:gap-[1.813rem]">
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
@@ -251,30 +315,12 @@ const NewGame: FunctionComponent = () => {
                           placeholder="Escribe las recomendaciones para la partida"
                           rows={8}
                           cols={14}
+                          value={recomendaciones}
+                          onChange={(e) => setRecomendaciones(e.target.value)}
                         />
                       </div>
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[1.25rem]">
-                        <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
-                          Carga el manual de la partida (si se trata de una
-                          partida digital)
-                        </div>
-                        <div className="flex flex-row items-start justify-start gap-[0.562rem] mq450:flex-wrap">
-                          <div className="flex flex-col items-start justify-start pt-[0.062rem] px-[0rem] pb-[0rem]">
-                            <div className="relative text-[0.875rem] font-light font-radio-option text-white text-left z-[2]">
-                              <p className="m-0">
-                                Carga el manual de la partida
-                              </p>
-                              <p className="m-0">formatos: pdf, doc, docx.</p>
-                            </div>
-                          </div>
-                          <button className="cursor-pointer [border:none] py-[0.343rem] pl-[1rem] pr-[0.937rem] bg-nude shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-11xl overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-lightgray-100">
-                            <div className="flex-1 relative text-[1rem] font-medium font-radio-option text-black text-center">
-                              Cargar archivo
-                            </div>
-                          </button>
-                        </div>
-                      </div>
                     </div>
+
                     <div className="flex-1 flex flex-col items-start justify-start gap-[1.481rem]">
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[13.288rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
@@ -286,9 +332,12 @@ const NewGame: FunctionComponent = () => {
                             className="w-[12.581rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
                             placeholder="Elige las opciones"
                             type="text"
+                            value={ciudad}
+                            onChange={(e) => setCiudad(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Contacto del máster
@@ -299,9 +348,12 @@ const NewGame: FunctionComponent = () => {
                             className="w-[11.763rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
                             placeholder="Elige las opciones"
                             type="text"
+                            value={contactoMaster}
+                            onChange={(e) => setContactoMaster(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Precio
@@ -310,11 +362,14 @@ const NewGame: FunctionComponent = () => {
                           <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
                           <input
                             className="w-[11.763rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Escribe el horario de la partida"
+                            placeholder="Escribe el precio de la partida"
                             type="text"
+                            value={precio}
+                            onChange={(e) => setPrecio(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Horario
@@ -325,16 +380,29 @@ const NewGame: FunctionComponent = () => {
                             className="w-[11.763rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
                             placeholder="Escribe el horario de la partida"
                             type="text"
+                            value={horario}
+                            onChange={(e) => setHorario(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* SECCIÓN 3: Información técnica */}
                   <div className="w-[54.5rem] flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq450:gap-[1.25rem]">
-                    <SessionInfoHeader
-                      settings="/tool.svg"
-                      informacinDeLaSesin="Información  técnica"
-                    />
+                    <div className="rounded-xl bg-oldlace-300 flex flex-row items-start justify-start py-[1.125rem] pl-[0.562rem] pr-[0.437rem] gap-[0.187rem] z-[2]">
+                      <div className="h-[3.75rem] w-[15.625rem] relative rounded-xl bg-oldlace-300 hidden" />
+                      <img
+                        className="h-[1.5rem] w-[1.5rem] relative z-[3]"
+                        loading="lazy"
+                        alt=""
+                        src="/tool.svg"
+                      />
+                      <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
+                        Información técnica
+                      </b>
+                    </div>
+
                     <div className="flex-1 flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq1050:min-w-full mq750:gap-[1.25rem] mq750:flex-wrap">
                       <div className="flex-1 flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[15.044rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
@@ -345,8 +413,11 @@ const NewGame: FunctionComponent = () => {
                           placeholder="Detalla las herramientas necesarias para la partida"
                           rows={8}
                           cols={14}
+                          value={herramientas}
+                          onChange={(e) => setHerramientas(e.target.value)}
                         />
                       </div>
+
                       <div className="w-[15.875rem] flex flex-col items-start justify-start gap-[1.937rem] mq450:gap-[0.938rem] mq750:flex-1">
                         <div className="self-stretch flex flex-col items-start justify-start pt-[0rem] px-[0rem] pb-[0.562rem] gap-[0.812rem]">
                           <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
@@ -356,7 +427,15 @@ const NewGame: FunctionComponent = () => {
                             <div className="flex-1 flex flex-row items-start justify-between gap-[1.25rem]">
                               <div className="w-[3.625rem] flex flex-row items-start justify-start gap-[0.562rem]">
                                 <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div className="w-[1.5rem] h-[1.5rem] relative rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border z-[2]" />
+                                  <div
+                                    className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
+                                    onClick={() => setUsoTarjetaX(true)}
+                                  >
+                                    <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
+                                    {usoTarjetaX && (
+                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
                                   Si
@@ -364,9 +443,14 @@ const NewGame: FunctionComponent = () => {
                               </div>
                               <div className="flex flex-row items-start justify-start gap-[0.562rem]">
                                 <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div className="w-[1.5rem] h-[1.5rem] relative">
+                                  <div
+                                    className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
+                                    onClick={() => setUsoTarjetaX(false)}
+                                  >
                                     <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                    <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    {!usoTarjetaX && (
+                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    )}
                                   </div>
                                 </div>
                                 <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
@@ -376,6 +460,7 @@ const NewGame: FunctionComponent = () => {
                             </div>
                           </div>
                         </div>
+
                         <div className="self-stretch flex flex-col items-start justify-start gap-[0.812rem]">
                           <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
                             ¿Uso obligatorio de cámara?
@@ -384,7 +469,15 @@ const NewGame: FunctionComponent = () => {
                             <div className="flex-1 flex flex-row items-start justify-between gap-[1.25rem]">
                               <div className="w-[3.625rem] flex flex-row items-start justify-start gap-[0.562rem]">
                                 <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div className="w-[1.5rem] h-[1.5rem] relative rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border z-[2]" />
+                                  <div
+                                    className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
+                                    onClick={() => setObligatorioCamara(true)}
+                                  >
+                                    <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
+                                    {obligatorioCamara && (
+                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
                                   Si
@@ -392,9 +485,14 @@ const NewGame: FunctionComponent = () => {
                               </div>
                               <div className="flex flex-row items-start justify-start gap-[0.562rem]">
                                 <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div className="w-[1.5rem] h-[1.5rem] relative">
+                                  <div
+                                    className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
+                                    onClick={() => setObligatorioCamara(false)}
+                                  >
                                     <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                    <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    {!obligatorioCamara && (
+                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    )}
                                   </div>
                                 </div>
                                 <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
@@ -404,6 +502,7 @@ const NewGame: FunctionComponent = () => {
                             </div>
                           </div>
                         </div>
+
                         <div className="self-stretch flex flex-col items-start justify-start gap-[0.812rem]">
                           <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
                             ¿Uso obligatorio de micrófono?
@@ -411,9 +510,14 @@ const NewGame: FunctionComponent = () => {
                           <div className="w-[9.5rem] flex flex-row items-start justify-between gap-[1.25rem]">
                             <div className="w-[3.625rem] flex flex-row items-start justify-start gap-[0.562rem]">
                               <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                <div className="w-[1.5rem] h-[1.5rem] relative">
+                                <div
+                                  className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
+                                  onClick={() => setObligatorioMicrofono(true)}
+                                >
                                   <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                  <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                  {obligatorioMicrofono && (
+                                    <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                  )}
                                 </div>
                               </div>
                               <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
@@ -422,7 +526,15 @@ const NewGame: FunctionComponent = () => {
                             </div>
                             <div className="flex flex-row items-start justify-start gap-[0.562rem]">
                               <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                <div className="w-[1.5rem] h-[1.5rem] relative rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border z-[2]" />
+                                <div
+                                  className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
+                                  onClick={() => setObligatorioMicrofono(false)}
+                                >
+                                  <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
+                                  {!obligatorioMicrofono && (
+                                    <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                  )}
+                                </div>
                               </div>
                               <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
                                 No
@@ -436,11 +548,20 @@ const NewGame: FunctionComponent = () => {
                 </div>
               </form>
             </div>
+
+            {/* Botones */}
             <div className="flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq450:gap-[1.25rem] mq750:flex-wrap">
-              <Button />
               <button
+                onClick={handleCrear}
+                className="cursor-pointer [border:none] py-[0.625rem] px-[3.5rem] bg-dark-gold h-[2.625rem] rounded-31xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] overflow-hidden flex flex-row items-start justify-start box-border z-[2] hover:bg-darkgoldenrod"
+              >
+                <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-black text-center min-w-[5.125rem]">
+                  Crear partida
+                </b>
+              </button>
+              <button
+                onClick={handleCancelar}
                 className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-[transparent] h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
-                onClick={onGamesTextClick}
               >
                 <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-dark-gold text-center min-w-[4rem]">
                   Cancelar

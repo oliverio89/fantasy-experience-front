@@ -1,4 +1,5 @@
 import { FunctionComponent, memo, useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../components/button";
 import PartidaCard, { Partida } from "../components/PartidaCard";
 
@@ -83,13 +84,13 @@ const partidasEjemplo: Partida[] = [
 ];
 
 const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
+  const navigate = useNavigate();
   const [filtroTipo, setFiltroTipo] = useState<string>("");
   const [busqueda, setBusqueda] = useState<string>("");
 
   const onButtonClick = useCallback(() => {
-    // Navegar a crear partida
-    console.log("Crear nueva partida");
-  }, []);
+    navigate("/crearpartida");
+  }, [navigate]);
 
   const handleLimpiar = useCallback(() => {
     setBusqueda("");
