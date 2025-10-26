@@ -69,6 +69,7 @@ function App() {
           path="/partidasdetalles-v12/:partidaId?"
           element={<PartidasDetalles />}
         />
+        <Route path="/detailsgame/:partidaId" element={<PartidasDetalles />} />
         <Route path="/nextgames" element={<NextGames />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Route>
