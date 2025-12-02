@@ -1,5 +1,7 @@
 # Fanstasy Experience (Castellano)
 
+> Nueva documentación unificada: ver `DOCUMENTACION_UNIFICADA.md` para un índice único, guía rápida, especificaciones de backend, migración y cambios.
+
 **Iniciación del proyecto:**
 
 1. Asegurate de tener Node JS instalada en tú computador.
