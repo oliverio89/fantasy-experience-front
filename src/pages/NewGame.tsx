@@ -1,10 +1,25 @@
-import { FunctionComponent, useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { FunctionComponent, useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { PRESET_TAGS } from "../constants";
+import PartidasService from "../services/partidasService";
+import { useToast } from "../context/ToastContext";
+import { Skeleton } from "../components/ui/Skeleton";
+import { CustomRadio } from "../components/ui/CustomRadio";
 
 const NewGame: FunctionComponent = () => {
   const navigate = useNavigate();
+  const { partidaId } = useParams<{ partidaId: string }>();
+  const isEditing = !!partidaId;
+  const { showToast } = useToast();
 
-  // Estados para los campos del formulario
+  // Wizard Step State
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
+
+  // Form Fields State
+  const INPUT_STYLE =
+    "w-full bg-transparent border border-nude rounded-lg p-3 text-nude placeholder:text-nude/50 focus:border-white transition-colors outline-none font-radio-option";
+
   const [titulo, setTitulo] = useState("");
   const [tipoPartida, setTipoPartida] = useState("");
   const [idioma, setIdioma] = useState("");
@@ -13,7 +28,6 @@ const NewGame: FunctionComponent = () => {
   const [temporalidad, setTemporalidad] = useState("");
   const [imagenUrl, setImagenUrl] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [tags, setTags] = useState("");
   const [recomendaciones, setRecomendaciones] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [contactoMaster, setContactoMaster] = useState("");
@@ -23,41 +37,246 @@ const NewGame: FunctionComponent = () => {
   const [usoTarjetaX, setUsoTarjetaX] = useState(false);
   const [obligatorioCamara, setObligatorioCamara] = useState(false);
   const [obligatorioMicrofono, setObligatorioMicrofono] = useState(false);
+  const [masterName, setMasterName] = useState("Master Default");
+  const [tags, setTags] = useState<string[]>([]);
+  const [customTagInput, setCustomTagInput] = useState("");
 
-  const handleCancelar = useCallback(() => {
-    navigate("/nextgames");
-  }, [navigate]);
+  // Nuevos estados para Horario desglosado
+  const [horarioDia, setHorarioDia] = useState("");
+  const [horarioFrecuencia, setHorarioFrecuencia] = useState("");
 
-  const handleCrear = useCallback(() => {
-    console.log("Crear partida:", {
-      titulo,
-      tipoPartida,
-      idioma,
-      edadMinima,
-      jugadores,
-      temporalidad,
-      imagenUrl,
-      descripcion,
-      tags,
-      recomendaciones,
-      ciudad,
-      contactoMaster,
-      precio,
-      horario,
-      herramientas,
-      usoTarjetaX,
-      obligatorioCamara,
-      obligatorioMicrofono,
+  // Sincronizar horarioDia y horarioFrecuencia con el string final horario
+  useEffect(() => {
+    if (horarioDia || horarioFrecuencia) {
+      setHorario(
+        `${horarioDia || "A convenir"} - ${horarioFrecuencia || "A convenir"}`
+      );
+    }
+  }, [horarioDia, horarioFrecuencia]);
+
+  // UI States
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const toggleTag = (tag: string) => {
+    setTags((prev) => {
+      const currentTags = Array.isArray(prev) ? prev : [];
+      return currentTags.includes(tag)
+        ? currentTags.filter((t) => t !== tag)
+        : [...currentTags, tag];
     });
+  };
+
+  const handleCustomTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val.endsWith(" ")) {
+      const newTag = val.trim();
+      if (newTag && !tags.includes(newTag)) {
+        setTags((prev) => {
+          const currentTags = Array.isArray(prev) ? prev : [];
+          return [...currentTags, newTag];
+        });
+      }
+      setCustomTagInput("");
+    } else {
+      setCustomTagInput(val);
+    }
+  };
+
+  // Load Data
+  useEffect(() => {
+    const fetchPartida = async () => {
+      if (partidaId) {
+        setLoading(true);
+        try {
+          const data: any = await PartidasService.obtenerPartidaPorId(
+            partidaId
+          );
+          setTitulo(data.titulo || "");
+          // Normalize tipoPartida to match Radio Button values (Title Case)
+          let loadedTipo = data.tipoPartida || "";
+          if (loadedTipo) {
+            loadedTipo =
+              loadedTipo.charAt(0).toUpperCase() +
+              loadedTipo.slice(1).toLowerCase();
+          }
+          setTipoPartida(loadedTipo);
+          setMasterName(data.masterName || "Master Default");
+          setDescripcion(data.descripcion || "");
+          setImagenUrl(data.imagenUrl || "");
+          setIdioma(data.idioma || "");
+          setEdadMinima(data.edadMinima || "");
+          setJugadores(data.jugadores || "");
+          setTemporalidad(data.temporalidad || "");
+          setTemporalidad(data.temporalidad || "");
+
+          let loadedTags = data.tags || [];
+          if (typeof loadedTags === "string") {
+            if (loadedTags.startsWith("[")) {
+              try {
+                loadedTags = JSON.parse(loadedTags);
+              } catch {
+                loadedTags = [];
+              }
+            } else {
+              loadedTags = loadedTags
+                .split(",")
+                .map((t: string) => t.trim())
+                .filter((t: string) => t);
+            }
+          }
+          setTags(loadedTags);
+
+          setRecomendaciones(data.recomendaciones || "");
+          setCiudad(data.ciudad || "");
+          setContactoMaster(data.contactoMaster || "");
+          setPrecio(data.precio || "");
+          setHorario(data.horario || "");
+
+          // Parsear horario si existe para rellenar los radio buttons
+          if (data.horario) {
+            const parts = data.horario.split(" - ");
+            if (parts.length === 2) {
+              setHorarioDia(parts[0]);
+              setHorarioFrecuencia(parts[1]);
+            }
+          }
+
+          setHerramientas(data.herramientas || "");
+          setUsoTarjetaX(!!data.usoTarjetaX);
+          setObligatorioCamara(!!data.obligatorioCamara);
+          setObligatorioMicrofono(!!data.obligatorioMicrofono);
+        } catch (err) {
+          console.error("Error cargando partida:", err);
+          showToast("Error al cargar la partida", "error");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchPartida();
+  }, [partidaId, showToast]);
+
+  // Validation Logic
+  const validateStep = (step: number): boolean => {
+    const newErrors: { [key: string]: string } = {};
+    let isValid = true;
+
+    if (step === 1) {
+      if (!titulo.trim()) newErrors.titulo = "El título es obligatorio";
+      if (!descripcion.trim())
+        newErrors.descripcion = "La descripción es obligatoria";
+      if (!tipoPartida.trim())
+        newErrors.tipoPartida = "El tipo de partida es obligatorio";
+      if (
+        tipoPartida.toLowerCase() !== "presencial" &&
+        tipoPartida.toLowerCase() !== "digital" &&
+        tipoPartida.toLowerCase() !== "online"
+      ) {
+        // Optional strict check, but simple required is enough for now
+      }
+    }
+
+    if (step === 2) {
+      if (!idioma.trim()) newErrors.idioma = "El idioma es obligatorio";
+      if (!jugadores.trim())
+        newErrors.jugadores = "El número de jugadores es obligatorio";
+      if (tipoPartida.toLowerCase() === "presencial" && !ciudad.trim()) {
+        newErrors.ciudad =
+          "La ciudad es obligatoria para partidas presenciales";
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      showToast("Por favor corrige los errores antes de continuar", "error");
+      isValid = false;
+    } else {
+      setErrors({});
+    }
+
+    return isValid;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      if (currentStep < totalSteps) {
+        setCurrentStep(currentStep + 1);
+        window.scrollTo(0, 0);
+      }
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handleCrear = useCallback(async () => {
+    console.log("handleCrear called", { currentStep, isEditing, partidaId });
+    if (!validateStep(currentStep)) {
+      console.log("Validation failed for step", currentStep);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const datosPartida: any = {
+        titulo,
+        masterName,
+        sistemaJuego: "D&D 5e",
+        fecha: new Date().toISOString().split("T")[0],
+        descripcion,
+        imagenUrl:
+          imagenUrl ||
+          "https://images.unsplash.com/photo-1642132652859-3ef5a92e6f45?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+        tipoPartida: tipoPartida.toLowerCase(),
+        rating: 0,
+        idioma,
+        edadMinima,
+        jugadores,
+        temporalidad,
+        tags,
+        recomendaciones,
+        ciudad,
+        contactoMaster,
+        precio,
+        horario,
+        herramientas,
+        usoTarjetaX,
+        obligatorioCamara,
+        obligatorioMicrofono,
+      };
+
+      if (isEditing && partidaId) {
+        await PartidasService.actualizarPartida(partidaId, datosPartida);
+        showToast("Partida actualizada con éxito", "success");
+        navigate(`/detailsgame/${partidaId}`);
+      } else {
+        await PartidasService.crearPartida(datosPartida);
+        showToast("Partida creada con éxito", "success");
+        navigate("/nextgames");
+      }
+    } catch (err: any) {
+      console.error("Error al guardar:", err);
+      showToast(err.message || "Error al guardar la partida", "error");
+    } finally {
+      setLoading(false);
+    }
   }, [
     titulo,
+    masterName,
+    descripcion,
+    imagenUrl,
     tipoPartida,
     idioma,
     edadMinima,
     jugadores,
     temporalidad,
-    imagenUrl,
-    descripcion,
     tags,
     recomendaciones,
     ciudad,
@@ -68,7 +287,70 @@ const NewGame: FunctionComponent = () => {
     usoTarjetaX,
     obligatorioCamara,
     obligatorioMicrofono,
+    isEditing,
+    partidaId,
+    navigate,
+    showToast,
+    currentStep,
   ]);
+
+  const renderStepIndicator = () => (
+    <div className="flex flex-row items-center justify-center gap-4 mb-8 w-full">
+      {[1, 2, 3].map((step) => (
+        <div key={step} className="flex items-center">
+          <div
+            onClick={() => {
+              if (step === currentStep) return;
+              if (step < currentStep) {
+                setCurrentStep(step);
+                window.scrollTo(0, 0);
+              } else if (validateStep(currentStep)) {
+                setCurrentStep(step);
+                window.scrollTo(0, 0);
+              }
+            }}
+            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 cursor-pointer hover:opacity-80 ${
+              currentStep >= step
+                ? "bg-dark-gold text-black"
+                : "bg-gray-700 text-gray-400"
+            }`}
+          >
+            {step}
+          </div>
+          {step < 3 && (
+            <div
+              className={`w-16 h-1 mx-2 rounded transition-colors duration-300 ${
+                currentStep > step ? "bg-dark-gold" : "bg-gray-700"
+              }`}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderError = (field: string) =>
+    errors[field] && (
+      <span className="text-red-500 text-sm mt-1 block font-radio-option">
+        {errors[field]}
+      </span>
+    );
+
+  if (loading && !titulo && isEditing) {
+    return (
+      <div className="w-full h-screen bg-black flex flex-col items-center justify-center gap-4">
+        <Skeleton variant="rectangular" width={300} height={40} />
+        <Skeleton variant="text" width={200} height={20} />
+        <div className="flex gap-4">
+          <Skeleton variant="rounded" width={100} height={100} />
+          <Skeleton variant="rounded" width={100} height={100} />
+        </div>
+        <div className="text-white font-radio-option mt-4">
+          Cargando partida...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full relative bg-white overflow-hidden flex flex-col items-start justify-start leading-[normal] tracking-[normal]">
@@ -76,497 +358,548 @@ const NewGame: FunctionComponent = () => {
         <div className="w-[80rem] h-[116.25rem] relative bg-black hidden max-w-full z-[1]" />
 
         <section className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start pt-[4rem] px-[6.062rem] pb-[5.312rem] box-border gap-[2.25rem] max-w-full z-[1] mt-[-1.813rem] text-left text-[2.25rem] text-nude font-radio-option lg:pt-[4rem] lg:px-[3rem] lg:pb-[3.438rem] lg:box-border mq1050:pb-[2.25rem] mq1050:box-border mq450:pb-[1.438rem] mq450:box-border mq750:gap-[1.125rem] mq750:pl-[1.5rem] mq750:pr-[1.5rem] mq750:box-border">
-          <div className="w-[70.125rem] h-[101.938rem] relative rounded-xl bg-darkslategray hidden max-w-full" />
-
+          {/* Header */}
           <div className="self-stretch flex flex-col items-start justify-start">
             <h1 className="m-0 self-stretch relative text-inherit font-extrabold font-[inherit] z-[2] mq1050:text-[1.813rem] mq1050:leading-[1.75rem] mq450:text-[1.375rem] mq450:leading-[1.313rem]">
-              Crear tu partida
+              {isEditing ? "Editar partida" : "Crear tu partida"}
             </h1>
             <div className="self-stretch h-[2.688rem] relative text-[1.125rem] leading-[1.625rem] whitespace-pre-wrap flex items-center shrink-0 z-[2] mt-[-0.625rem]">
-              Completa la información necesaria para crear tu partida.
+              {isEditing
+                ? "Modifica la información de tu partida."
+                : "Completa la información paso a paso."}
             </div>
           </div>
 
-          <div className="self-stretch h-[86.125rem] flex flex-col items-end justify-start gap-[4.375rem] max-w-full mq1050:gap-[2.188rem] mq450:gap-[1.063rem]">
+          {/* Stepper */}
+          {renderStepIndicator()}
+
+          {/* Form Content */}
+          <div className="self-stretch flex flex-col items-end justify-start gap-[2rem] max-w-full">
             <div className="self-stretch flex flex-row items-start justify-end py-[0rem] pl-[0rem] pr-[0.062rem] box-border max-w-full">
-              <form className="m-0 flex-1 flex flex-col items-start justify-start gap-[4.75rem] max-w-full mq1050:gap-[2.375rem] mq450:gap-[1.188rem]">
-                {/* SECCIÓN 1: Información de la partida */}
-                <div className="self-stretch flex flex-row items-start justify-start gap-[2.5rem] lg:flex-wrap mq450:gap-[1.25rem]">
-                  <div className="rounded-xl bg-oldlace-300 flex flex-row items-start justify-start py-[1.125rem] pl-[0.562rem] pr-[0.437rem] gap-[0.187rem] z-[2]">
-                    <div className="h-[3.75rem] w-[15.625rem] relative rounded-xl bg-oldlace-300 hidden" />
-                    <img
-                      className="h-[1.5rem] w-[1.5rem] relative z-[3]"
-                      loading="lazy"
-                      alt=""
-                      src="/group-95.svg"
-                    />
-                    <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
-                      Información de la partida
-                    </b>
-                  </div>
-
-                  {/* Columna izquierda */}
-                  <div className="w-[18rem] flex flex-col items-start justify-start pt-[0.062rem] px-[0rem] pb-[0rem] box-border">
-                    <div className="self-stretch flex flex-col items-start justify-start gap-[2rem] mq450:gap-[1rem]">
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[15.688rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Imagen de partida
-                        </div>
-                        <img
-                          className="self-stretch flex-1 relative rounded-xl max-w-full overflow-hidden max-h-full object-cover z-[2]"
-                          loading="lazy"
-                          alt=""
-                          src="/rectangle-63@2x.png"
-                        />
-                      </div>
-                      <div className="self-stretch flex flex-row items-start justify-between pt-[0rem] px-[0rem] pb-[1.125rem] gap-[1.25rem] mq450:flex-wrap">
-                        <div className="w-[6.75rem] flex flex-col items-start justify-start pt-[0.062rem] px-[0rem] pb-[0rem] box-border">
-                          <div className="self-stretch relative text-[0.875rem] font-light font-radio-option text-white text-left z-[2]">
-                            <p className="m-0">máximo 2MB</p>
-                            <p className="m-0">formatos: jpg, png</p>
-                          </div>
-                        </div>
-                        <div className="shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-11xl bg-nude overflow-hidden flex flex-row items-start justify-start py-[0.343rem] pl-[0.937rem] pr-[0.875rem] z-[2]">
-                          <div className="flex-1 relative text-[1rem] font-medium font-radio-option text-black text-center">
-                            Cargar imagen
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[1.312rem]">
-                        <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                          <div className="w-[15.044rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                            Descripción
-                          </div>
-                          <textarea
-                            className="border-nude border-[1px] border-solid bg-[transparent] h-[9.375rem] w-auto [outline:none] self-stretch rounded-3xs box-border flex flex-row items-start justify-start py-[0.25rem] px-[0.562rem] font-radio-option font-light text-[0.875rem] text-nude z-[2]"
-                            placeholder="Describe la partida"
-                            rows={8}
-                            cols={14}
-                            value={descripcion}
-                            onChange={(e) => setDescripcion(e.target.value)}
-                          />
-                        </div>
-
-                        <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                          <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                            Tags
-                          </div>
-                          <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-end justify-between py-[0rem] pl-[0.562rem] pr-[0.75rem] gap-[1.25rem] z-[2]">
-                            <div className="h-[2.5rem] w-[18rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                            <input
-                              className="h-[2.5rem] w-[11.763rem] relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3] bg-transparent border-none outline-none"
-                              placeholder="Elige las opciones"
-                              value={tags}
-                              onChange={(e) => setTags(e.target.value)}
-                            />
-                            <div className="flex flex-col items-start justify-end pt-[0rem] px-[0rem] pb-[0.312rem]">
-                              <img
-                                className="w-[1.5rem] h-[1.5rem] relative z-[3]"
-                                alt=""
-                                src="/group-100.svg"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Columna derecha */}
-                  <div className="w-[19.25rem] flex flex-col items-start justify-start pt-[0.062rem] px-[0rem] pb-[0rem] box-border">
-                    <div className="self-stretch flex flex-col items-start justify-start gap-[2.225rem] mq450:gap-[1.125rem]">
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[16.106rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Título de la partida
-                        </div>
-                        <div className="self-stretch flex flex-row items-start justify-start py-[0rem] px-[0.875rem] relative">
-                          <div className="h-full w-full absolute !m-[0] top-[0rem] right-[0rem] bottom-[0rem] left-[0rem] [filter:blur(1px)] rounded-xl border-dark-gold border-[1px] border-solid box-border mix-blend-normal z-[2]" />
-                          <input
-                            className="w-[12.831rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Escribe el nombre de la partida"
-                            type="text"
-                            value={titulo}
-                            onChange={(e) => setTitulo(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[13.288rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Tipo de partida
-                        </div>
-                        <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-between py-[0rem] pl-[0.625rem] pr-[0.937rem] gap-[1.25rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <input
-                            className="h-[2.5rem] w-[12.581rem] relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3] bg-transparent border-none outline-none"
-                            placeholder="Escoge una opción"
-                            type="text"
-                            value={tipoPartida}
-                            onChange={(e) => setTipoPartida(e.target.value)}
-                          />
-                          <div className="flex flex-col items-start justify-start pt-[0.5rem] px-[0rem] pb-[0rem]">
-                            <div className="w-[1.5rem] h-[1.5rem] relative">
-                              <img
-                                className="absolute top-[0rem] left-[0rem] w-full h-full z-[3]"
-                                alt=""
-                                src="/group-113.svg"
-                              />
-                              <img
-                                className="absolute top-[0rem] left-[0rem] w-full h-full z-[4]"
-                                alt=""
-                                src="/group-99.svg"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Idioma
-                        </div>
-                        <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <input
-                            className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Escribe el idioma de la partida"
-                            type="text"
-                            value={idioma}
-                            onChange={(e) => setIdioma(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Edad mínima
-                        </div>
-                        <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <input
-                            className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Escribe la edad mínima"
-                            type="text"
-                            value={edadMinima}
-                            onChange={(e) => setEdadMinima(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Número de jugadores
-                        </div>
-                        <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <input
-                            className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Escribe el número de jugadores"
-                            type="text"
-                            value={jugadores}
-                            onChange={(e) => setJugadores(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Temporalidad
-                        </div>
-                        <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <input
-                            className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Escribe la temporalidad"
-                            type="text"
-                            value={temporalidad}
-                            onChange={(e) => setTemporalidad(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SECCIÓN 2: Información de la sesión */}
-                <div className="self-stretch flex flex-col items-start justify-start gap-[4.125rem] max-w-full mq1050:gap-[2.063rem] mq450:gap-[1rem]">
-                  <div className="self-stretch flex flex-row items-start justify-start gap-[2.437rem] mq1050:flex-wrap mq450:gap-[1.188rem]">
-                    <div className="rounded-xl bg-oldlace-300 flex flex-row items-start justify-start py-[1.125rem] pl-[0.562rem] pr-[0.437rem] gap-[0.187rem] z-[2]">
-                      <div className="h-[3.75rem] w-[15.625rem] relative rounded-xl bg-oldlace-300 hidden" />
-                      <img
-                        className="h-[1.5rem] w-[1.5rem] relative z-[3]"
-                        loading="lazy"
-                        alt=""
-                        src="/settings.svg"
-                      />
-                      <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
-                        Información de la sesión
+              <form className="m-0 flex-1 flex flex-col items-start justify-start gap-[2rem] max-w-full">
+                {/* STEP 1: DATOS BÁSICOS */}
+                {currentStep === 1 && (
+                  <div className="self-stretch flex flex-col gap-6 animate-slide-in-right">
+                    <div className="rounded-xl bg-oldlace-300 flex items-center p-4 gap-2 z-[2] w-fit">
+                      <img src="/group-95.svg" alt="" className="w-6 h-6" />
+                      <b className="text-[1.25rem] text-nude">
+                        Información Básica
                       </b>
                     </div>
 
-                    <div className="w-[18.125rem] flex flex-col items-start justify-start gap-[3.687rem] mq450:gap-[1.813rem]">
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
-                          Recomendaciones para la partida
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Columna Izquierda */}
+                      <div className="flex flex-col gap-6">
+                        <div>
+                          <label className="block text-nude mb-2">
+                            Título de la partida *
+                          </label>
+                          <input
+                            className={`w-full bg-transparent border-b border-dark-gold text-nude p-2 outline-none focus:border-white transition-colors ${
+                              errors.titulo ? "border-red-500" : ""
+                            }`}
+                            placeholder="Ej: La Maldición de Strahd"
+                            value={titulo}
+                            onChange={(e) => setTitulo(e.target.value)}
+                          />
+                          {renderError("titulo")}
                         </div>
-                        <textarea
-                          className="border-nude border-[1px] border-solid bg-[transparent] h-[9.375rem] w-auto [outline:none] self-stretch rounded-3xs box-border flex flex-row items-start justify-start py-[0.25rem] px-[0.562rem] font-radio-option font-light text-[0.875rem] text-nude z-[2]"
-                          placeholder="Escribe las recomendaciones para la partida"
-                          rows={8}
-                          cols={14}
-                          value={recomendaciones}
-                          onChange={(e) => setRecomendaciones(e.target.value)}
-                        />
+
+                        <div>
+                          <label className="block text-nude mb-2">
+                            Imagen (URL)
+                          </label>
+                          <input
+                            className="w-full bg-black/20 rounded border-none text-white p-2 outline-none"
+                            placeholder="https://..."
+                            value={imagenUrl}
+                            onChange={(e) => setImagenUrl(e.target.value)}
+                          />
+                          {imagenUrl && (
+                            <img
+                              src={imagenUrl}
+                              alt="Preview"
+                              className="h-24 object-cover rounded mt-2"
+                            />
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-nude mb-2">
+                            Descripción *
+                          </label>
+                          <textarea
+                            className={`w-full bg-transparent border border-nude rounded p-2 text-nude outline-none h-32 ${
+                              errors.descripcion ? "border-red-500" : ""
+                            }`}
+                            placeholder="Describe la aventura..."
+                            value={descripcion}
+                            onChange={(e) => setDescripcion(e.target.value)}
+                          />
+                          {renderError("descripcion")}
+                        </div>
+                      </div>
+
+                      {/* Columna Derecha */}
+                      <div className="flex flex-col gap-6">
+                        <div>
+                          <label className="block text-nude mb-4">
+                            Tipo de partida *
+                          </label>
+                          <div className="flex gap-6 mt-2">
+                            {/* Presencial */}
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio
+                                checked={tipoPartida === "Presencial"}
+                              />
+                              <input
+                                type="radio"
+                                checked={tipoPartida === "Presencial"}
+                                onChange={() => setTipoPartida("Presencial")}
+                                className="hidden"
+                              />
+                              Presencial
+                            </label>
+
+                            {/* Digital */}
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio
+                                checked={tipoPartida === "Digital"}
+                              />
+                              <input
+                                type="radio"
+                                checked={tipoPartida === "Digital"}
+                                onChange={() => setTipoPartida("Digital")}
+                                className="hidden"
+                              />
+                              Digital
+                            </label>
+
+                            {/* Online */}
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio checked={tipoPartida === "Online"} />
+                              <input
+                                type="radio"
+                                checked={tipoPartida === "Online"}
+                                onChange={() => setTipoPartida("Online")}
+                                className="hidden"
+                              />
+                              Online
+                            </label>
+                          </div>
+                          {renderError("tipoPartida")}
+                        </div>
+
+                        <div>
+                          <label className="block text-nude mb-4">
+                            Etiquetas
+                          </label>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {PRESET_TAGS.map((tag) => (
+                              <button
+                                key={tag}
+                                type="button"
+                                onClick={() => toggleTag(tag)}
+                                className={`px-4 py-2 rounded-full text-sm transition-all border ${
+                                  Array.isArray(tags) && tags.includes(tag)
+                                    ? "bg-nude text-black border-nude font-bold"
+                                    : "bg-transparent text-nude border-nude/50 hover:bg-nude/10"
+                                }`}
+                              >
+                                {tag}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Tags seleccionados e inputs extra */}
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {Array.isArray(tags) &&
+                              tags
+                                .filter((t) => !PRESET_TAGS.includes(t))
+                                .map((tag) => (
+                                  <div
+                                    key={tag}
+                                    className="flex items-center gap-1 px-3 py-1 rounded-full bg-nude/20 text-nude border border-nude/30 text-xs"
+                                  >
+                                    <span>{tag}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleTag(tag)}
+                                      className="hover:text-white cursor-pointer ml-1 font-bold"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                          </div>
+
+                          <div className="relative">
+                            <input
+                              className="w-full bg-transparent border-b border-nude text-nude p-2 outline-none placeholder:text-nude/50"
+                              placeholder="Otro... (escribe y pulsa espacio)"
+                              value={customTagInput}
+                              onChange={handleCustomTagChange}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
+                  </div>
+                )}
 
-                    <div className="flex-1 flex flex-col items-start justify-start gap-[1.481rem]">
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[13.288rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Ciudad (si es presencial)
+                {/* STEP 2: DETALLES DE SESIÓN */}
+                {currentStep === 2 && (
+                  <div className="self-stretch flex flex-col gap-6 animate-slide-in-right">
+                    <div className="rounded-xl bg-oldlace-300 flex items-center p-4 gap-2 z-[2] w-fit">
+                      <img src="/settings.svg" alt="" className="w-6 h-6" />
+                      <b className="text-[1.25rem] text-nude">
+                        Detalles de la Sesión
+                      </b>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Left Column: Details */}
+                      <div className="flex flex-col gap-6">
+                        {/* Grupos de inputs en 2 columnas para ahorrar espacio */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-nude mb-2 font-radio-option">
+                              Nº Jugadores *
+                            </label>
+                            <input
+                              type="number"
+                              className={`${INPUT_STYLE.replace(
+                                "w-full",
+                                "w-32"
+                              )} ${errors.jugadores ? "border-red-500" : ""}`}
+                              placeholder="3"
+                              value={jugadores}
+                              onChange={(e) => setJugadores(e.target.value)}
+                            />
+                            {renderError("jugadores")}
+                          </div>
+
+                          <div>
+                            <label className="block text-nude mb-2 font-radio-option">
+                              Edad Mínima
+                            </label>
+                            <input
+                              className={INPUT_STYLE.replace("w-full", "w-32")}
+                              placeholder="+18"
+                              value={edadMinima}
+                              onChange={(e) => setEdadMinima(e.target.value)}
+                            />
+                          </div>
                         </div>
-                        <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.625rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-nude mb-2 font-radio-option">
+                              Sesiones
+                            </label>
+                            <input
+                              type="number"
+                              className={INPUT_STYLE.replace("w-full", "w-32")}
+                              placeholder="Ej: 4"
+                              value={temporalidad}
+                              onChange={(e) => setTemporalidad(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-nude mb-2 font-radio-option">
+                              Precio (€)
+                            </label>
+                            <input
+                              type="number"
+                              className={INPUT_STYLE.replace("w-full", "w-32")}
+                              placeholder="0"
+                              value={precio}
+                              onChange={(e) => setPrecio(e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-nude mb-2 font-radio-option">
+                            Ciudad (Si es presencial)
+                          </label>
                           <input
-                            className="w-[12.581rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Elige las opciones"
-                            type="text"
+                            className={`${INPUT_STYLE} ${
+                              errors.ciudad ? "border-red-500" : ""
+                            }`}
+                            placeholder="Madrid, Barcelona..."
                             value={ciudad}
                             onChange={(e) => setCiudad(e.target.value)}
                           />
+                          {renderError("ciudad")}
                         </div>
                       </div>
 
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Contacto del máster
+                      {/* Right Column: Schedule */}
+                      <div className="flex flex-col gap-6">
+                        <div>
+                          <label className="block text-nude mb-4 text-lg font-radio-option">
+                            Horario
+                          </label>
+                          <div className="grid grid-cols-2 gap-8">
+                            {/* Momento */}
+                            <div className="flex flex-col gap-2">
+                              <span className="text-nude/70 text-xs font-bold uppercase tracking-wider font-radio-option">
+                                Momento
+                              </span>
+                              {["Mañana", "Tarde", "A convenir"].map((opt) => (
+                                <label
+                                  key={opt}
+                                  className="flex items-center text-nude gap-2 cursor-pointer hover:opacity-80 font-radio-option"
+                                >
+                                  <CustomRadio
+                                    checked={horarioDia === opt}
+                                    size="sm"
+                                  />
+                                  <input
+                                    type="radio"
+                                    className="hidden"
+                                    checked={horarioDia === opt}
+                                    onChange={() => setHorarioDia(opt)}
+                                  />
+                                  <span className="text-xs">{opt}</span>
+                                </label>
+                              ))}
+                            </div>
+
+                            {/* Frecuencia */}
+                            <div className="flex flex-col gap-2">
+                              <span className="text-nude/70 text-xs font-bold uppercase tracking-wider font-radio-option">
+                                Frecuencia
+                              </span>
+                              {[
+                                "Semanalmente",
+                                "Quincenalmente",
+                                "A convenir",
+                              ].map((opt) => (
+                                <label
+                                  key={opt}
+                                  className="flex items-center text-nude gap-2 cursor-pointer hover:opacity-80 font-radio-option"
+                                >
+                                  <CustomRadio
+                                    checked={horarioFrecuencia === opt}
+                                    size="sm"
+                                  />
+                                  <input
+                                    type="radio"
+                                    className="hidden"
+                                    checked={horarioFrecuencia === opt}
+                                    onChange={() => setHorarioFrecuencia(opt)}
+                                  />
+                                  <span className="text-xs">{opt}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                        <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.562rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
+
+                        <div>
+                          <label className="block text-nude mb-2 font-radio-option">
+                            Idioma *
+                          </label>
+                          <div className="flex gap-4">
+                            {["Español", "Inglés"].map((lang) => (
+                              <label
+                                key={lang}
+                                className="flex items-center text-nude gap-2 cursor-pointer hover:opacity-80 font-radio-option"
+                              >
+                                <CustomRadio checked={idioma === lang} />
+                                <input
+                                  type="radio"
+                                  className="hidden"
+                                  checked={idioma === lang}
+                                  onChange={() => setIdioma(lang)}
+                                />
+                                {lang}
+                              </label>
+                            ))}
+                          </div>
+                          {renderError("idioma")}
+                        </div>
+
+                        <div>
+                          <label className="block text-nude mb-2 font-radio-option">
+                            Contacto del Master
+                          </label>
                           <input
-                            className="w-[11.763rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Elige las opciones"
-                            type="text"
+                            className={INPUT_STYLE}
+                            placeholder="Discord, Email..."
                             value={contactoMaster}
                             onChange={(e) => setContactoMaster(e.target.value)}
                           />
                         </div>
-                      </div>
 
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Precio
-                        </div>
-                        <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.562rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <input
-                            className="w-[11.763rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Escribe el precio de la partida"
-                            type="text"
-                            value={precio}
-                            onChange={(e) => setPrecio(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Horario
-                        </div>
-                        <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.562rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <input
-                            className="w-[11.763rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]"
-                            placeholder="Escribe el horario de la partida"
-                            type="text"
-                            value={horario}
-                            onChange={(e) => setHorario(e.target.value)}
+                        <div>
+                          <label className="block text-nude mb-2 font-radio-option">
+                            Recomendaciones
+                          </label>
+                          <textarea
+                            className={`${INPUT_STYLE} h-24`}
+                            placeholder="Traer dados propios, tener webcam..."
+                            value={recomendaciones}
+                            onChange={(e) => setRecomendaciones(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
                   </div>
+                )}
 
-                  {/* SECCIÓN 3: Información técnica */}
-                  <div className="w-[54.5rem] flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq450:gap-[1.25rem]">
-                    <div className="rounded-xl bg-oldlace-300 flex flex-row items-start justify-start py-[1.125rem] pl-[0.562rem] pr-[0.437rem] gap-[0.187rem] z-[2]">
-                      <div className="h-[3.75rem] w-[15.625rem] relative rounded-xl bg-oldlace-300 hidden" />
-                      <img
-                        className="h-[1.5rem] w-[1.5rem] relative z-[3]"
-                        loading="lazy"
-                        alt=""
-                        src="/tool.svg"
-                      />
-                      <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
-                        Información técnica
+                {/* STEP 3: TÉCNICO Y EXTRAS */}
+                {currentStep === 3 && (
+                  <div className="self-stretch flex flex-col gap-6 animate-slide-in-right">
+                    <div className="rounded-xl bg-oldlace-300 flex items-center p-4 gap-2 z-[2] w-fit">
+                      <img src="/tool.svg" alt="" className="w-6 h-6" />
+                      <b className="text-[1.25rem] text-nude">
+                        Requisitos Técnicos
                       </b>
                     </div>
 
-                    <div className="flex-1 flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq1050:min-w-full mq750:gap-[1.25rem] mq750:flex-wrap">
-                      <div className="flex-1 flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[15.044rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Herramientas necesarias
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div>
+                        <label className="block text-nude mb-2 font-radio-option">
+                          Herramientas Necesarias
+                        </label>
                         <textarea
-                          className="border-nude border-[1px] border-solid bg-[transparent] h-[9.375rem] w-auto [outline:none] self-stretch rounded-3xs box-border flex flex-row items-start justify-start py-[0.625rem] px-[0.437rem] font-radio-option font-light text-[0.875rem] text-nude z-[2]"
-                          placeholder="Detalla las herramientas necesarias para la partida"
-                          rows={8}
-                          cols={14}
+                          className={INPUT_STYLE + " h-32"}
+                          placeholder="Roll20, Discord, D&D Beyond..."
                           value={herramientas}
                           onChange={(e) => setHerramientas(e.target.value)}
                         />
                       </div>
 
-                      <div className="w-[15.875rem] flex flex-col items-start justify-start gap-[1.937rem] mq450:gap-[0.938rem] mq750:flex-1">
-                        <div className="self-stretch flex flex-col items-start justify-start pt-[0rem] px-[0rem] pb-[0.562rem] gap-[0.812rem]">
-                          <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
+                      <div className="flex flex-col gap-8">
+                        {/* Toggles */}
+                        <div className="flex flex-col gap-3">
+                          <span className="text-nude text-lg">
                             Uso de tarjeta X
-                          </div>
-                          <div className="w-[9.75rem] flex flex-row items-start justify-start py-[0rem] px-[0.125rem] box-border">
-                            <div className="flex-1 flex flex-row items-start justify-between gap-[1.25rem]">
-                              <div className="w-[3.625rem] flex flex-row items-start justify-start gap-[0.562rem]">
-                                <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div
-                                    className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
-                                    onClick={() => setUsoTarjetaX(true)}
-                                  >
-                                    <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                    {usoTarjetaX && (
-                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
-                                  Si
-                                </div>
-                              </div>
-                              <div className="flex flex-row items-start justify-start gap-[0.562rem]">
-                                <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div
-                                    className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
-                                    onClick={() => setUsoTarjetaX(false)}
-                                  >
-                                    <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                    {!usoTarjetaX && (
-                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
-                                  No
-                                </div>
-                              </div>
-                            </div>
+                          </span>
+                          <div className="flex gap-8">
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio checked={usoTarjetaX} />
+                              <input
+                                type="radio"
+                                checked={usoTarjetaX}
+                                onChange={() => setUsoTarjetaX(true)}
+                                className="hidden"
+                              />
+                              Si
+                            </label>
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio checked={!usoTarjetaX} />
+                              <input
+                                type="radio"
+                                checked={!usoTarjetaX}
+                                onChange={() => setUsoTarjetaX(false)}
+                                className="hidden"
+                              />
+                              No
+                            </label>
                           </div>
                         </div>
 
-                        <div className="self-stretch flex flex-col items-start justify-start gap-[0.812rem]">
-                          <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
+                        <div className="flex flex-col gap-3">
+                          <span className="text-nude text-lg">
                             ¿Uso obligatorio de cámara?
-                          </div>
-                          <div className="w-[9.75rem] flex flex-row items-start justify-start py-[0rem] px-[0.125rem] box-border">
-                            <div className="flex-1 flex flex-row items-start justify-between gap-[1.25rem]">
-                              <div className="w-[3.625rem] flex flex-row items-start justify-start gap-[0.562rem]">
-                                <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div
-                                    className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
-                                    onClick={() => setObligatorioCamara(true)}
-                                  >
-                                    <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                    {obligatorioCamara && (
-                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
-                                  Si
-                                </div>
-                              </div>
-                              <div className="flex flex-row items-start justify-start gap-[0.562rem]">
-                                <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div
-                                    className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
-                                    onClick={() => setObligatorioCamara(false)}
-                                  >
-                                    <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                    {!obligatorioCamara && (
-                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
-                                  No
-                                </div>
-                              </div>
-                            </div>
+                          </span>
+                          <div className="flex gap-8">
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio checked={obligatorioCamara} />
+                              <input
+                                type="radio"
+                                checked={obligatorioCamara}
+                                onChange={() => setObligatorioCamara(true)}
+                                className="hidden"
+                              />
+                              Si
+                            </label>
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio checked={!obligatorioCamara} />
+                              <input
+                                type="radio"
+                                checked={!obligatorioCamara}
+                                onChange={() => setObligatorioCamara(false)}
+                                className="hidden"
+                              />
+                              No
+                            </label>
                           </div>
                         </div>
 
-                        <div className="self-stretch flex flex-col items-start justify-start gap-[0.812rem]">
-                          <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
+                        <div className="flex flex-col gap-3">
+                          <span className="text-nude text-lg">
                             ¿Uso obligatorio de micrófono?
-                          </div>
-                          <div className="w-[9.5rem] flex flex-row items-start justify-between gap-[1.25rem]">
-                            <div className="w-[3.625rem] flex flex-row items-start justify-start gap-[0.562rem]">
-                              <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                <div
-                                  className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
-                                  onClick={() => setObligatorioMicrofono(true)}
-                                >
-                                  <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                  {obligatorioMicrofono && (
-                                    <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
-                                  )}
-                                </div>
-                              </div>
-                              <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
-                                Si
-                              </div>
-                            </div>
-                            <div className="flex flex-row items-start justify-start gap-[0.562rem]">
-                              <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                <div
-                                  className="w-[1.5rem] h-[1.5rem] relative cursor-pointer"
-                                  onClick={() => setObligatorioMicrofono(false)}
-                                >
-                                  <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                  {!obligatorioMicrofono && (
-                                    <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
-                                  )}
-                                </div>
-                              </div>
-                              <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
-                                No
-                              </div>
-                            </div>
+                          </span>
+                          <div className="flex gap-8">
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio checked={obligatorioMicrofono} />
+                              <input
+                                type="radio"
+                                checked={obligatorioMicrofono}
+                                onChange={() => setObligatorioMicrofono(true)}
+                                className="hidden"
+                              />
+                              Si
+                            </label>
+                            <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                              <CustomRadio checked={!obligatorioMicrofono} />
+                              <input
+                                type="radio"
+                                checked={!obligatorioMicrofono}
+                                onChange={() => setObligatorioMicrofono(false)}
+                                className="hidden"
+                              />
+                              No
+                            </label>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* Navigation Buttons */}
+                <div className="flex flex-row items-center justify-between gap-4 mt-8 w-full border-t border-white/10 pt-8">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (currentStep > 1) handlePrev();
+                      else navigate("/nextgames");
+                    }}
+                    className="px-6 py-2 border border-dark-gold text-dark-gold rounded-full hover:bg-dark-gold hover:text-black transition-all duration-300 font-radio-option"
+                  >
+                    {currentStep === 1 ? "Cancelar" : "Anterior"}
+                  </button>
+
+                  {currentStep < 3 ? (
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      className="px-8 py-2 bg-dark-gold text-black rounded-full font-bold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg font-radio-option"
+                    >
+                      Siguiente
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleCrear}
+                      disabled={loading}
+                      className="px-8 py-2 bg-dark-gold text-black rounded-full font-bold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg disabled:opacity-50 flex items-center gap-2 font-radio-option"
+                    >
+                      {loading
+                        ? "Guardando..."
+                        : isEditing
+                        ? "Guardar Cambios"
+                        : "Crear Partida"}
+                    </button>
+                  )}
                 </div>
               </form>
-            </div>
-
-            {/* Botones */}
-            <div className="flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq450:gap-[1.25rem] mq750:flex-wrap">
-              <button
-                onClick={handleCrear}
-                className="cursor-pointer [border:none] py-[0.625rem] px-[3.5rem] bg-dark-gold h-[2.625rem] rounded-31xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] overflow-hidden flex flex-row items-start justify-start box-border z-[2] hover:bg-darkgoldenrod"
-              >
-                <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-black text-center min-w-[5.125rem]">
-                  Crear partida
-                </b>
-              </button>
-              <button
-                onClick={handleCancelar}
-                className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-[transparent] h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
-              >
-                <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-dark-gold text-center min-w-[4rem]">
-                  Cancelar
-                </b>
-              </button>
             </div>
           </div>
         </section>

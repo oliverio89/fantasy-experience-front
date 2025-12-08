@@ -96,6 +96,7 @@ export const usePartidas = (filtros?: FiltrosPartida) => {
     filtros?.ratingMin,
     filtros?.limit,
     filtros?.page,
+    filtros?.busqueda,
   ]);
 
   const recargar = useCallback(async () => {

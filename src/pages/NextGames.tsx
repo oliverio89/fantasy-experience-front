@@ -1,4 +1,11 @@
-import { FunctionComponent, memo, useCallback, useState } from "react";
+import {
+  FunctionComponent,
+  memo,
+  useCallback,
+  useState,
+  useEffect,
+} from "react";
+import { PRESET_TAGS } from "../constants";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/button";
 import PartidaCard, { Partida } from "../components/PartidaCard";
@@ -10,15 +17,32 @@ export type RootType = {
 
 const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
   const navigate = useNavigate();
-  const [filtroTipo, setFiltroTipo] = useState<string>("");
+  const [filtroTipo, setFiltroTipo] = useState<string[]>([]);
   const [busqueda, setBusqueda] = useState<string>("");
+  const [debouncedBusqueda, setDebouncedBusqueda] = useState<string>("");
+  const [filtroTags, setFiltroTags] = useState<string[]>([]);
+
+  // Debounce para la búsqueda
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedBusqueda(busqueda);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [busqueda]);
 
   // Usar el hook genérico para ver TODAS las partidas (sin filtro de fecha futura)
   const {
     partidas: proximasPartidas,
     loading,
     error,
-  } = usePartidas({ limit: 12 });
+  } = usePartidas({
+    limit: 12,
+    tipo: filtroTipo.length > 0 ? filtroTipo : undefined,
+    busqueda: debouncedBusqueda,
+  });
 
   const onButtonClick = useCallback(() => {
     navigate("/crearpartida");
@@ -26,12 +50,40 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
 
   const handleLimpiar = useCallback(() => {
     setBusqueda("");
-    setFiltroTipo("");
+    setFiltroTipo([]);
+    setFiltroTags([]);
   }, []);
 
   const handleBuscar = useCallback(() => {
-    console.log("Buscar:", busqueda, "Filtro:", filtroTipo);
-  }, [busqueda, filtroTipo]);
+    console.log(
+      "Buscar:",
+      busqueda,
+      "Filtro:",
+      filtroTipo,
+      "Tags:",
+      filtroTags
+    );
+  }, [busqueda, filtroTipo, filtroTags]);
+
+  const toggleFiltro = useCallback((tipo: string) => {
+    setFiltroTipo((prev) => {
+      if (prev.includes(tipo)) {
+        return prev.filter((t) => t !== tipo);
+      } else {
+        return [...prev, tipo];
+      }
+    });
+  }, []);
+
+  const toggleTagFiltro = useCallback((tag: string) => {
+    setFiltroTags((prev) => {
+      if (prev.includes(tag)) {
+        return prev.filter((t) => t !== tag);
+      } else {
+        return [...prev, tag];
+      }
+    });
+  }, []);
 
   // Función para alternar colores de fondo
   const getBackgroundColor = (index: number) => {
@@ -84,9 +136,9 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
           {/* Botones de filtro - SIN "Todos" */}
           <div className="flex flex-row items-start justify-start gap-2.5 mb-[27px] flex-wrap">
             <button
-              onClick={() => setFiltroTipo("online")}
+              onClick={() => toggleFiltro("online")}
               className={`h-[30px] px-4 cursor-pointer [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-center justify-center py-[3px] transition-all ${
-                filtroTipo === "online"
+                filtroTipo.includes("online")
                   ? "bg-nude text-black"
                   : "bg-transparent text-nude hover:bg-nude/20"
               }`}
@@ -96,9 +148,9 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               </span>
             </button>
             <button
-              onClick={() => setFiltroTipo("presencial")}
+              onClick={() => toggleFiltro("presencial")}
               className={`h-[30px] px-4 cursor-pointer [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-center justify-center py-[3px] transition-all ${
-                filtroTipo === "presencial"
+                filtroTipo.includes("presencial")
                   ? "bg-nude text-black"
                   : "bg-transparent text-nude hover:bg-nude/20"
               }`}
@@ -108,21 +160,9 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               </span>
             </button>
             <button
-              onClick={() => setFiltroTipo("rol")}
+              onClick={() => toggleFiltro("digital")}
               className={`h-[30px] px-4 cursor-pointer [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-center justify-center py-[3px] transition-all ${
-                filtroTipo === "rol"
-                  ? "bg-nude text-black"
-                  : "bg-transparent text-nude hover:bg-nude/20"
-              }`}
-            >
-              <span className="relative leading-[20px] text-base font-texto">
-                ROL
-              </span>
-            </button>
-            <button
-              onClick={() => setFiltroTipo("digital")}
-              className={`h-[30px] px-4 cursor-pointer [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-center justify-center py-[3px] transition-all ${
-                filtroTipo === "digital"
+                filtroTipo.includes("digital")
                   ? "bg-nude text-black"
                   : "bg-transparent text-nude hover:bg-nude/20"
               }`}

@@ -1,43 +1,95 @@
-import { FunctionComponent, useCallback } from "react";
+import { FunctionComponent, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PartidasService from "../services/partidasService";
+import { Partida } from "../components/PartidaCard";
 
 const DetailsGame: FunctionComponent = () => {
   const navigate = useNavigate();
-  const { partidaId } = useParams<{ partidaId?: string }>();
+  const { partidaId } = useParams<{ partidaId: string }>();
+
+  // Usamos 'any' para permitir campos extra que puedan venir del backend aunque no estén en la interfaz base
+  const [partida, setPartida] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPartida = async () => {
+      if (partidaId) {
+        try {
+          const data = await PartidasService.obtenerPartidaPorId(partidaId);
+          setPartida(data);
+        } catch (err) {
+          console.error("Error cargando partida:", err);
+          setError("No se pudo cargar la información de la partida.");
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+        setError("ID de partida no válido");
+      }
+    };
+
+    fetchPartida();
+  }, [partidaId]);
 
   const handleVolver = useCallback(() => {
     navigate("/nextgames");
   }, [navigate]);
 
+  const handleEditar = useCallback(() => {
+    navigate(`/editarpartida/${partidaId}`);
+  }, [navigate, partidaId]);
+
+  const handleEliminar = useCallback(async () => {
+    if (
+      confirm(
+        "¿Estás seguro de que deseas eliminar esta partida? Esta acción no se puede deshacer."
+      )
+    ) {
+      try {
+        if (partidaId) {
+          await PartidasService.eliminarPartida(partidaId);
+          alert("Partida eliminada correctamente.");
+          navigate("/nextgames");
+        }
+      } catch (err) {
+        console.error("Error al eliminar:", err);
+        alert("Hubo un error al intentar eliminar la partida.");
+      }
+    }
+  }, [partidaId, navigate]);
+
   const handleComprar = useCallback(() => {
     console.log("Comprar partida:", partidaId);
+    alert("Funcionalidad de compra en desarrollo");
   }, [partidaId]);
 
-  // Datos de ejemplo
-  const partida = {
-    id: partidaId,
-    titulo: "Partida Título",
-    tipoPartida: "Presencial",
-    idioma: "Español",
-    edadMinima: "18+",
-    jugadores: "4-6 jugadores",
-    temporalidad: "3-4 horas",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    descripcion:
-      "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-    tags: "Fantasía, Medieval, Aventura",
-    recomendaciones:
-      "Se recomienda tener conocimientos básicos del sistema. Traer dados y hoja de personaje.",
-    ciudad: "Madrid",
-    contactoMaster: "master@example.com",
-    precio: "15€",
-    horario: "Sábados 18:00-22:00",
-    herramientas:
-      "Dados, hoja de personaje, lápiz, conexión a internet estable.",
-    usoTarjetaX: false,
-    obligatorioCamara: true,
-    obligatorioMicrofono: false,
-  };
+  if (loading) {
+    return (
+      <div className="w-full h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl font-radio-option">
+          Cargando detalles de la partida...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !partida) {
+    return (
+      <div className="w-full h-screen bg-black flex flex-col items-center justify-center gap-4">
+        <div className="text-red-500 text-xl font-radio-option">
+          {error || "Partida no encontrada"}
+        </div>
+        <button
+          onClick={handleVolver}
+          className="py-2 px-4 bg-dark-gold rounded-xl cursor-pointer"
+        >
+          Volver
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full relative bg-white overflow-hidden flex flex-col items-start justify-start leading-[normal] tracking-[normal]">
@@ -52,11 +104,12 @@ const DetailsGame: FunctionComponent = () => {
               {partida.titulo}
             </h1>
             <div className="self-stretch h-[2.688rem] relative text-[1.125rem] leading-[1.625rem] whitespace-pre-wrap flex items-center shrink-0 z-[2] mt-[-0.625rem]">
-              Consulta la información y reserva para esta partida
+              Detalles de la partida organizada por{" "}
+              {partida.masterName || "Master Desconocido"}
             </div>
           </div>
 
-          <div className="self-stretch h-[86.125rem] flex flex-col items-end justify-start gap-[4.375rem] max-w-full mq1050:gap-[2.188rem] mq450:gap-[1.063rem]">
+          <div className="self-stretch flex flex-col items-end justify-start gap-[4.375rem] max-w-full mq1050:gap-[2.188rem] mq450:gap-[1.063rem]">
             <div className="self-stretch flex flex-row items-start justify-end py-[0rem] pl-[0rem] pr-[0.062rem] box-border max-w-full">
               <div className="m-0 flex-1 flex flex-col items-start justify-start gap-[4.75rem] max-w-full mq1050:gap-[2.375rem] mq450:gap-[1.188rem]">
                 {/* SECCIÓN 1: Información de la partida */}
@@ -82,10 +135,14 @@ const DetailsGame: FunctionComponent = () => {
                           Imagen de partida
                         </div>
                         <img
-                          className="self-stretch flex-1 relative rounded-xl max-w-full overflow-hidden max-h-full object-cover z-[2]"
+                          className="self-stretch flex-1 relative rounded-xl max-w-full overflow-hidden max-h-[300px] object-cover z-[2]"
                           loading="lazy"
-                          alt=""
-                          src={partida.imagenUrl}
+                          alt={partida.titulo}
+                          src={partida.imagenUrl || "/placeholder.jpg"}
+                          onError={(e: any) =>
+                            (e.target.src =
+                              "https://via.placeholder.com/300x200?text=No+Image")
+                          }
                         />
                       </div>
 
@@ -105,7 +162,7 @@ const DetailsGame: FunctionComponent = () => {
                           </div>
                           <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-end justify-between py-[0rem] pl-[0.562rem] pr-[0.75rem] gap-[1.25rem] z-[2]">
                             <div className="h-[2.5rem] w-[18rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                            <div className="h-[2.5rem] w-[11.763rem] relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3]">
+                            <div className="h-[2.5rem] w-full relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3]">
                               {partida.tags}
                             </div>
                           </div>
@@ -133,11 +190,16 @@ const DetailsGame: FunctionComponent = () => {
                         <div className="w-[13.288rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
                           Tipo de partida
                         </div>
-                        <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-between py-[0rem] pl-[0.625rem] pr-[0.937rem] gap-[1.25rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <div className="h-[2.5rem] w-[12.581rem] relative text-[0.875rem] font-light font-radio-option text-nude text-left flex items-center shrink-0 z-[3]">
-                            {partida.tipoPartida}
+                        <div className="flex items-center gap-3 mt-1 cursor-default">
+                          <div className="w-4 h-4 rounded-full flex items-center justify-center border border-nude bg-nude">
+                            <div className="w-2 h-2 bg-black rounded-full" />
                           </div>
+                          <span className="relative text-[0.875rem] font-light font-radio-option text-nude text-left z-[3]">
+                            {partida.tipoPartida
+                              ? partida.tipoPartida.charAt(0).toUpperCase() +
+                                partida.tipoPartida.slice(1).toLowerCase()
+                              : ""}
+                          </span>
                         </div>
                       </div>
 
@@ -304,7 +366,16 @@ const DetailsGame: FunctionComponent = () => {
                             <div className="flex-1 flex flex-row items-start justify-between gap-[1.25rem]">
                               <div className="w-[3.625rem] flex flex-row items-start justify-start gap-[0.562rem]">
                                 <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                  <div className="w-[1.5rem] h-[1.5rem] relative rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border z-[2]" />
+                                  <div className="w-[1.5rem] h-[1.5rem] relative">
+                                    <div
+                                      className={`absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2] ${
+                                        partida.usoTarjetaX ? "" : ""
+                                      }`}
+                                    />
+                                    {partida.usoTarjetaX && (
+                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
                                   Si
@@ -313,8 +384,14 @@ const DetailsGame: FunctionComponent = () => {
                               <div className="flex flex-row items-start justify-start gap-[0.562rem]">
                                 <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
                                   <div className="w-[1.5rem] h-[1.5rem] relative">
-                                    <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
-                                    <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    <div
+                                      className={`absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2] ${
+                                        !partida.usoTarjetaX ? "" : ""
+                                      }`}
+                                    />
+                                    {!partida.usoTarjetaX && (
+                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    )}
                                   </div>
                                 </div>
                                 <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
@@ -396,7 +473,17 @@ const DetailsGame: FunctionComponent = () => {
                             </div>
                             <div className="flex flex-row items-start justify-start gap-[0.562rem]">
                               <div className="flex flex-col items-start justify-start pt-[0.25rem] px-[0rem] pb-[0rem]">
-                                <div className="w-[1.5rem] h-[1.5rem] relative rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border z-[2]" />
+                                <div className="w-[1.5rem] h-[1.5rem] relative">
+                                  {!partida.obligatorioMicrofono && (
+                                    <>
+                                      <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
+                                      <div className="absolute top-[0.375rem] left-[0.375rem] rounded-[50%] bg-nude border-nude border-[0px] border-solid box-border w-[0.75rem] h-[0.75rem] z-[3]" />
+                                    </>
+                                  )}
+                                  {partida.obligatorioMicrofono && (
+                                    <div className="absolute top-[0rem] left-[0rem] rounded-[50%] bg-gray-200 border-nude border-[0px] border-solid box-border w-full h-full z-[2]" />
+                                  )}
+                                </div>
                               </div>
                               <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
                                 No
@@ -411,8 +498,8 @@ const DetailsGame: FunctionComponent = () => {
               </div>
             </div>
 
-            {/* Botones */}
-            <div className="flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq450:gap-[1.25rem] mq750:flex-wrap">
+            {/* Botones de acción principales */}
+            <div className="flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq450:gap-[1.25rem] mq750:flex-wrap mb-8">
               <button
                 onClick={handleComprar}
                 className="cursor-pointer [border:none] py-[0.625rem] px-[3.5rem] bg-dark-gold h-[2.625rem] rounded-31xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] overflow-hidden flex flex-row items-start justify-start box-border z-[2] hover:bg-darkgoldenrod"
@@ -422,11 +509,27 @@ const DetailsGame: FunctionComponent = () => {
                 </b>
               </button>
               <button
+                onClick={handleEditar}
+                className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-nude/10 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-nude/20 hover:border-darkgoldenrod-100"
+              >
+                <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-white text-center min-w-[4rem]">
+                  Editar
+                </b>
+              </button>
+              <button
+                onClick={handleEliminar}
+                className="cursor-pointer border-red-500 border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-red-900/20 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-red-900/40"
+              >
+                <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-red-500 text-center min-w-[4rem]">
+                  Eliminar
+                </b>
+              </button>
+              <button
                 onClick={handleVolver}
                 className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-[transparent] h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
               >
                 <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-dark-gold text-center min-w-[4rem]">
-                  Cancelar
+                  Volver
                 </b>
               </button>
             </div>

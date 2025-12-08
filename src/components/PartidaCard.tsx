@@ -15,6 +15,7 @@ export interface Partida {
   imagenUrl: string;
   tipoPartida: TipoPartida;
   rating: number; // de 0 a 5
+  tags?: string[];
 }
 
 export type PartidaCardProps = {
@@ -51,7 +52,9 @@ RatingStars.displayName = "RatingStars";
 const BadgeTipoPartida: FunctionComponent<{ tipo: TipoPartida }> = memo(
   ({ tipo }) => {
     const getBadgeConfig = () => {
-      switch (tipo) {
+      const normalizedTipo = tipo ? tipo.toLowerCase() : "digital";
+
+      switch (normalizedTipo) {
         case "digital":
           return {
             icon: "/star-1.svg",
@@ -179,9 +182,37 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
           )}
 
           {/* Rating de estrellas */}
-          <div className="mt-2">
+          <div className="mt-2 text-center w-full">
             <RatingStars rating={partida.rating} />
           </div>
+
+          {/* Tags */}
+          {partida.tags && partida.tags.length > 0 && (
+            <div className="self-stretch flex flex-row flex-wrap items-center justify-center gap-1.5 mt-2 overflow-hidden h-auto max-h-[60px]">
+              {partida.tags.slice(0, 4).map((tag, index) => (
+                <span
+                  key={index}
+                  className={`px-2 py-0.5 text-xs rounded-full border border-solid ${
+                    isDarkBackground
+                      ? "border-goldenrod text-goldenrod"
+                      : "border-black text-black"
+                  } truncate max-w-[100px]`}
+                  title={tag}
+                >
+                  {tag}
+                </span>
+              ))}
+              {partida.tags.length > 4 && (
+                <span
+                  className={`text-xs ${
+                    isDarkBackground ? "text-goldenrod" : "text-black"
+                  }`}
+                >
+                  +{partida.tags.length - 4}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Descripción (opcional) - Máximo 2 líneas */}
