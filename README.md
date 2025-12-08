@@ -7,7 +7,10 @@
 1. Asegurate de tener Node JS instalada en tú computador.
 2. Abre el proyecto en un editor de código como Visual Estudio Code.
 3. Escribe en la terminal, `npm install` para instalar las dependencias bases del proyecto.
-4. Escribe en la terminal, `npm start` para ver el proyecto en tu navegador.
+4. **Configura las variables de entorno:**
+   - Copia `.env.example` a `.env`: `cp .env.example .env`
+   - Edita `.env` con tus credenciales de Supabase (ver `SECURITY.md` para más detalles)
+5. Escribe en la terminal, `npm start` para ver el proyecto en tu navegador.
 
 **Objetivos del proyecto:**
 

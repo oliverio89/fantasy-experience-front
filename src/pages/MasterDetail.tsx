@@ -8,7 +8,6 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { Master } from "../types/masters";
 import { MASTERS_DATA } from "../data/mastersData";
-import GameCard from "../components/GameCard";
 import PartidaCard, { Partida } from "../components/PartidaCard";
 
 export type MasterDetailType = {

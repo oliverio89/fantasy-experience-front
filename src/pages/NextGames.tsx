@@ -2,91 +2,23 @@ import { FunctionComponent, memo, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/button";
 import PartidaCard, { Partida } from "../components/PartidaCard";
+import { usePartidas } from "../hooks/usePartidas"; // Usar el hook genérico
 
 export type RootType = {
   className?: string;
 };
 
-// Datos de ejemplo (hardcodeados - vendrán de API)
-const partidasEjemplo: Partida[] = [
-  {
-    id: 1,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 4,
-    descripcion:
-      "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-  },
-  {
-    id: 2,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "online",
-    rating: 5,
-    descripcion:
-      "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-  },
-  {
-    id: 3,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 3,
-    descripcion:
-      "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-  },
-  {
-    id: 4,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 4,
-    descripcion:
-      "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-  },
-  {
-    id: 5,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 5,
-    descripcion:
-      "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-  },
-  {
-    id: 6,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "online",
-    rating: 4,
-    descripcion:
-      "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-  },
-];
-
 const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
   const navigate = useNavigate();
   const [filtroTipo, setFiltroTipo] = useState<string>("");
   const [busqueda, setBusqueda] = useState<string>("");
+
+  // Usar el hook genérico para ver TODAS las partidas (sin filtro de fecha futura)
+  const {
+    partidas: proximasPartidas,
+    loading,
+    error,
+  } = usePartidas({ limit: 12 });
 
   const onButtonClick = useCallback(() => {
     navigate("/crearpartida");
@@ -277,16 +209,42 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
         </div>
 
         {/* Grid de partidas - 3 columnas fijas */}
-        <div className="self-stretch grid grid-cols-3 gap-x-[18px] gap-y-[43px] max-w-full mq1050:grid-cols-2 mq750:grid-cols-1">
-          {partidasEjemplo.map((partida, index) => (
-            <PartidaCard
-              key={partida.id}
-              partida={partida}
-              mostrarDescripcion={true}
-              backgroundColor={getBackgroundColor(index)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="self-stretch flex flex-col items-center justify-center py-20 text-white">
+            <div className="text-2xl font-bold mb-4">Cargando partidas...</div>
+            <div className="text-nude">Conectando con Supabase...</div>
+          </div>
+        ) : error ? (
+          <div className="self-stretch flex flex-col items-center justify-center py-20 text-white">
+            <div className="text-2xl font-bold mb-4 text-red-500">
+              Error al cargar partidas
+            </div>
+            <div className="text-nude">{error}</div>
+            <div className="mt-4 text-sm text-gray-400">
+              Asegúrate de haber ejecutado los scripts SQL en Supabase
+            </div>
+          </div>
+        ) : proximasPartidas.length === 0 ? (
+          <div className="self-stretch flex flex-col items-center justify-center py-20 text-white">
+            <div className="text-2xl font-bold mb-4">
+              No se encontraron partidas
+            </div>
+            <div className="text-nude">
+              Ejecuta el script seed.sql para insertar datos de prueba
+            </div>
+          </div>
+        ) : (
+          <div className="self-stretch grid grid-cols-3 gap-x-[18px] gap-y-[43px] max-w-full mq1050:grid-cols-2 mq750:grid-cols-1">
+            {proximasPartidas.map((partida, index) => (
+              <PartidaCard
+                key={partida.id}
+                partida={partida}
+                mostrarDescripcion={true}
+                backgroundColor={getBackgroundColor(index)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Paginación */}
         <div className="self-stretch flex flex-row items-center justify-center gap-8 text-lg text-nude font-texto py-10">

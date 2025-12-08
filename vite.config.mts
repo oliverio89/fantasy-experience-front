@@ -17,4 +17,6 @@ export default defineConfig({
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
+  // Configurar variables de entorno para Vite
+  envPrefix: "VITE_",
 });
