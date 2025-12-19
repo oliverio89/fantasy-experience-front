@@ -20,8 +20,5 @@ if (!supabaseAnonKey) {
 // Nota: No loguear información sensible en producción
 
 // Crear y exportar el cliente de Supabase
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: false, // No persistir sesión en el cliente
-  },
-});
+// Crear y exportar el cliente de Supabase
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

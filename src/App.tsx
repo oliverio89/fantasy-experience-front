@@ -16,6 +16,7 @@ import UserDetail from "./pages/UserDetail";
 import MasterDetail from "./pages/MasterDetail";
 import NextGames from "./pages/NextGames";
 import OurMasters from "./pages/OurMasters";
+import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 
 function App() {
@@ -55,32 +56,36 @@ function App() {
   }, [pathname]);
 
   return (
-    <ToastProvider>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<HomeV />} />
-          <Route path="/crearpartida" element={<CrearPartida />} />
-          <Route path="/editarpartida/:partidaId" element={<CrearPartida />} />
-          {/* <Route path="/partidadetalles" element={<PartidasDetalles />} /> */}
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<LogIn />} />
-          <Route path="/contacto" element={<Contact />} />
-          <Route path="/user" element={<UserDetail />} />
-          <Route path="/ourmasters" element={<OurMasters />} />
-          <Route path="/master/:masterId" element={<MasterDetail />} />
-          <Route
-            path="/partidasdetalles-v12/:partidaId?"
-            element={<PartidasDetalles />}
-          />
-          <Route
-            path="/detailsgame/:partidaId"
-            element={<PartidasDetalles />}
-          />
-          <Route path="/nextgames" element={<NextGames />} />
-          <Route path="*" element={<div>404 Not Found</div>} />
-        </Route>
-      </Routes>
-    </ToastProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomeV />} />
+            <Route path="/crearpartida" element={<CrearPartida />} />
+            <Route
+              path="/editarpartida/:partidaId"
+              element={<CrearPartida />}
+            />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<LogIn />} />
+            <Route path="/contacto" element={<Contact />} />
+            <Route path="/user" element={<UserDetail />} />
+            <Route path="/ourmasters" element={<OurMasters />} />
+            <Route path="/master/:masterId" element={<MasterDetail />} />
+            <Route
+              path="/partidasdetalles-v12/:partidaId?"
+              element={<PartidasDetalles />}
+            />
+            <Route
+              path="/detailsgame/:partidaId"
+              element={<PartidasDetalles />}
+            />
+            <Route path="/nextgames" element={<NextGames />} />
+            <Route path="*" element={<div>404 Not Found</div>} />
+          </Route>
+        </Routes>
+      </ToastProvider>
+    </AuthProvider>
   );
 }
 export default App;

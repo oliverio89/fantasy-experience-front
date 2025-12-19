@@ -14,8 +14,8 @@ export type ButtonType = {
   button1Border?: string;
   button1TextDecoration?: string;
   button1FontWeight?: string;
-  __PH1__?: () => void;
   onClick?: () => void;
+  type?: "button" | "submit" | "reset";
 };
 
 const Button: FunctionComponent<ButtonType> = memo(
@@ -28,15 +28,14 @@ const Button: FunctionComponent<ButtonType> = memo(
     button1Width = "15.625rem",
     button1FontSize = "1.125rem",
     button1BackgroundColor = "#cd9c20",
-    __PH1__,
     onClick,
+    type = "submit",
   }) => {
-    const handleClick = __PH1__ || onClick;
-
     return (
       <button
+        type={type}
         className={`cursor-pointer [border:none] shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden shrink-0 flex flex-row items-start justify-start box-border z-[2] hover:opacity-90 transition-opacity ${className}`}
-        onClick={handleClick}
+        onClick={onClick}
         style={{
           padding: button1Padding,
           height: button1Height,

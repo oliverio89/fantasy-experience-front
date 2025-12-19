@@ -1,5 +1,6 @@
 import { FunctionComponent, memo, useCallback, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom"; // Importamos useNavigate y useLocation
+import { useAuth } from "../context/AuthContext";
 
 export type FrameComponent1Type = {
   className?: string;
@@ -10,6 +11,7 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
     const navigate = useNavigate(); // Hook para redireccionar
     const location = useLocation(); // Hook para obtener la ruta actual
     const [menuOpen, setMenuOpen] = useState(false); // Estado para controlar el menú hamburguesa
+    const { user } = useAuth();
 
     // Función para alternar el estado del menú
     const toggleMenu = () => {
@@ -38,9 +40,13 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
     }, [navigate]);
 
     const onUserDetailTextClick = useCallback(() => {
-      navigate("/user"); // Redirige a la ruta /contacto
+      if (user) {
+        navigate("/user");
+      } else {
+        navigate("/login");
+      }
       setMenuOpen(false);
-    }, [navigate]);
+    }, [navigate, user]);
 
     // Función para determinar si el enlace está activo
     const getLinkClass = (path: string) =>
@@ -137,19 +143,19 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
                   </div>
                 </div>
 
-                <button className="cursor-pointer border-dark-gold border-[1px] border-solid py-[7px] px-[19px] bg-[transparent] self-stretch flex-1 rounded-11xl flex flex-row items-start justify-start gap-[5px] z-[1]">
+                <button
+                  onClick={onUserDetailTextClick}
+                  className="cursor-pointer border-dark-gold border-[1px] border-solid py-[7px] px-[19px] bg-[transparent] self-stretch flex-1 rounded-11xl flex flex-row items-start justify-start gap-[5px] z-[1] hover:bg-dark-gold/10 transition-colors"
+                >
                   <img
                     className="h-6 w-6 relative overflow-hidden shrink-0"
                     alt=""
                     src="/user.svg"
                   />
                   <div className="flex-1 flex flex-col items-start justify-start pt-px px-0 pb-0">
-                    <a
-                      className="[text-decoration:none] self-stretch relative text-lg font-bold font-titulo-2  text-dark-gold text-center"
-                      onClick={onUserDetailTextClick}
-                    >
-                      Mi cuenta
-                    </a>
+                    <span className="[text-decoration:none] self-stretch relative text-lg font-bold font-titulo-2  text-dark-gold text-center whitespace-nowrap">
+                      {user ? "Mi cuenta" : "Entrar"}
+                    </span>
                   </div>
                   <div className="h-[42px] w-[140px] relative rounded-11xl border-dark-gold border-[1px] border-solid box-border hidden" />
                 </button>
@@ -185,8 +191,11 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
           {/* Fondo semitransparente detrás del menú hamburguesa */}
           {menuOpen && (
             <>
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-              <div className="fixed top-0 left-0 w-auto h-full bg-black text-white z-50 overflow-y-auto lg:flex">
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                onClick={toggleMenu}
+              ></div>
+              <div className="fixed top-0 left-0 w-auto h-full bg-black text-white z-50 overflow-y-auto lg:flex animate-slide-in-right">
                 <nav className="flex flex-col items-start justify-start text-xl font-titulo-2 text-white space-y-4 p-5">
                   <a
                     className={`[text-decoration:none] h-20 font-medium flex items-center justify-start w-full ${getLinkClass(
@@ -257,19 +266,19 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
                     </div>
 
                     {/* Mi cuenta dentro del menú hamburguesa */}
-                    <button className="cursor-pointer border-dark-gold border-[1px] border-solid py-[7px] px-[19px] bg-[transparent] rounded-11xl flex flex-row items-start justify-start gap-[5px]">
+                    <button
+                      onClick={onUserDetailTextClick}
+                      className="cursor-pointer border-dark-gold border-[1px] border-solid py-[7px] px-[19px] bg-[transparent] rounded-11xl flex flex-row items-start justify-start gap-[5px]"
+                    >
                       <img
                         className="h-6 w-6 relative overflow-hidden shrink-0"
                         alt="Mi cuenta"
                         src="/user.svg"
                       />
                       <div className="flex-1 flex flex-col items-start justify-start pt-px px-0 pb-0">
-                        <a
-                          className="relative text-lg font-bold font-titulo-2 text-dark-gold text-center"
-                          onClick={onUserDetailTextClick}
-                        >
-                          Mi cuenta
-                        </a>
+                        <span className="relative text-lg font-bold font-titulo-2 text-dark-gold text-center whitespace-nowrap">
+                          {user ? "Mi cuenta" : "Entrar"}
+                        </span>
                       </div>
                     </button>
                   </div>
