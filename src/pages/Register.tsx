@@ -5,11 +5,10 @@ import Button from "../components/button";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import { CustomRadio } from "../components/ui/CustomRadio";
-import { useToast } from "../context/ToastContext";
+import Modal from "../components/ui/Modal";
 
 const Registerv: FunctionComponent = () => {
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -22,51 +21,110 @@ const Registerv: FunctionComponent = () => {
 
   const [loading, setLoading] = useState(false);
 
+  // Custom error state for the Modal
+  const [errorState, setErrorState] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+  }>({ show: false, title: "", message: "" });
+
+  const showError = (title: string, message: string) => {
+    setErrorState({ show: true, title, message });
+  };
+
+  const closeError = () => {
+    setErrorState({ ...errorState, show: false });
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const onRegisterClick = async () => {
-    if (!formData.name || !formData.email || !formData.password) {
-      showToast("Por favor, completa todos los campos requeridos.", "error");
+    // 1. Validation Logic
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.password.trim()
+    ) {
+      showError(
+        "Campos Incompletos",
+        "Por favor, completa todos los campos obligatorios para continuar."
+      );
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      showToast("Las contraseñas no coinciden.", "error");
+      showError(
+        "Error de Contraseña",
+        "Las contraseñas no coinciden. Por favor, asegúrate de escribirlas correctamente."
+      );
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      showError(
+        "Contraseña Insegura",
+        "La contraseña debe tener al menos 6 caracteres."
+      );
       return;
     }
 
     setLoading(true);
 
     try {
+      console.log("Attempting Supabase SignUp with:", {
+        email: formData.email,
+      });
+
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/email-confirmation`,
           data: {
             full_name: formData.name,
             role: formData.role,
             city: formData.city,
-            // Note: 'city' isn't explicitly in the trigger insert, but 'role' and 'full_name' are.
-            // We can update the SQL trigger later if we want city in profile automatically,
-            // or let the user update it in profile page.
           },
         },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      showToast(
-        "¡Cuenta creada! Revisa tu email para confirmar (si está habilitado) o inicia sesión.",
-        "success"
-      );
+      console.log("Supabase SignUp Success:", data);
+
+      // Navigate to login on success
       navigate("/login");
     } catch (error: any) {
-      console.error(error);
-      showToast(error.message || "Error al registrarse", "error");
+      console.error("Registration Error:", error);
+      const errorMessage = error.message || "";
+
+      // 2. Map Supabase Errors to User-Friendly Messages
+      if (
+        errorMessage.includes("User already registered") ||
+        errorMessage.includes("already registered")
+      ) {
+        showError(
+          "Usuario Existente",
+          "Este correo electrónico ya está registrado en nuestra plataforma. Por favor, inicia sesión."
+        );
+      } else if (errorMessage.includes("valid email")) {
+        showError(
+          "Email Inválido",
+          "Por favor, introduce una dirección de correo electrónico válida."
+        );
+      } else if (errorMessage.includes("password")) {
+        showError(
+          "Problema con la Contraseña",
+          "La contraseña no cumple con los requisitos de seguridad."
+        );
+      } else {
+        showError(
+          "Error de Registro",
+          "Ha ocurrido un problema al crear tu cuenta. Por favor, inténtalo de nuevo."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -82,6 +140,16 @@ const Registerv: FunctionComponent = () => {
 
   return (
     <div className="w-full relative bg-white overflow-hidden flex flex-row items-stretch justify-start leading-[normal] tracking-[normal] [row-gap:20px] text-center text-[6.25rem] text-dark-gold font-milonga mq1025:flex-wrap">
+      {/* Error Modal */}
+      <Modal
+        isOpen={errorState.show}
+        onClose={closeError}
+        title={errorState.title}
+        type="error"
+      >
+        {errorState.message}
+      </Modal>
+
       <div className="bg-black flex flex-col items-start justify-start pt-[20.375rem] px-[0rem] pb-[10.687rem] box-border gap-[6rem] min-w-[38.75rem] max-w-full z-[1] mq725:gap-[3rem] mq725:pt-[13.25rem] mq725:pb-[6.938rem] mq725:box-border mq725:min-w-full mq450:gap-[1.5rem] mq1025:flex-1">
         <div className="self-stretch h-[52rem] relative bg-black hidden" />
         <h1 className="m-0 self-stretch h-[11.313rem] relative text-inherit leading-[76.6%] font-normal font-[inherit] flex items-center shrink-0 z-[2] mq450:text-[1.875rem] mq450:leading-[1.938rem] mq975:text-[3.125rem] mq975:leading-[2.875rem]">
@@ -222,6 +290,7 @@ const Registerv: FunctionComponent = () => {
           propPadding1="0rem 0rem 0rem 0.75rem"
           propMinWidth="12.438rem"
         />
+
         <div className="flex flex-row items-start justify-start pt-[0rem] px-[9.812rem] pb-[1.25rem] box-border max-w-full mq725:pl-[4.875rem] mq725:pr-[4.875rem] mq725:box-border mq450:pl-[1.25rem] mq450:pr-[1.25rem] mq450:box-border">
           <Button
             button1={loading ? "Creando..." : "Crear cuenta"}
@@ -234,6 +303,7 @@ const Registerv: FunctionComponent = () => {
             type="submit"
           />
         </div>
+
         <div
           className="self-stretch relative text-[1.25rem] text-black text-center cursor-pointer z-[2] mq450:text-[1rem]"
           onClick={onAcountClick}

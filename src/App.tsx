@@ -11,6 +11,7 @@ import CrearPartida from "./pages/NewGame";
 import PartidasDetalles from "./pages/DetailsGame";
 import Register from "./pages/Register";
 import LogIn from "./pages/LogIn";
+import EmailConfirmation from "./pages/EmailConfirmation";
 import Contact from "./pages/Contact";
 import UserDetail from "./pages/UserDetail";
 import MasterDetail from "./pages/MasterDetail";
@@ -68,6 +69,7 @@ function App() {
             />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<LogIn />} />
+            <Route path="/email-confirmation" element={<EmailConfirmation />} />
             <Route path="/contacto" element={<Contact />} />
             <Route path="/user" element={<UserDetail />} />
             <Route path="/ourmasters" element={<OurMasters />} />

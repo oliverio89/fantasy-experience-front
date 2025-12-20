@@ -1,12 +1,21 @@
-import { FunctionComponent, memo, useCallback, useState } from "react";
+import {
+  FunctionComponent,
+  memo,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import PartidaCard, { Partida } from "../components/PartidaCard";
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabase";
+import { useToast } from "../context/ToastContext";
 
 export type UserDetailType = {
   className?: string;
 };
 
-// Datos de ejemplo de partidas del usuario
+// Datos de ejemplo de partidas del usuario (mantener hardcodeado por ahora)
 const partidasUsuario: Partida[] = [
   {
     id: 1,
@@ -43,33 +52,147 @@ const partidasUsuario: Partida[] = [
 const UserDetail: FunctionComponent<UserDetailType> = memo(
   ({ className = "" }) => {
     const navigate = useNavigate();
-    const [isEditing, setIsEditing] = useState(false);
+    const { user, refreshProfile, loading: authLoading } = useAuth();
+    const { showToast } = useToast();
 
-    // Estados para los campos del perfil
-    const [nombreUsuario, setNombreUsuario] = useState("John");
-    const [correoElectronico, setCorreoElectronico] = useState("john@mail.com");
+    const [isEditing, setIsEditing] = useState(false);
+    const [nombreUsuario, setNombreUsuario] = useState("");
+    const [correoElectronico, setCorreoElectronico] = useState("");
+    // Password is only for display simulation or change request
     const [contrasena, setContrasena] = useState("*************");
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Initialize state with real user data
+    useEffect(() => {
+      if (user) {
+        setNombreUsuario(user.user_metadata?.full_name || "");
+        setCorreoElectronico(user.email || "");
+      } else if (!authLoading) {
+        // Redirect if not logged in
+        navigate("/login");
+      }
+    }, [user, authLoading, navigate]);
+
+    // Safety timeout: If loading takes too long (>3s), assume verify failed or user not logged in
+    useEffect(() => {
+      if (authLoading) {
+        const timer = setTimeout(() => {
+          if (!user) {
+            console.warn("Auth loading timed out, redirecting to login");
+            navigate("/login");
+          }
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [authLoading, user, navigate]);
 
     const handleCancelar = useCallback(() => {
+      if (user) {
+        setNombreUsuario(user.user_metadata?.full_name || "");
+        setCorreoElectronico(user.email || "");
+      }
       setIsEditing(false);
-      navigate("/");
-    }, [navigate]);
+    }, [user]);
 
-    const handleEditarPerfil = useCallback(() => {
+    const handleEditarPerfil = useCallback(async () => {
       if (isEditing) {
-        console.log("Guardar cambios:", {
-          nombreUsuario,
-          correoElectronico,
-        });
-        setIsEditing(false);
+        // Guardar cambios
+        if (!user) return;
+        setIsSaving(true);
+        console.log("Iniciando guardado de perfil...");
+
+        // Helper for timeouts
+        const timeoutPromise = (ms: number) =>
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Tiempo de espera agotado")), ms)
+          );
+
+        try {
+          const updates: { data: { full_name: string } } = {
+            data: { full_name: nombreUsuario },
+          };
+
+          // Email updates disabled for stability
+          // if (correoElectronico !== user.email) { ... }
+
+          // 1. Update Auth Metadata (Supabase Auth)
+          console.log("Actualizando Auth Metadata..."); // Debug log
+          const { error: authError } = (await Promise.race([
+            supabase.auth.updateUser(updates),
+            timeoutPromise(5000),
+          ])) as any;
+          if (authError) throw authError;
+          console.log("Auth Metadata actualizado."); // Debug log
+
+          // 2. Update Public Profile Table (Database)
+          console.log("Actualizando Tabla Profiles...", {
+            id: user.id,
+            nombre: nombreUsuario,
+          }); // Debug log
+
+          // Use upsert instead of update to handle case where profile row missing
+          const { error: profileError } = (await Promise.race([
+            supabase
+              .from("profiles")
+              .upsert({ id: user.id, full_name: nombreUsuario })
+              .select(),
+            timeoutPromise(5000),
+          ])) as any;
+
+          if (profileError) {
+            console.error("Profile table update failed:", profileError);
+            showToast(
+              "Error update perfil publico: " + profileError.message,
+              "info"
+            );
+          } else {
+            console.log("Tabla Profiles actualizada."); // Debug log
+          }
+
+          // 3. Reload Page as requested
+          console.log("Recargando página..."); // Debug log
+          window.location.reload();
+        } catch (error: any) {
+          console.error("Error updating profile:", error);
+          showToast(error.message || "Error al actualizar perfil", "error");
+          setIsSaving(false);
+        }
       } else {
         setIsEditing(true);
       }
-    }, [isEditing, nombreUsuario, correoElectronico]);
+    }, [isEditing, user, nombreUsuario, correoElectronico, showToast]);
 
-    const handleCambiarContrasena = useCallback(() => {
-      console.log("Cambiar contraseña");
-    }, []);
+    const handleCambiarContrasena = useCallback(async () => {
+      if (!user?.email) return;
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(
+          user.email,
+          {
+            redirectTo: "http://localhost:3000/user", // Redirect back here after password reset flow
+          }
+        );
+        if (error) throw error;
+        showToast(
+          "Se ha enviado un correo para restablecer tu contraseña.",
+          "success"
+        );
+      } catch (error: any) {
+        console.error("Error sending reset password email:", error);
+        showToast("Error al solicitar cambio de contraseña", "error");
+      }
+    }, [user, showToast]);
+
+    if (authLoading) {
+      return (
+        <div className="w-full min-h-screen bg-black flex items-center justify-center text-nude font-titulo-2 text-xl">
+          Cargando perfil...
+        </div>
+      );
+    }
+
+    if (!user) {
+      return null; // Will redirect in useEffect
+    }
 
     return (
       <div
@@ -87,9 +210,12 @@ const UserDetail: FunctionComponent<UserDetailType> = memo(
                   <div className="relative">
                     <div className="w-[250px] h-[250px] rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center overflow-hidden z-[1] border-4 border-dark-gold/30">
                       <div className="text-[120px] font-bold text-nude">
-                        {nombreUsuario.charAt(0).toUpperCase()}
+                        {nombreUsuario
+                          ? nombreUsuario.charAt(0).toUpperCase()
+                          : "?"}
                       </div>
                     </div>
+                    {/* Botón de editar avatar (por ahora solo visual o futuro) */}
                     <button className="absolute bottom-0 right-0 w-[60px] h-[60px] rounded-full bg-dark-gold flex items-center justify-center z-[2] cursor-pointer hover:bg-darkgoldenrod transition-colors shadow-[0px_4px_8px_rgba(0,_0,_0,_0.3)]">
                       <svg
                         className="w-7 h-7 text-black"
@@ -157,20 +283,12 @@ const UserDetail: FunctionComponent<UserDetailType> = memo(
                       </div>
                       <div className="self-stretch rounded-xl border-dark-gold border-[1px] border-solid box-border flex flex-row items-start justify-start py-[0rem] px-[0.687rem]">
                         <div className="h-[2.5rem] w-full relative rounded-xl border-dark-gold border-[1px] border-solid box-border hidden" />
-                        {isEditing ? (
-                          <input
-                            className="w-full [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[1]"
-                            type="email"
-                            value={correoElectronico}
-                            onChange={(e) =>
-                              setCorreoElectronico(e.target.value)
-                            }
-                          />
-                        ) : (
-                          <div className="w-full [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[1]">
-                            {correoElectronico}
-                          </div>
-                        )}
+                        <div className="w-full [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude/50 text-left flex items-center p-0 z-[1] cursor-not-allowed">
+                          {correoElectronico}
+                          <span className="ml-2 text-xs text-dark-gold/70">
+                            (No editable)
+                          </span>
+                        </div>
                       </div>
                     </div>
 
@@ -190,20 +308,30 @@ const UserDetail: FunctionComponent<UserDetailType> = memo(
             <div className="flex flex-row items-start justify-start gap-[42px] max-w-full mq450:gap-[21px] mq700:flex-wrap">
               <button
                 onClick={handleEditarPerfil}
-                className="cursor-pointer [border:none] py-[10px] px-[81.5px] bg-dark-gold h-[42px] w-[250px] shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden shrink-0 flex flex-row items-start justify-start box-border z-[1] hover:bg-darkgoldenrod transition-colors"
+                disabled={isSaving}
+                className={`cursor-pointer [border:none] py-[10px] px-[81.5px] bg-dark-gold h-[42px] w-[250px] shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden shrink-0 flex flex-row items-start justify-start box-border z-[1] hover:bg-darkgoldenrod transition-colors ${
+                  isSaving ? "opacity-70 cursor-wait" : ""
+                }`}
               >
                 <b className="h-[22px] w-[88px] relative text-lg flex font-titulo-2 text-black text-center items-center justify-center shrink-0">
-                  {isEditing ? "Guardar perfil" : "Editar perfil"}
+                  {isSaving
+                    ? "Guardando..."
+                    : isEditing
+                    ? "Guardar perfil"
+                    : "Editar perfil"}
                 </b>
               </button>
-              <button
-                onClick={handleCancelar}
-                className="cursor-pointer border-dark-gold border-[1px] border-solid py-2 px-11 bg-[transparent] h-[42px] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[1] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
-              >
-                <b className="flex-1 relative text-lg inline-block font-titulo-2 text-dark-gold text-center min-w-[64px]">
-                  Cancelar
-                </b>
-              </button>
+              {isEditing && (
+                <button
+                  onClick={handleCancelar}
+                  disabled={isSaving}
+                  className="cursor-pointer border-dark-gold border-[1px] border-solid py-2 px-11 bg-[transparent] h-[42px] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[1] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
+                >
+                  <b className="flex-1 relative text-lg inline-block font-titulo-2 text-dark-gold text-center min-w-[64px]">
+                    Cancelar
+                  </b>
+                </button>
+              )}
             </div>
           </section>
 
