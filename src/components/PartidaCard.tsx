@@ -16,6 +16,8 @@ export interface Partida {
   tipoPartida: TipoPartida;
   rating: number; // de 0 a 5
   tags?: string[];
+  jugadores?: string; // Total plazas
+  jugadoresActuales?: number;
 }
 
 export type PartidaCardProps = {
@@ -133,6 +135,11 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
       backgroundColor === "#1a1a1a" || backgroundColor === "#darkslategray";
     const textColor = isDarkBackground ? "text-oldlace-100" : "text-black";
 
+    // Calcular vacantes
+    const maxJugadores = Number(partida.jugadores || 0);
+    const actuales = partida.jugadoresActuales || 0;
+    const vacantes = Math.max(0, maxJugadores - actuales);
+
     return (
       <div
         className={`w-[360px] min-h-[536px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 max-w-full text-center text-base ${textColor} font-titulo-2 hover:scale-[1.02] transition-transform duration-200 ${className}`}
@@ -159,6 +166,11 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
 
         {/* Contenido de la tarjeta */}
         <div className="self-stretch flex flex-col items-center justify-start pt-0 px-4 pb-0 gap-3 relative min-h-[196px]">
+          {/* Vacantes - Badge top right of content */}
+          <div className="absolute top-[-10px] right-[10px] bg-dark-gold text-black font-bold px-3 py-1 rounded-full text-xs box-shadow-md z-[5]">
+            {vacantes > 0 ? `${vacantes} libres` : "COMPLETA"}
+          </div>
+
           {/* Título - Máximo 2 líneas */}
           <h2 className="m-0 self-stretch relative text-13xl font-bold font-[inherit] text-goldenrod z-[1] mq1050:text-7xl mq450:text-lgi overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] h-[80px]">
             {partida.titulo}

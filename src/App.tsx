@@ -72,6 +72,7 @@ function App() {
             <Route path="/email-confirmation" element={<EmailConfirmation />} />
             <Route path="/contacto" element={<Contact />} />
             <Route path="/user" element={<UserDetail />} />
+            <Route path="/user/:userId" element={<UserDetail />} />
             <Route path="/ourmasters" element={<OurMasters />} />
             <Route path="/master/:masterId" element={<MasterDetail />} />
             <Route

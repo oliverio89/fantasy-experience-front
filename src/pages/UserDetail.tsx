@@ -1,368 +1,627 @@
 import {
   FunctionComponent,
   memo,
-  useCallback,
-  useEffect,
   useState,
+  useEffect,
+  useCallback,
 } from "react";
-import { useNavigate } from "react-router-dom";
-import PartidaCard, { Partida } from "../components/PartidaCard";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
+import { Profile, ProfileService } from "../services/profileService";
+import { ImageUpload } from "../components/ImageUpload";
 import { useToast } from "../context/ToastContext";
+import PartidaCard, { Partida } from "../components/PartidaCard";
 
-export type UserDetailType = {
-  className?: string;
+// Helper for Array inputs (Systems, Tags, etc.)
+const ArrayInput: FunctionComponent<{
+  label: string;
+  values: string[];
+  onChange: (newValues: string[]) => void;
+  placeholder?: string;
+}> = ({ label, values, onChange, placeholder }) => {
+  const [inputValue, setInputValue] = useState("");
+
+  const handleAdd = () => {
+    if (inputValue.trim()) {
+      onChange([...values, inputValue.trim()]);
+      setInputValue("");
+    }
+  };
+
+  const handleRemove = (index: number) => {
+    onChange(values.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-light-gold font-bold">{label}</label>
+      <div className="flex flex-wrap gap-2 mb-2">
+        {values.map((v, i) => (
+          <span
+            key={i}
+            className="bg-darkslategray text-nude px-3 py-1 rounded-full text-sm flex items-center gap-2 border border-dark-gold"
+          >
+            {v}
+            <button
+              onClick={() => handleRemove(i)}
+              className="text-red-400 hover:text-red-300 font-bold"
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder={placeholder || "Añadir item..."}
+          className="flex-1 bg-black/50 border border-dark-gold text-nude px-4 py-2 rounded-lg"
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+        />
+        <button
+          onClick={handleAdd}
+          type="button"
+          className="bg-dark-gold text-black px-4 py-2 rounded-lg hover:brightness-110"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
 };
 
-// Datos de ejemplo de partidas del usuario (mantener hardcodeado por ahora)
-const partidasUsuario: Partida[] = [
-  {
-    id: 1,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 4,
-  },
-  {
-    id: 2,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "online",
-    rating: 5,
-  },
-  {
-    id: 3,
-    titulo: "Partida Título",
-    masterName: "Master name",
-    sistemaJuego: "Sistema de partida",
-    fecha: "Fecha",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 3,
-  },
-];
+const UserDetail: FunctionComponent = () => {
+  const { user } = useAuth();
+  const { userId } = useParams<{ userId: string }>();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
 
-const UserDetail: FunctionComponent<UserDetailType> = memo(
-  ({ className = "" }) => {
-    const navigate = useNavigate();
-    const { user, refreshProfile, loading: authLoading } = useAuth();
-    const { showToast } = useToast();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [nombreUsuario, setNombreUsuario] = useState("");
-    const [correoElectronico, setCorreoElectronico] = useState("");
-    // Password is only for display simulation or change request
-    const [contrasena, setContrasena] = useState("*************");
-    const [isSaving, setIsSaving] = useState(false);
+  // Games state
+  const [myGames, setMyGames] = useState<any[]>([]);
 
-    // Initialize state with real user data
-    useEffect(() => {
-      if (user) {
-        setNombreUsuario(user.user_metadata?.full_name || "");
-        setCorreoElectronico(user.email || "");
-      } else if (!authLoading) {
-        // Redirect if not logged in
-        navigate("/login");
-      }
-    }, [user, authLoading, navigate]);
+  // Form State
+  const [formData, setFormData] = useState<Partial<Profile>>({});
 
-    // Safety timeout: If loading takes too long (>3s), assume verify failed or user not logged in
-    useEffect(() => {
-      if (authLoading) {
-        const timer = setTimeout(() => {
-          if (!user) {
-            console.warn("Auth loading timed out, redirecting to login");
-            navigate("/login");
-          }
-        }, 3000);
-        return () => clearTimeout(timer);
-      }
-    }, [authLoading, user, navigate]);
+  // Determined ID: URL param OR Auth User ID
+  const targetUserId = userId || user?.id;
+  const isMyProfile = user && targetUserId === user.id;
 
-    const handleCancelar = useCallback(() => {
-      if (user) {
-        setNombreUsuario(user.user_metadata?.full_name || "");
-        setCorreoElectronico(user.email || "");
-      }
-      setIsEditing(false);
-    }, [user]);
+  useEffect(() => {
+    if (targetUserId) {
+      loadProfile(targetUserId);
+    } else {
+      // If no ID and no logged in user, redirect to login
+      navigate("/login");
+    }
+  }, [targetUserId, navigate]);
 
-    const handleEditarPerfil = useCallback(async () => {
-      if (isEditing) {
-        // Guardar cambios
-        if (!user) return;
-        setIsSaving(true);
-        console.log("Iniciando guardado de perfil...");
-
-        // Helper for timeouts
-        const timeoutPromise = (ms: number) =>
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Tiempo de espera agotado")), ms)
-          );
-
-        try {
-          const updates: { data: { full_name: string } } = {
-            data: { full_name: nombreUsuario },
-          };
-
-          // Email updates disabled for stability
-          // if (correoElectronico !== user.email) { ... }
-
-          // 1. Update Auth Metadata (Supabase Auth)
-          console.log("Actualizando Auth Metadata..."); // Debug log
-          const { error: authError } = (await Promise.race([
-            supabase.auth.updateUser(updates),
-            timeoutPromise(5000),
-          ])) as any;
-          if (authError) throw authError;
-          console.log("Auth Metadata actualizado."); // Debug log
-
-          // 2. Update Public Profile Table (Database)
-          console.log("Actualizando Tabla Profiles...", {
-            id: user.id,
-            nombre: nombreUsuario,
-          }); // Debug log
-
-          // Use upsert instead of update to handle case where profile row missing
-          const { error: profileError } = (await Promise.race([
-            supabase
-              .from("profiles")
-              .upsert({ id: user.id, full_name: nombreUsuario })
-              .select(),
-            timeoutPromise(5000),
-          ])) as any;
-
-          if (profileError) {
-            console.error("Profile table update failed:", profileError);
-            showToast(
-              "Error update perfil publico: " + profileError.message,
-              "info"
-            );
-          } else {
-            console.log("Tabla Profiles actualizada."); // Debug log
-          }
-
-          // 3. Reload Page as requested
-          console.log("Recargando página..."); // Debug log
-          window.location.reload();
-        } catch (error: any) {
-          console.error("Error updating profile:", error);
-          showToast(error.message || "Error al actualizar perfil", "error");
-          setIsSaving(false);
-        }
+  const loadProfile = async (id: string) => {
+    setLoading(true);
+    try {
+      const data = await ProfileService.getProfile(id);
+      if (data) {
+        setProfile(data);
+        setFormData(data); // Init form data
+        loadGames(id);
       } else {
-        setIsEditing(true);
+        setProfile(null);
       }
-    }, [isEditing, user, nombreUsuario, correoElectronico, showToast]);
+    } catch (error) {
+      console.error(error);
+      showToast("Error al cargar perfil", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleCambiarContrasena = useCallback(async () => {
-      if (!user?.email) return;
-      try {
-        const { error } = await supabase.auth.resetPasswordForEmail(
-          user.email,
-          {
-            redirectTo: "http://localhost:3000/user", // Redirect back here after password reset flow
-          }
-        );
-        if (error) throw error;
-        showToast(
-          "Se ha enviado un correo para restablecer tu contraseña.",
-          "success"
-        );
-      } catch (error: any) {
-        console.error("Error sending reset password email:", error);
-        showToast("Error al solicitar cambio de contraseña", "error");
-      }
-    }, [user, showToast]);
+  const loadGames = async (id: string) => {
+    // 1. Games Created
+    const { data: created } = await supabase
+      .from("games")
+      .select("*")
+      .eq("master_id", id);
 
-    if (authLoading) {
-      return (
-        <div className="w-full min-h-screen bg-black flex items-center justify-center text-nude font-titulo-2 text-xl">
-          Cargando perfil...
+    if (created) setMyGames(created);
+  };
+
+  const handleSave = async () => {
+    if (!targetUserId) return;
+    setIsSaving(true);
+    try {
+      await ProfileService.updateProfile(targetUserId, formData);
+      setProfile((prev) => ({ ...prev!, ...formData } as Profile));
+      setIsEditing(false);
+      showToast("Perfil actualizado correctamente", "success");
+    } catch (error) {
+      console.error(error);
+      showToast("Error al actualizar perfil", "error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setFormData(profile || {});
+    setIsEditing(false);
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      navigate("/login");
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <img
+          key={i}
+          className="h-[40.7px] w-10"
+          alt="Estrella llena"
+          src="/rating-star.svg"
+        />
+      );
+    }
+
+    if (hasHalfStar) {
+      stars.push(
+        <div key="half" className="relative h-[40.7px] w-10">
+          <img
+            className="absolute h-[40.7px] w-10"
+            alt="Estrella vacía"
+            src="/rating-star-empty.svg"
+          />
+          <img
+            className="absolute h-[40.7px] w-10"
+            alt="Media estrella"
+            src="/rating-star.svg"
+            style={{
+              clipPath: "polygon(0 0, 50% 0, 50% 100%, 0% 100%)",
+            }}
+          />
         </div>
       );
     }
 
-    if (!user) {
-      return null; // Will redirect in useEffect
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <img
+          key={`empty-${i}`}
+          className="h-[40.7px] w-10"
+          alt="Estrella vacía"
+          src="/rating-star-empty.svg"
+        />
+      );
     }
 
-    return (
-      <div
-        className={`w-full min-h-screen bg-black flex flex-col items-center justify-start py-10 px-5 leading-[normal] tracking-[normal] ${className}`}
-      >
-        <div className="w-full max-w-[1120px] flex flex-col items-start justify-start gap-[41px] mq700:gap-5">
-          {/* Sección del perfil */}
-          <section className="self-stretch rounded-xl bg-darkslategray flex flex-col items-end justify-start pt-[50px] px-[94px] pb-[39px] box-border gap-[79px] max-w-full text-left text-xl text-white font-titulo-2 mq450:gap-5 mq450:pl-5 mq450:pr-5 mq450:box-border mq700:gap-[39px] mq700:pl-[47px] mq700:pr-[47px] mq700:box-border mq925:pt-8 mq925:pb-[25px] mq925:box-border">
-            <div className="w-[1120px] h-[754px] relative rounded-xl bg-darkslategray hidden max-w-full" />
+    return stars;
+  };
 
-            <div className="self-stretch flex flex-row items-start justify-end py-0 px-[3px] box-border max-w-full">
-              <div className="flex-1 flex flex-col items-end justify-start gap-[85px] max-w-full mq450:gap-[21px] mq925:gap-[42px]">
-                {/* Avatar con botón de editar */}
-                <div className="self-stretch flex flex-row items-start justify-center py-0 mq450:px-5">
-                  <div className="relative">
-                    <div className="w-[250px] h-[250px] rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center overflow-hidden z-[1] border-4 border-dark-gold/30">
-                      <div className="text-[120px] font-bold text-nude">
-                        {nombreUsuario
-                          ? nombreUsuario.charAt(0).toUpperCase()
-                          : "?"}
-                      </div>
-                    </div>
-                    {/* Botón de editar avatar (por ahora solo visual o futuro) */}
-                    <button className="absolute bottom-0 right-0 w-[60px] h-[60px] rounded-full bg-dark-gold flex items-center justify-center z-[2] cursor-pointer hover:bg-darkgoldenrod transition-colors shadow-[0px_4px_8px_rgba(0,_0,_0,_0.3)]">
-                      <svg
-                        className="w-7 h-7 text-black"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                        />
-                      </svg>
-                    </button>
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen bg-black flex items-center justify-center">
+        <div className="loader"></div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="w-full min-h-screen bg-black flex items-center justify-center text-nude">
+        Perfil no encontrado
+      </div>
+    );
+  }
+
+  // --- VIEW MODE (Pixel Perfect to MasterDetailOld) ---
+  if (!isEditing) {
+    return (
+      <div className="w-full bg-black min-h-screen pt-[7.75rem]">
+        {/* Botón de regreso / Controles Usuario */}
+        <div className="w-full max-w-[1120px] mx-auto px-6 py-8 flex justify-between items-center">
+          <button
+            onClick={() => navigate("/ourmasters")}
+            className="px-6 py-3 bg-transparent border border-nude text-nude rounded-xl hover:bg-nude hover:text-black transition-all duration-200 flex items-center gap-3 font-medium"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Volver a Masters
+          </button>
+
+          {isMyProfile && (
+            <div className="flex gap-4">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="bg-dark-gold text-black px-6 py-3 rounded-xl font-bold hover:brightness-110 shadow-[0px_0px_20px_rgba(212,175,55,0.3)]"
+              >
+                Editar Mi Perfil
+              </button>
+              <button
+                onClick={handleLogout}
+                className="border border-red-500 text-red-500 px-6 py-3 rounded-xl hover:bg-red-500/10"
+              >
+                Cerrar Sesión
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Layout principal de 2 columnas - Diseño Original */}
+        <div className="w-full max-w-[1120px] mx-auto px-6 pb-12">
+          <div className="flex flex-row items-start justify-start gap-10 leading-[normal] tracking-[normal] text-center text-5xl text-nude font-texto-2 mq700:gap-5 mq900:flex-wrap">
+            {/* COLUMNA IZQUIERDA */}
+            <div className="flex flex-col items-start justify-start gap-9 max-w-full mq450:gap-[18px] mq450:min-w-full mq900:flex-1">
+              {/* Foto del Master - Circular completo */}
+              <div className="self-stretch flex justify-center">
+                <img
+                  className="w-[347px] h-[347px] rounded-full object-cover border-4 border-light-gold"
+                  loading="lazy"
+                  alt={`Avatar de ${profile.fullName}`}
+                  src={profile.avatarUrl || "/default-avatar.png"}
+                />
+              </div>
+
+              {/* Información sobre el Master */}
+              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[26.7px] max-w-full mq450:p-4 mq450:box-border">
+                <h2 className="m-0 self-stretch relative text-15xl font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-left w-full">
+                  Sobre el Máster
+                </h2>
+
+                <div className="self-stretch flex flex-col items-start justify-start gap-2 text-light-gold text-left w-full">
+                  <b className="self-stretch relative z-[1] mq450:text-lgi">
+                    Sistemas preferidos
+                  </b>
+                  <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1]">
+                    {profile.sistemas?.length
+                      ? profile.sistemas.join(", ")
+                      : "No especificado"}
                   </div>
                 </div>
 
-                {/* Campos del perfil en 2 columnas */}
-                <div className="self-stretch flex flex-row items-start justify-start gap-10 max-w-full mq450:gap-5 mq925:flex-wrap">
-                  {/* Columna izquierda */}
-                  <div className="flex-1 flex flex-col items-start justify-start gap-[85px] min-w-[288px] max-w-full mq450:gap-[42px]">
-                    {/* Nombre de usuario */}
-                    <div className="self-stretch flex flex-col items-start justify-start gap-[15px] z-[1]">
-                      <div className="relative font-medium mq450:text-base">
-                        Nombre de usuario
-                      </div>
-                      <div className="self-stretch rounded-xl border-dark-gold border-[1px] border-solid box-border flex flex-row items-start justify-start py-[0rem] px-[0.687rem]">
-                        <div className="h-[2.5rem] w-full relative rounded-xl border-dark-gold border-[1px] border-solid box-border hidden" />
-                        {isEditing ? (
-                          <input
-                            className="w-full [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[1]"
-                            type="text"
-                            value={nombreUsuario}
-                            onChange={(e) => setNombreUsuario(e.target.value)}
-                          />
-                        ) : (
-                          <div className="w-full [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[1]">
-                            {nombreUsuario}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Contraseña */}
-                    <div className="self-stretch flex flex-col items-start justify-start gap-[15px] z-[1]">
-                      <div className="relative font-medium mq450:text-base">
-                        Contraseña
-                      </div>
-                      <div className="self-stretch rounded-xl border-dark-gold border-[1px] border-solid box-border flex flex-row items-start justify-start py-[0rem] px-[0.687rem]">
-                        <div className="h-[2.5rem] w-full relative rounded-xl border-dark-gold border-[1px] border-solid box-border hidden" />
-                        <div className="w-full [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[1]">
-                          {contrasena}
-                        </div>
-                      </div>
-                    </div>
+                <div className="self-stretch flex flex-col items-start justify-start gap-1.5 text-light-gold text-left w-full">
+                  <b className="self-stretch relative z-[1] mq450:text-lgi mq450:leading-[18px]">
+                    Preferencia de partidas
+                  </b>
+                  <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1]">
+                    {profile.tiposPartida?.length
+                      ? profile.tiposPartida.join(", ")
+                      : "No especificado"}
                   </div>
+                </div>
 
-                  {/* Columna derecha */}
-                  <div className="flex-1 flex flex-col items-start justify-start gap-28 min-w-[288px] max-w-full mq450:gap-14">
-                    {/* Correo Electrónico */}
-                    <div className="self-stretch flex flex-col items-start justify-start gap-[15px] z-[1]">
-                      <div className="relative font-medium mq450:text-base">
-                        Correo Electrónico
+                <div className="self-stretch flex flex-col items-end justify-start gap-[10.5px] max-w-full w-full">
+                  <b className="self-stretch relative text-light-gold z-[1] mq450:text-lgi text-left w-full">
+                    Tags:
+                  </b>
+                  <div className="self-stretch flex flex-row flex-wrap items-start justify-start gap-2 text-base w-full">
+                    {profile.tags?.map((tag, idx) => (
+                      <div
+                        key={idx}
+                        className="px-3 py-1 [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid text-nude leading-[20px]"
+                      >
+                        {tag}
                       </div>
-                      <div className="self-stretch rounded-xl border-dark-gold border-[1px] border-solid box-border flex flex-row items-start justify-start py-[0rem] px-[0.687rem]">
-                        <div className="h-[2.5rem] w-full relative rounded-xl border-dark-gold border-[1px] border-solid box-border hidden" />
-                        <div className="w-full [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude/50 text-left flex items-center p-0 z-[1] cursor-not-allowed">
-                          {correoElectronico}
-                          <span className="ml-2 text-xs text-dark-gold/70">
-                            (No editable)
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Link Cambiar contraseña */}
-                    <div
-                      className="self-stretch relative [text-decoration:underline] font-medium z-[1] mq450:text-base cursor-pointer hover:text-dark-gold transition-colors"
-                      onClick={handleCambiarContrasena}
-                    >
-                      Cambiar contraseña
-                    </div>
+                    ))}
+                    {!profile.tags?.length && (
+                      <span className="text-gray-500 italic text-sm">
+                        Sin tags
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Partidas jugadas (visual placeholder using logic similar to old component) */}
+              <div className="self-stretch flex flex-col items-start justify-start gap-4">
+                {/*  Show recent created games just as text blocks like original "Partida 2" */}
+                {myGames.length > 0 ? (
+                  myGames.slice(0, 3).map((game) => (
+                    <div
+                      key={game.id}
+                      className="self-stretch rounded-xl bg-nude border border-darkslategray flex flex-col items-center justify-center py-12 px-6 cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => navigate(`/detailsgame/${game.id}`)}
+                    >
+                      <div className="text-black text-lg font-semibold">
+                        {game.titulo}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="self-stretch rounded-xl bg-nude/5 border-dashed border border-nude/30 py-8 flex items-center justify-center">
+                    <span className="text-nude/50">Sin partidas creadas</span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Botones */}
-            <div className="flex flex-row items-start justify-start gap-[42px] max-w-full mq450:gap-[21px] mq700:flex-wrap">
-              <button
-                onClick={handleEditarPerfil}
-                disabled={isSaving}
-                className={`cursor-pointer [border:none] py-[10px] px-[81.5px] bg-dark-gold h-[42px] w-[250px] shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden shrink-0 flex flex-row items-start justify-start box-border z-[1] hover:bg-darkgoldenrod transition-colors ${
-                  isSaving ? "opacity-70 cursor-wait" : ""
-                }`}
-              >
-                <b className="h-[22px] w-[88px] relative text-lg flex font-titulo-2 text-black text-center items-center justify-center shrink-0">
-                  {isSaving
-                    ? "Guardando..."
-                    : isEditing
-                    ? "Guardar perfil"
-                    : "Editar perfil"}
-                </b>
-              </button>
-              {isEditing && (
-                <button
-                  onClick={handleCancelar}
-                  disabled={isSaving}
-                  className="cursor-pointer border-dark-gold border-[1px] border-solid py-2 px-11 bg-[transparent] h-[42px] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[1] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
-                >
-                  <b className="flex-1 relative text-lg inline-block font-titulo-2 text-dark-gold text-center min-w-[64px]">
-                    Cancelar
-                  </b>
-                </button>
-              )}
-            </div>
-          </section>
-
-          {/* Sección de Próximas partidas */}
-          <section className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start pt-6 px-9 pb-12 box-border gap-10 max-w-full text-center text-15xl text-nude font-titulo-2 mq450:pl-5 mq450:pr-5 mq450:box-border mq450:gap-5">
-            <div className="w-full relative rounded-xl bg-darkslategray hidden max-w-full" />
-
-            <h2 className="m-0 self-stretch text-inherit font-bold font-[inherit] flex items-center justify-center z-[1] mq450:text-xl mq925:text-8xl">
-              Próximas partidas
-            </h2>
-
-            {/* Grid de 3 partidas */}
-            <div className="self-stretch flex flex-row items-start justify-center gap-[18px] z-[1] mq925:flex-wrap">
-              {partidasUsuario.map((partida) => (
-                <div
-                  key={partida.id}
-                  className="scale-[0.75] origin-top flex-shrink-0"
-                >
-                  <PartidaCard
-                    partida={partida}
-                    mostrarDescripcion={false}
-                    backgroundColor="#DAB16A"
-                  />
+            {/* COLUMNA DERECHA */}
+            <section className="flex-1 flex flex-col items-start justify-start gap-[35.7px] min-w-[476px] max-w-full text-center text-21xl text-dark-gold font-texto-2 mq700:min-w-full mq900:gap-[18px]">
+              {/* Nombre del Master y Rating */}
+              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-end justify-start p-6 gap-0.5">
+                <h1 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-5xl mq900:text-13xl text-light-gold text-right w-full">
+                  {profile.fullName}
+                </h1>
+                <div className="self-stretch h-10 relative text-xl font-medium text-nude flex items-center justify-end shrink-0 z-[1] mq450:text-base">
+                  Valoración
                 </div>
-              ))}
-            </div>
-          </section>
+                <div className="self-stretch flex flex-row items-start justify-end py-0 pl-[21px] pr-0">
+                  <div className="flex flex-row items-start justify-start gap-[18px]">
+                    {renderStars(4.8)} {/* Placeholder rating */}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 gap-[27px] text-15xl mq700:p-4 mq700:box-border">
+                <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-nude text-left w-full">
+                  Bio
+                </h2>
+                <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-left">
+                  {profile.bio || "Sin biografía disponible."}
+                </div>
+              </div>
+
+              {/* Estilo de juego */}
+              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 gap-[27px] text-15xl mq700:p-4 mq700:box-border">
+                <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-nude text-left w-full">
+                  Estilo de juego
+                </h2>
+                <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-left">
+                  <p className="mb-4">
+                    <strong>Duración de sesión:</strong>{" "}
+                    {profile.duracionSesion?.join(", ") || "No especificado"}
+                  </p>
+                  <p className="mb-4">
+                    <strong>Número de jugadores:</strong>{" "}
+                    {profile.numeroJugadores?.join(", ") || "No especificado"}
+                  </p>
+                  <p className="mb-4">
+                    <strong>Estilos de juego:</strong>{" "}
+                    {profile.estilos?.join(", ") || "No especificado"}
+                  </p>
+                  <p>
+                    <strong>Idiomas:</strong>{" "}
+                    {profile.idiomas?.join(", ") || "No especificado"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Próximas partidas */}
+              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[27px] max-w-full text-15xl text-nude mq700:p-4 mq700:box-border">
+                <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-left w-full">
+                  Próximas partidas
+                </h2>
+                <div className="self-stretch flex flex-row items-start justify-start py-0 px-0 box-border max-w-full">
+                  <div className="flex-1 flex flex-row items-start justify-center gap-[37px] max-w-full mq700:gap-[18px] mq700:flex-wrap">
+                    {myGames.length > 0 ? (
+                      myGames.map((game) => (
+                        <PartidaCard
+                          key={game.id}
+                          // Manually mapping game to Partida type expected by card
+                          partida={
+                            {
+                              id: game.id,
+                              titulo: game.titulo,
+                              masterName: profile.fullName,
+                              sistemaJuego: game.sistema_juego,
+                              fecha: game.fecha_inicio,
+                              descripcion: game.descripcion,
+                              imagenUrl:
+                                game.imagen_fondo || "/default-game-bg.png",
+                              tipoPartida: game.tipo_partida,
+                              rating: 5.0,
+                            } as any
+                          }
+                          mostrarDescripcion={true}
+                          onClick={() => navigate(`/detailsgame/${game.id}`)}
+                          className="flex-1 min-w-[211px] max-w-full"
+                        />
+                      ))
+                    ) : (
+                      <p className="text-lg text-gray-500 italic">
+                        No tienes próximas partidas programadas.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
     );
   }
-);
+
+  // --- EDIT MODE (Original Form Implementation) ---
+  return (
+    <div className="w-full bg-black min-h-screen pt-[7.75rem] text-nude px-4">
+      <div className="max-w-[1120px] mx-auto pb-20">
+        <h1 className="text-4xl text-light-gold mb-8 font-titulo-2">
+          Editar Perfil
+        </h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Left Column: Avatar & Basic Info */}
+          <div className="md:col-span-1 flex flex-col gap-6">
+            <div className="bg-darkslategray p-6 rounded-xl border border-dark-gold/20">
+              <h3 className="text-xl font-bold text-light-gold mb-4">Avatar</h3>
+              <div className="flex flex-col items-center">
+                <img
+                  src={
+                    formData.avatarUrl ||
+                    profile?.avatarUrl ||
+                    "/default-avatar.png"
+                  }
+                  className="w-40 h-40 rounded-full object-cover border-4 border-dark-gold mb-4"
+                />
+                <ImageUpload
+                  userId={targetUserId!}
+                  currentAvatarUrl={formData.avatarUrl || null}
+                  onUploadComplete={(url) =>
+                    setFormData({ ...formData, avatarUrl: url })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="bg-darkslategray p-6 rounded-xl border border-dark-gold/20 flex flex-col gap-4">
+              <h3 className="text-xl font-bold text-light-gold">
+                Información Básica
+              </h3>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm text-gray-400">Nombre Público</label>
+                <input
+                  className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white"
+                  value={formData.fullName || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, fullName: e.target.value })
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm text-gray-400">Nombre</label>
+                <input
+                  className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white opacity-50 cursor-not-allowed"
+                  value={profile?.firstName || ""}
+                  disabled
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm text-gray-400">Apellidos</label>
+                <input
+                  className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white opacity-50 cursor-not-allowed"
+                  value={profile?.lastName || ""}
+                  disabled
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Details */}
+          <div className="md:col-span-2 flex flex-col gap-6">
+            <div className="bg-darkslategray p-6 rounded-xl border border-dark-gold/20">
+              <h3 className="text-xl font-bold text-light-gold mb-4">
+                Biografía
+              </h3>
+              <textarea
+                className="w-full h-40 bg-black/50 border border-dark-gold rounded-lg p-4 text-white resize-none"
+                value={formData.bio || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, bio: e.target.value })
+                }
+                placeholder="Cuéntanos sobre ti, tu experiencia en rol, etc..."
+              />
+            </div>
+
+            <div className="bg-darkslategray p-6 rounded-xl border border-dark-gold/20 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="col-span-2">
+                <h3 className="text-xl font-bold text-light-gold mb-4">
+                  Detalles de Master
+                </h3>
+              </div>
+
+              <ArrayInput
+                label="Sistemas que diriges"
+                values={formData.sistemas || []}
+                onChange={(vals) =>
+                  setFormData({ ...formData, sistemas: vals })
+                }
+                placeholder="D&D 5e, Pathfinder..."
+              />
+
+              <ArrayInput
+                label="Estilos de juego"
+                values={formData.estilos || []}
+                onChange={(vals) => setFormData({ ...formData, estilos: vals })}
+                placeholder="Narrativo, Combate tactico..."
+              />
+
+              <ArrayInput
+                label="Tipos de partida"
+                values={formData.tiposPartida || []}
+                onChange={(vals) =>
+                  setFormData({ ...formData, tiposPartida: vals })
+                }
+                placeholder="Online, Presencial, One-shot..."
+              />
+
+              <ArrayInput
+                label="Idiomas"
+                values={formData.idiomas || []}
+                onChange={(vals) => setFormData({ ...formData, idiomas: vals })}
+                placeholder="Español, Inglés..."
+              />
+
+              <ArrayInput
+                label="Duración de sesión habitual"
+                values={formData.duracionSesion || []}
+                onChange={(vals) =>
+                  setFormData({ ...formData, duracionSesion: vals })
+                }
+                placeholder="3-4 horas..."
+              />
+
+              <ArrayInput
+                label="Número de jugadores"
+                values={formData.numeroJugadores || []}
+                onChange={(vals) =>
+                  setFormData({ ...formData, numeroJugadores: vals })
+                }
+                placeholder="4-5 jugadores..."
+              />
+
+              <ArrayInput
+                label="Tags / Etiquetas"
+                values={formData.tags || []}
+                onChange={(vals) => setFormData({ ...formData, tags: vals })}
+                placeholder="Terror, Fantasía..."
+              />
+            </div>
+
+            <div className="flex gap-4 justify-end mt-4">
+              <button
+                onClick={handleCancel}
+                className="border border-dark-gold text-dark-gold px-8 py-3 rounded-full hover:bg-dark-gold/10 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="bg-dark-gold text-black px-8 py-3 rounded-full font-bold hover:brightness-110 shadow-[0px_0px_20px_rgba(212,175,55,0.4)] transition-all"
+              >
+                {isSaving ? "Guardando..." : "Guardar Cambios"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default UserDetail;

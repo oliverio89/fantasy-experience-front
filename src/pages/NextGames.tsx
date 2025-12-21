@@ -22,6 +22,10 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
   const [debouncedBusqueda, setDebouncedBusqueda] = useState<string>("");
   const [filtroTags, setFiltroTags] = useState<string[]>([]);
 
+  // States for new filters
+  const [filtroSistema, setFiltroSistema] = useState<string>("");
+  const [filtroFecha, setFiltroFecha] = useState<string>("");
+
   // Debounce para la búsqueda
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -33,7 +37,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
     };
   }, [busqueda]);
 
-  // Usar el hook genérico para ver TODAS las partidas (sin filtro de fecha futura)
+  // Usar el hook genérico para ver TODAS las partidas
   const {
     partidas: proximasPartidas,
     loading,
@@ -42,6 +46,8 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
     limit: 12,
     tipo: filtroTipo.length > 0 ? filtroTipo : undefined,
     busqueda: debouncedBusqueda,
+    sistemaJuego: filtroSistema || undefined,
+    fechaInicio: filtroFecha || undefined,
   });
 
   const onButtonClick = useCallback(() => {
@@ -52,6 +58,8 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
     setBusqueda("");
     setFiltroTipo([]);
     setFiltroTags([]);
+    setFiltroSistema("");
+    setFiltroFecha("");
   }, []);
 
   const handleBuscar = useCallback(() => {
@@ -61,9 +69,13 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
       "Filtro:",
       filtroTipo,
       "Tags:",
-      filtroTags
+      filtroTags,
+      "Sistema:",
+      filtroSistema,
+      "Fecha:",
+      filtroFecha
     );
-  }, [busqueda, filtroTipo, filtroTags]);
+  }, [busqueda, filtroTipo, filtroTags, filtroSistema, filtroFecha]);
 
   const toggleFiltro = useCallback((tipo: string) => {
     setFiltroTipo((prev) => {
@@ -112,7 +124,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             button1Border="none"
             button1TextDecoration="none"
             button1FontWeight="700"
-            __PH1__={onButtonClick}
+            onClick={onButtonClick}
           />
         </header>
 
@@ -171,6 +183,51 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
                 Digital
               </span>
             </button>
+          </div>
+
+          {/* Filtros Avanzados: Sistema y Fecha */}
+          <div className="self-stretch flex flex-col items-start justify-start gap-[5px] max-w-full mb-[27px]">
+            <div className="text-left text-lg text-white leading-[26px] font-texto mb-2">
+              Filtros adicionales:
+            </div>
+            <div className="flex flex-row gap-4 flex-wrap">
+              {/* Filtro Sistema */}
+              <select
+                value={filtroSistema}
+                onChange={(e) => setFiltroSistema(e.target.value)}
+                className="h-[42px] px-4 rounded-xl border-nude border-[1px] border-solid bg-transparent text-nude font-texto text-base focus:outline-none focus:border-dark-gold cursor-pointer"
+              >
+                <option value="" className="bg-black text-nude">
+                  Todos los sistemas
+                </option>
+                <option value="D&D 5e" className="bg-black text-nude">
+                  D&D 5e
+                </option>
+                <option value="Cthulhu" className="bg-black text-nude">
+                  Cthulhu
+                </option>
+                <option value="Pathfinder 2e" className="bg-black text-nude">
+                  Pathfinder 2e
+                </option>
+                <option value="Vampiro" className="bg-black text-nude">
+                  Vampiro
+                </option>
+                <option value="Otro" className="bg-black text-nude">
+                  Otro
+                </option>
+              </select>
+
+              {/* Filtro Fecha Inicio */}
+              <div className="flex flex-row items-center gap-2">
+                <span className="text-nude font-texto">Desde:</span>
+                <input
+                  type="date"
+                  value={filtroFecha}
+                  onChange={(e) => setFiltroFecha(e.target.value)}
+                  className="h-[42px] px-4 rounded-xl border-nude border-[1px] border-solid bg-transparent text-nude font-texto text-base focus:outline-none focus:border-dark-gold cursor-pointer [color-scheme:dark]"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Campo de búsqueda */}
@@ -250,9 +307,9 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
 
         {/* Grid de partidas - 3 columnas fijas */}
         {loading ? (
-          <div className="self-stretch flex flex-col items-center justify-center py-20 text-white">
-            <div className="text-2xl font-bold mb-4">Cargando partidas...</div>
-            <div className="text-nude">Conectando con Supabase...</div>
+          <div className="self-stretch flex flex-col items-center justify-center py-20 text-white gap-4">
+            <div className="loader"></div>
+            <div className="text-nude font-texto">Cargando partidas...</div>
           </div>
         ) : error ? (
           <div className="self-stretch flex flex-col items-center justify-center py-20 text-white">

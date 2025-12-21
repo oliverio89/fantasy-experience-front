@@ -2,6 +2,8 @@ import { FunctionComponent, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PartidasService from "../services/partidasService";
 import { Partida } from "../components/PartidaCard";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 const DetailsGame: FunctionComponent = () => {
   const navigate = useNavigate();
@@ -11,13 +13,25 @@ const DetailsGame: FunctionComponent = () => {
   const [partida, setPartida] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { showToast } = useToast();
+
+  const [isJoined, setIsJoined] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
 
   useEffect(() => {
-    const fetchPartida = async () => {
+    const fetchPartidaAndStatus = async () => {
       if (partidaId) {
         try {
           const data = await PartidasService.obtenerPartidaPorId(partidaId);
           setPartida(data);
+
+          if (user) {
+            const joined = await PartidasService.verificarInscripcion(
+              partidaId
+            );
+            setIsJoined(joined);
+          }
         } catch (err) {
           console.error("Error cargando partida:", err);
           setError("No se pudo cargar la información de la partida.");
@@ -30,8 +44,8 @@ const DetailsGame: FunctionComponent = () => {
       }
     };
 
-    fetchPartida();
-  }, [partidaId]);
+    fetchPartidaAndStatus();
+  }, [partidaId, user]);
 
   const handleVolver = useCallback(() => {
     navigate("/nextgames");
@@ -60,10 +74,44 @@ const DetailsGame: FunctionComponent = () => {
     }
   }, [partidaId, navigate]);
 
-  const handleComprar = useCallback(() => {
-    console.log("Comprar partida:", partidaId);
-    alert("Funcionalidad de compra en desarrollo");
-  }, [partidaId]);
+  const handleToggleJoin = useCallback(async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    if (!partidaId) return;
+
+    setJoinLoading(true);
+    try {
+      if (isJoined) {
+        // Salir
+        await PartidasService.salirPartida(partidaId);
+        setIsJoined(false);
+        showToast("Has salido de la partida", "info");
+      } else {
+        // Unirse
+        // Check if full
+        if (Number(partida.jugadoresActuales) >= Number(partida.jugadores)) {
+          throw new Error("La partida está completa");
+        }
+        await PartidasService.unirsePartida(partidaId);
+        setIsJoined(true);
+        showToast("¡Te has apuntado a la partida!", "success");
+      }
+
+      // Refrescar datos de la partida para actualizar slots
+      const updatedPartida = await PartidasService.obtenerPartidaPorId(
+        partidaId
+      );
+      setPartida(updatedPartida);
+    } catch (error: any) {
+      console.error("Error al cambiar estado unirse:", error);
+      showToast(error.message || "Error al realizar la acción", "error");
+    } finally {
+      setJoinLoading(false);
+    }
+  }, [user, navigate, partidaId, isJoined, showToast]);
 
   if (loading) {
     return (
@@ -495,35 +543,100 @@ const DetailsGame: FunctionComponent = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* SECCIÓN NUEVA: Jugadores Inscritos */}
+                <div className="w-full max-w-[54.5rem] flex flex-col items-start justify-start gap-[1.5rem]">
+                  <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
+                    Jugadores Inscritos ({partida.jugadoresActuales}/
+                    {partida.jugadores})
+                  </b>
+                  <div className="flex flex-row flex-wrap gap-4 items-start justify-start">
+                    {Array.from({ length: Number(partida.jugadores) }).map(
+                      (_, index) => {
+                        const player = partida.participantes?.[index];
+                        return (
+                          <div
+                            key={index}
+                            className="flex flex-col items-center gap-2 w-[80px]"
+                          >
+                            <div
+                              className={`w-[60px] h-[60px] rounded-full border-2 flex items-center justify-center ${
+                                player
+                                  ? "bg-dark-gold border-goldenrod text-black"
+                                  : "bg-transparent border-gray-500 text-gray-500 border-dashed"
+                              }`}
+                            >
+                              {player ? (
+                                <span className="text-xl font-bold uppercase">
+                                  {player.nombre?.charAt(0) || "?"}
+                                </span>
+                              ) : (
+                                <span className="text-sm">+</span>
+                              )}
+                            </div>
+                            <span className="text-xs text-nude text-center truncate w-full">
+                              {player
+                                ? player.nombre?.split(" ")[0] || "Jugador"
+                                : "Libre"}
+                            </span>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Botones de acción principales */}
             <div className="flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq450:gap-[1.25rem] mq750:flex-wrap mb-8">
-              <button
-                onClick={handleComprar}
-                className="cursor-pointer [border:none] py-[0.625rem] px-[3.5rem] bg-dark-gold h-[2.625rem] rounded-31xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] overflow-hidden flex flex-row items-start justify-start box-border z-[2] hover:bg-darkgoldenrod"
-              >
-                <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-black text-center min-w-[5.125rem]">
-                  Comprar partida
-                </b>
-              </button>
-              <button
-                onClick={handleEditar}
-                className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-nude/10 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-nude/20 hover:border-darkgoldenrod-100"
-              >
-                <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-white text-center min-w-[4rem]">
-                  Editar
-                </b>
-              </button>
-              <button
-                onClick={handleEliminar}
-                className="cursor-pointer border-red-500 border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-red-900/20 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-red-900/40"
-              >
-                <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-red-500 text-center min-w-[4rem]">
-                  Eliminar
-                </b>
-              </button>
+              {user?.id !== partida.masterId && (
+                <button
+                  onClick={handleToggleJoin}
+                  disabled={joinLoading}
+                  className={`cursor-pointer [border:none] py-[0.625rem] px-[3.5rem] h-[2.625rem] rounded-31xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] overflow-hidden flex flex-row items-start justify-start box-border z-[2] transition-colors ${
+                    isJoined
+                      ? "bg-red-900/20 border-red-500 border-[1px] border-solid hover:bg-red-900/40"
+                      : "bg-dark-gold hover:bg-darkgoldenrod"
+                  } ${joinLoading ? "opacity-70 cursor-wait" : ""}`}
+                >
+                  <b
+                    className={`flex-1 relative text-[1.125rem] inline-block font-radio-option text-center min-w-[5.125rem] ${
+                      isJoined ? "text-red-500" : "text-black"
+                    }`}
+                  >
+                    {joinLoading
+                      ? "Procesando..."
+                      : isJoined
+                      ? "Desapuntarse"
+                      : Number(partida.jugadoresActuales) >=
+                        Number(partida.jugadores)
+                      ? "Completa"
+                      : "Apuntarse"}
+                  </b>
+                </button>
+              )}
+
+              {user?.id === partida.masterId && (
+                <>
+                  <button
+                    onClick={handleEditar}
+                    className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-nude/10 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-nude/20 hover:border-darkgoldenrod-100"
+                  >
+                    <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-white text-center min-w-[4rem]">
+                      Editar
+                    </b>
+                  </button>
+                  <button
+                    onClick={handleEliminar}
+                    className="cursor-pointer border-red-500 border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-red-900/20 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-red-900/40"
+                  >
+                    <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-red-500 text-center min-w-[4rem]">
+                      Eliminar
+                    </b>
+                  </button>
+                </>
+              )}
               <button
                 onClick={handleVolver}
                 className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-[transparent] h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
