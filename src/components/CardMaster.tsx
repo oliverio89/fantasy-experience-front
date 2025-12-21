@@ -98,13 +98,13 @@ const CardMaster: FunctionComponent<SlideType> = memo(
         onClick={handleClick}
       >
         <img
-          className="absolute top-[0px] left-[80px] rounded-[50%] w-[200px] h-[200px] object-cover z-[1]"
+          className="absolute top-[0px] left-[80px] rounded-[50%] w-[200px] h-[200px] object-cover z-[1] border-[3px] border-solid border-dark-gold"
           loading="lazy"
           alt="MasterCard"
           src={masterCard}
         />
-        <div className="absolute top-[49px] left-[0px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black1 border-dark-gold border-[1px] border-solid box-border w-full flex flex-col items-end justify-start pt-40 px-0 pb-3.5 gap-4">
-          <div className="self-stretch h-[360px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black1 border-dark-gold border-[1px] border-solid box-border hidden" />
+        <div className="absolute top-[49px] left-[0px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black border-dark-gold border-[1px] border-solid box-border w-full flex flex-col items-end justify-start pt-40 px-0 pb-3.5 gap-4">
+          <div className="self-stretch h-[360px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black border-dark-gold border-[1px] border-solid box-border hidden" />
           <h2 className="m-0 self-stretch h-[18px] relative text-inherit font-bold font-[inherit] flex items-center justify-center shrink-0 z-[1] mq1050:text-7xl mq450:text-lgi">
             {MasterName}
           </h2>
@@ -116,19 +116,18 @@ const CardMaster: FunctionComponent<SlideType> = memo(
             </div>
           </div>
 
-          <div className="self-stretch flex flex-col items-start justify-start pt-0 px-0 pb-[9px] gap-[11px] text-xl text-oldlace-100">
-            <b className="self-stretch relative z-[1] mq450:text-base">
-              {Preferencia}
+          <div className="self-stretch flex flex-col items-center justify-start pt-0 px-4 pb-[9px] gap-[4px] text-xl text-white">
+            <b className="self-stretch relative z-[1] mq450:text-base leading-tight">
+              <span className="line-clamp-2">{Sistema}</span>
             </b>
-            <div className="self-stretch relative text-lg z-[1]">{Sistema}</div>
+            <div className="self-stretch relative text-base z-[1] text-nude leading-normal font-medium flex items-center justify-center">
+              {Preferencia}
+            </div>
           </div>
 
-          <div className="self-stretch flex flex-row items-start justify-end py-0 px-5 text-lg">
-            <div className="flex-1 rounded-xl bg-gray border-dark-gold border-[1px] border-solid flex flex-row items-start justify-start z-[1]">
-              <div className="h-[30px] w-80 relative rounded-xl bg-gray border-dark-gold border-[1px] border-solid box-border hidden" />
-              <b className="flex-1 relative inline-block max-w-full z-[1]">
-                Ver perfil
-              </b>
+          <div className="self-stretch flex flex-row items-start justify-center py-0 px-5 text-lg mt-auto">
+            <div className="w-[80%] rounded-full border border-dark-gold py-1 px-4 text-dark-gold hover:bg-dark-gold hover:text-black transition-colors z-[1]">
+              Ver perfil
             </div>
           </div>
         </div>

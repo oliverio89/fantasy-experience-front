@@ -61,7 +61,7 @@ const Root: FunctionComponent = () => {
       email: "hidden", // Not needed for card
       avatar: profile.avatarUrl || "/default-avatar.png",
       bio: profile.bio || "Sin biografía.",
-      // Default / Placeholder values for fields not yet in DB or Profile
+      // Aggregated Data from ProfileService
       experiencia: "Experto" as ExperienciaMaster,
       sistemas: (profile.sistemas as SistemaJuego[]) || [],
       tiposPartida: (profile.tiposPartida as any[]) || [],

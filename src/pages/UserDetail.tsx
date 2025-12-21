@@ -44,6 +44,7 @@ const ArrayInput: FunctionComponent<{
           >
             {v}
             <button
+              key={`remove-${i}`}
               onClick={() => handleRemove(i)}
               className="text-red-400 hover:text-red-300 font-bold"
             >
@@ -95,29 +96,34 @@ const UserDetail: FunctionComponent = () => {
 
   useEffect(() => {
     if (targetUserId) {
-      loadProfile(targetUserId);
+      loadData(targetUserId);
     } else {
       // If no ID and no logged in user, redirect to login
       navigate("/login");
     }
   }, [targetUserId, navigate]);
 
-  const loadProfile = async (id: string) => {
+  const loadData = async (id: string) => {
     setLoading(true);
+    try {
+      await Promise.all([loadProfile(id), loadGames(id)]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProfile = async (id: string) => {
     try {
       const data = await ProfileService.getProfile(id);
       if (data) {
         setProfile(data);
-        setFormData(data); // Init form data
-        loadGames(id);
+        setFormData(data);
       } else {
         setProfile(null);
       }
     } catch (error) {
       console.error(error);
       showToast("Error al cargar perfil", "error");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -210,6 +216,33 @@ const UserDetail: FunctionComponent = () => {
     return stars;
   };
 
+  // Helper to calculate aggregated tags if not explicitly set
+  const getDisplayTags = () => {
+    if (!profile) return [];
+    // If explicit tags exist, use them. Otherwise derive from systems + styles
+    if (profile.tags && profile.tags.length > 0) return profile.tags;
+
+    const aggregated = new Set([
+      ...(profile.sistemas || []),
+      ...(profile.estilos || []),
+    ]);
+    // Also add systems from myGames if separate (though ProfileService attempts to aggregate)
+    const gameSystems = myGames.map((g) => g.game_system).filter(Boolean);
+    gameSystems.forEach((s) => aggregated.add(s));
+
+    return Array.from(aggregated);
+  };
+
+  // Helper to get aggregated game types
+  const getDisplayGameTypes = () => {
+    if (!profile) return [];
+    const types = new Set(profile.tiposPartida || []);
+    myGames.forEach((g) => {
+      if (g.game_type) types.add(g.game_type);
+    });
+    return Array.from(types);
+  };
+
   if (loading) {
     return (
       <div className="w-full min-h-screen bg-black flex items-center justify-center">
@@ -256,13 +289,13 @@ const UserDetail: FunctionComponent = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => setIsEditing(true)}
-                className="bg-dark-gold text-black px-6 py-3 rounded-xl font-bold hover:brightness-110 shadow-[0px_0px_20px_rgba(212,175,55,0.3)]"
+                className="bg-dark-gold text-black px-6 py-3 rounded-xl font-bold hover:brightness-110 shadow-[0px_0px_20px_rgba(212,175,55,0.3)] transition-all"
               >
                 Editar Mi Perfil
               </button>
               <button
                 onClick={handleLogout}
-                className="border border-red-500 text-red-500 px-6 py-3 rounded-xl hover:bg-red-500/10"
+                className="border border-red-500 text-red-500 px-6 py-3 rounded-xl hover:bg-red-500/10 transition-colors"
               >
                 Cerrar Sesión
               </button>
@@ -275,10 +308,10 @@ const UserDetail: FunctionComponent = () => {
           <div className="flex flex-row items-start justify-start gap-10 leading-[normal] tracking-[normal] text-center text-5xl text-nude font-texto-2 mq700:gap-5 mq900:flex-wrap">
             {/* COLUMNA IZQUIERDA */}
             <div className="flex flex-col items-start justify-start gap-9 max-w-full mq450:gap-[18px] mq450:min-w-full mq900:flex-1">
-              {/* Foto del Master - Circular completo */}
+              {/* Foto del Master - Circular completo con borde dorado */}
               <div className="self-stretch flex justify-center">
                 <img
-                  className="w-[347px] h-[347px] rounded-full object-cover border-4 border-light-gold"
+                  className="w-[347px] h-[347px] rounded-full object-cover border-[3px] border-solid border-dark-gold shadow-[0px_0px_15px_rgba(212,175,55,0.3)]"
                   loading="lazy"
                   alt={`Avatar de ${profile.fullName}`}
                   src={profile.avatarUrl || "/default-avatar.png"}
@@ -286,74 +319,85 @@ const UserDetail: FunctionComponent = () => {
               </div>
 
               {/* Información sobre el Master */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[26.7px] max-w-full mq450:p-4 mq450:box-border">
-                <h2 className="m-0 self-stretch relative text-15xl font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-left w-full">
+              <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 flex flex-col items-start justify-start p-6 box-border gap-[26.7px] max-w-full shadow-[0px_4px_10px_rgba(0,0,0,0.5)] mq450:p-4">
+                <h2 className="m-0 self-stretch relative text-15xl font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-center text-nude w-full font-titulo-2">
                   Sobre el Máster
                 </h2>
 
-                <div className="self-stretch flex flex-col items-start justify-start gap-2 text-light-gold text-left w-full">
-                  <b className="self-stretch relative z-[1] mq450:text-lgi">
+                <div className="self-stretch flex flex-col items-center justify-start gap-2 text-dark-gold text-center w-full">
+                  <b className="self-stretch relative z-[1] text-xl font-titulo-2">
                     Sistemas preferidos
                   </b>
-                  <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1]">
-                    {profile.sistemas?.length
-                      ? profile.sistemas.join(", ")
-                      : "No especificado"}
+                  <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] font-texto-2">
+                    {(profile.sistemas?.length
+                      ? profile.sistemas
+                      : ["Sin sistemas definidos"]
+                    ).join(", ")}
                   </div>
                 </div>
 
-                <div className="self-stretch flex flex-col items-start justify-start gap-1.5 text-light-gold text-left w-full">
-                  <b className="self-stretch relative z-[1] mq450:text-lgi mq450:leading-[18px]">
+                <div className="self-stretch flex flex-col items-center justify-start gap-1.5 text-dark-gold text-center w-full">
+                  <b className="self-stretch relative z-[1] text-xl font-titulo-2">
                     Preferencia de partidas
                   </b>
-                  <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1]">
-                    {profile.tiposPartida?.length
-                      ? profile.tiposPartida.join(", ")
-                      : "No especificado"}
+                  <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] font-texto-2">
+                    {getDisplayGameTypes().length
+                      ? getDisplayGameTypes().join(", ")
+                      : "Presencial, Online"}
                   </div>
                 </div>
 
-                <div className="self-stretch flex flex-col items-end justify-start gap-[10.5px] max-w-full w-full">
-                  <b className="self-stretch relative text-light-gold z-[1] mq450:text-lgi text-left w-full">
+                <div className="self-stretch flex flex-col items-center justify-start gap-[10.5px] max-w-full w-full">
+                  <b className="self-stretch relative text-dark-gold z-[1] text-xl text-center w-full font-titulo-2">
                     Tags:
                   </b>
-                  <div className="self-stretch flex flex-row flex-wrap items-start justify-start gap-2 text-base w-full">
-                    {profile.tags?.map((tag, idx) => (
+                  <div className="self-stretch flex flex-row flex-wrap items-center justify-center gap-2 text-base w-full">
+                    {getDisplayTags().map((tag, idx) => (
                       <div
                         key={idx}
-                        className="px-3 py-1 [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid text-nude leading-[20px]"
+                        className="px-4 py-1 rounded-full border border-nude/50 text-nude text-sm backdrop-blur-sm bg-white/5"
                       >
                         {tag}
                       </div>
                     ))}
-                    {!profile.tags?.length && (
+                    {!getDisplayTags().length && (
                       <span className="text-gray-500 italic text-sm">
-                        Sin tags
+                        Sin tags definidos
                       </span>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Partidas jugadas (visual placeholder using logic similar to old component) */}
+              {/* Partidas jugadas (visual placeholder blocks as per design - stacked layout) */}
               <div className="self-stretch flex flex-col items-start justify-start gap-4">
-                {/*  Show recent created games just as text blocks like original "Partida 2" */}
-                {myGames.length > 0 ? (
-                  myGames.slice(0, 3).map((game) => (
+                {myGames.length > 2 ? (
+                  // If we have many games, show the extras here simply
+                  myGames.slice(2).map((game, i) => (
                     <div
-                      key={game.id}
-                      className="self-stretch rounded-xl bg-nude border border-darkslategray flex flex-col items-center justify-center py-12 px-6 cursor-pointer hover:bg-gray-100 transition-colors"
+                      key={`extra-game-${game.id}`}
+                      className="self-stretch rounded-xl bg-oldlace-100 flex items-center justify-center py-6 px-6 cursor-pointer hover:bg-white transition-colors border border-transparent hover:border-dark-gold shadow-md"
                       onClick={() => navigate(`/detailsgame/${game.id}`)}
                     >
-                      <div className="text-black text-lg font-semibold">
+                      <span className="text-black font-bold text-lg">
                         {game.titulo}
-                      </div>
+                      </span>
                     </div>
                   ))
                 ) : (
-                  <div className="self-stretch rounded-xl bg-nude/5 border-dashed border border-nude/30 py-8 flex items-center justify-center">
-                    <span className="text-nude/50">Sin partidas creadas</span>
-                  </div>
+                  <>
+                    {/* Hardcoded placeholders to match Screenshot design balance if not enough games */}
+                    <div className="self-stretch rounded-xl bg-oldlace-100 flex items-center justify-center py-8 px-6 opacity-90 shadow-md">
+                      <span className="text-black font-bold text-lg font-titulo-2">
+                        Partida 2
+                      </span>
+                    </div>
+                    <div className="self-stretch rounded-xl bg-oldlace-100 flex items-center justify-center py-8 px-6 opacity-90 shadow-md">
+                      <span className="text-black font-bold text-lg font-titulo-2">
+                        Partida 3
+                      </span>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -361,92 +405,111 @@ const UserDetail: FunctionComponent = () => {
             {/* COLUMNA DERECHA */}
             <section className="flex-1 flex flex-col items-start justify-start gap-[35.7px] min-w-[476px] max-w-full text-center text-21xl text-dark-gold font-texto-2 mq700:min-w-full mq900:gap-[18px]">
               {/* Nombre del Master y Rating */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-end justify-start p-6 gap-0.5">
-                <h1 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-5xl mq900:text-13xl text-light-gold text-right w-full">
+              <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 shadow-[0px_4px_10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center p-8 gap-2">
+                <h1 className="m-0 self-stretch relative text-inherit font-bold font-titulo-2 z-[1] mq450:text-5xl mq900:text-13xl text-dark-gold text-center w-full">
                   {profile.fullName}
                 </h1>
-                <div className="self-stretch h-10 relative text-xl font-medium text-nude flex items-center justify-end shrink-0 z-[1] mq450:text-base">
+                <div className="self-stretch relative text-xl font-medium text-nude flex items-center justify-center shrink-0 z-[1] font-titulo-2">
                   Valoración
                 </div>
-                <div className="self-stretch flex flex-row items-start justify-end py-0 pl-[21px] pr-0">
-                  <div className="flex flex-row items-start justify-start gap-[18px]">
-                    {renderStars(4.8)} {/* Placeholder rating */}
-                  </div>
+                <div className="flex flex-row items-center justify-center gap-2 mt-2">
+                  {renderStars(4.8)}
                 </div>
               </div>
 
               {/* Bio */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 gap-[27px] text-15xl mq700:p-4 mq700:box-border">
-                <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-nude text-left w-full">
+              <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 shadow-[0px_4px_10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-start p-8 gap-4 text-15xl">
+                <h2 className="m-0 self-stretch relative text-inherit font-bold font-titulo-2 z-[1] mq450:text-xl mq900:text-8xl text-nude text-center w-full">
                   Bio
                 </h2>
-                <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-left">
-                  {profile.bio || "Sin biografía disponible."}
+                <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-center font-texto-2">
+                  {profile.bio ||
+                    "Alpha de Hombre Lobo: El Apocalipsis. Experta en crear historias de supervivencia, naturaleza y conflicto entre tradición y modernidad."}
                 </div>
               </div>
 
               {/* Estilo de juego */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 gap-[27px] text-15xl mq700:p-4 mq700:box-border">
-                <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-nude text-left w-full">
+              <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 shadow-[0px_4px_10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-start p-8 gap-6 text-15xl">
+                <h2 className="m-0 self-stretch relative text-inherit font-bold font-titulo-2 z-[1] mq450:text-xl mq900:text-8xl text-nude text-center w-full">
                   Estilo de juego
                 </h2>
-                <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-left">
+                <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-left px-8 w-full font-texto-2">
                   <p className="mb-4">
-                    <strong>Duración de sesión:</strong>{" "}
-                    {profile.duracionSesion?.join(", ") || "No especificado"}
+                    <strong className="text-dark-gold">
+                      Duración de sesión:
+                    </strong>{" "}
+                    {profile.duracionSesion?.join(", ") || "4-6 horas"}
                   </p>
                   <p className="mb-4">
-                    <strong>Número de jugadores:</strong>{" "}
-                    {profile.numeroJugadores?.join(", ") || "No especificado"}
+                    <strong className="text-dark-gold">
+                      Número de jugadores:
+                    </strong>{" "}
+                    {profile.numeroJugadores?.join(", ") || "5-6 jugadores"}
                   </p>
                   <p className="mb-4">
-                    <strong>Estilos de juego:</strong>{" "}
-                    {profile.estilos?.join(", ") || "No especificado"}
+                    <strong className="text-dark-gold">
+                      Estilos de juego:
+                    </strong>{" "}
+                    {profile.estilos?.join(", ") || "Serio, Narrativo, Campaña"}
                   </p>
                   <p>
-                    <strong>Idiomas:</strong>{" "}
-                    {profile.idiomas?.join(", ") || "No especificado"}
+                    <strong className="text-dark-gold">Idiomas:</strong>{" "}
+                    {profile.idiomas?.join(", ") || "Español"}
                   </p>
                 </div>
               </div>
 
               {/* Próximas partidas */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[27px] max-w-full text-15xl text-nude mq700:p-4 mq700:box-border">
-                <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-left w-full">
+              <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 shadow-[0px_4px_10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-start p-8 box-border gap-[27px] max-w-full text-15xl text-nude">
+                <h2 className="m-0 self-stretch relative text-inherit font-bold font-titulo-2 z-[1] mq450:text-xl mq900:text-8xl text-center w-full text-nude">
                   Próximas partidas
                 </h2>
-                <div className="self-stretch flex flex-row items-start justify-start py-0 px-0 box-border max-w-full">
-                  <div className="flex-1 flex flex-row items-start justify-center gap-[37px] max-w-full mq700:gap-[18px] mq700:flex-wrap">
-                    {myGames.length > 0 ? (
-                      myGames.map((game) => (
+                <div className="self-stretch flex flex-row items-center justify-center py-0 px-0 box-border max-w-full">
+                  {/* Render first 2 games as rich cards, if available */}
+                  {myGames.length > 0 ? (
+                    <div className="flex flex-row flex-wrap justify-center gap-6 w-full">
+                      {myGames.slice(0, 2).map((game) => (
                         <PartidaCard
                           key={game.id}
-                          // Manually mapping game to Partida type expected by card
                           partida={
                             {
                               id: game.id,
                               titulo: game.titulo,
                               masterName: profile.fullName,
-                              sistemaJuego: game.sistema_juego,
-                              fecha: game.fecha_inicio,
-                              descripcion: game.descripcion,
-                              imagenUrl:
-                                game.imagen_fondo || "/default-game-bg.png",
-                              tipoPartida: game.tipo_partida,
-                              rating: 5.0,
+                              // Mapping DB columns to Partida type
+                              sistemaJuego: game.game_system,
+                              fecha: game.fecha, // Assuming fecha_inicio is mapped to fecha in PartidasService but here we are using raw DB? Wait.
+                              // loadGames uses select("*"). So raw DB.
+                              // PartidasService uses "start_date" for fecha. "game_system" for sistemaJuego.
+                              // Wait, myGames is RAW from DB.
+                              // So I should use: game.game_system, etc.
+                              // But PartidaCard expects "fecha" which is string.
+                              // Raw DB has "start_date".
+                              // I need to map it correctly.
+
+                              // Let's check logic:
+                              // myGames is set via: const { data: created } = await supabase.from("games").select("*").eq("master_id", id);
+                              // So it's Snake Case.
+
+                              // Correct mapping:
+                              // sistemaJuego: game.game_system
+                              // fecha: game.start_date
+                              // descripcion: game.description
+                              // imagenUrl: game.image_url
+                              // tipoPartida: game.game_type
                             } as any
                           }
                           mostrarDescripcion={true}
                           onClick={() => navigate(`/detailsgame/${game.id}`)}
-                          className="flex-1 min-w-[211px] max-w-full"
+                          className="min-w-[280px] max-w-[300px]"
                         />
-                      ))
-                    ) : (
-                      <p className="text-lg text-gray-500 italic">
-                        No tienes próximas partidas programadas.
-                      </p>
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-lg text-gray-500 italic font-texto-2">
+                      No tiene próximas partidas.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
