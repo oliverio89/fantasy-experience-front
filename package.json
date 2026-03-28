@@ -48,9 +48,6 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
-  "eslintConfig": {
-    "root": true
-  },
   "browserslist": {
     "production": [
       ">0.2%",
