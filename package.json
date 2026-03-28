@@ -25,21 +25,28 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
-    "@vitejs/plugin-react": "^4.7.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.2",
     "autoprefixer": "^10.4.8",
     "baseline-browser-mapping": "^2.8.32",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "jsdom": "^24.0.0",
     "postcss": "^8.4.16",
     "tailwindcss": "^3.1.8",
-    "vite": "^5.4.10"
+    "vite": "^8.0.3",
+    "vitest": "^4.1.2"
   },
   "scripts": {
     "start": "vite",
     "build": "vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "eslintConfig": {
     "root": true
