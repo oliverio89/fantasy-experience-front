@@ -23,6 +23,7 @@ export type SistemaJuego =
   | "D&D B/X"
   | "OSR (Old School Revival)"
   | "Indie RPGs"
+  | "Z-Corp"
   | "Otros";
 
 // Tipos de partida

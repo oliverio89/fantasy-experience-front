@@ -542,9 +542,8 @@ const UserDetail: FunctionComponent = () => {
                   className="w-40 h-40 rounded-full object-cover border-4 border-dark-gold mb-4"
                 />
                 <ImageUpload
-                  userId={targetUserId!}
-                  currentAvatarUrl={formData.avatarUrl || null}
-                  onUploadComplete={(url) =>
+                  currentImage={formData.avatarUrl || undefined}
+                  onImageUploaded={(url: string) =>
                     setFormData({ ...formData, avatarUrl: url })
                   }
                 />

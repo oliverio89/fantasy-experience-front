@@ -37,7 +37,7 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
     const handlePrecioToggle = useCallback(
       (precio: RangoPrecio) => {
         const newPrecios = filters.tiposPartida.includes(precio as any)
-          ? filters.tiposPartida.filter((p) => p !== precio)
+          ? filters.tiposPartida.filter((p) => (p as unknown) !== precio)
           : [...filters.tiposPartida, precio as any];
 
         onFiltersChange({

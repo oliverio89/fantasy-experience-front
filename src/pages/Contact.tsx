@@ -76,7 +76,7 @@ const ContactoV: FunctionComponent = () => {
             button1Height1="1.375rem"
             button1Width1="2.938rem"
             button1FontSize="1.125rem"
-            __PH1__={onButtonClick}
+            onClick={onButtonClick}
           />
         </div>
       </div>

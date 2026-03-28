@@ -320,6 +320,19 @@ export class PartidasService {
     }
   }
 
+  static async obtenerPartidasDestacadas(limit: number = 6): Promise<Partida[]> {
+    const respuesta = await this.obtenerPartidas({ limit, ratingMin: 4 });
+    return respuesta.partidas;
+  }
+
+  static async obtenerProximasPartidas(limit: number = 4): Promise<Partida[]> {
+    const respuesta = await this.obtenerPartidas({
+      limit,
+      fechaInicio: new Date().toISOString(),
+    });
+    return respuesta.partidas;
+  }
+
   static async verificarInscripcion(gameId: string | number): Promise<boolean> {
     try {
       const {

@@ -314,7 +314,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                         key={partida.id}
                         partida={partida}
                         mostrarDescripcion={true}
-                        onClick={() => handleGameClick(partida.id)}
+                        onClick={() => handleGameClick(String(partida.id))}
                         className="flex-1 min-w-[211px] max-w-full"
                       />
                     ))}
