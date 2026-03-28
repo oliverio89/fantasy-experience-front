@@ -1,0 +1,14 @@
+name: Deploy Fantasy Experience
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Deploy on VPS
+        run: /opt/deploy/fantasyexperience.sh

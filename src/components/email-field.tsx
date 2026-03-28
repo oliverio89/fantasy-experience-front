@@ -4,6 +4,10 @@ export type EmailFieldType = {
   className?: string;
   correoElectrnico?: string;
   ingresaTuEmailPlaceholder?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  name?: string;
 
   /** Style props */
   propPadding?: CSSProperties["padding"];
@@ -14,6 +18,10 @@ const EmailField: FunctionComponent<EmailFieldType> = memo(
     className = "",
     correoElectrnico,
     ingresaTuEmailPlaceholder,
+    value,
+    onChange,
+    type = "text",
+    name,
     propPadding,
   }) => {
     const emailFieldStyle: CSSProperties = useMemo(() => {
@@ -36,7 +44,10 @@ const EmailField: FunctionComponent<EmailFieldType> = memo(
             <input
               className="w-full [border:none] [outline:none] font-light font-titulo-2 text-[0.875rem] bg-[transparent] h-[2.5rem] flex-1 relative text-black text-left flex items-center min-w-[12.125rem] p-0 max-w-full z-[2]"
               placeholder={ingresaTuEmailPlaceholder}
-              type="text"
+              type={type}
+              name={name}
+              value={value}
+              onChange={onChange}
             />
           </div>
         </div>

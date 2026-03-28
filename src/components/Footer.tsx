@@ -53,7 +53,7 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
                     alt="Twitter"
                     src="/twitter.svg"
                     onClick={() =>
-                      window.open("https://x.com/FantasyExperien", "_blank")
+                      window.open("https://x.com/RolFantasyExp", "_blank")
                     } // Abre Twitter en una nueva pestaña
                   />
                 </div>

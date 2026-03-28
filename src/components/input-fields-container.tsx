@@ -4,6 +4,10 @@ export type InputFieldsContainerType = {
   className?: string;
   correoElectrnico?: string;
   ingresaTuEmailPlaceholder?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  name?: string;
 
   /** Style props */
   propPadding?: CSSProperties["padding"];
@@ -17,6 +21,10 @@ const InputFieldsContainer: FunctionComponent<InputFieldsContainerType> = memo(
     className = "",
     correoElectrnico,
     ingresaTuEmailPlaceholder,
+    value,
+    onChange,
+    type = "text",
+    name,
     propPadding,
     propGap,
     propPadding1,
@@ -66,7 +74,10 @@ const InputFieldsContainer: FunctionComponent<InputFieldsContainerType> = memo(
             <input
               className="w-full [border:none] [outline:none] font-light font-titulo-2 text-[1rem] bg-[transparent] h-[2.5rem] flex-1 relative text-black text-left flex items-center min-w-[12.125rem] p-0 max-w-full z-[2]"
               placeholder={ingresaTuEmailPlaceholder}
-              type="text"
+              type={type}
+              name={name}
+              value={value}
+              onChange={onChange}
               style={ingresaTuEmailStyle}
             />
           </div>

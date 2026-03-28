@@ -4,6 +4,43 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 
 ---
 
+## [1.2.0] - 2025-01-XX
+
+### 🗑️ Limpieza y Deprecación
+
+#### Eliminación de Componentes Obsoletos
+
+- **Eliminado:** `CardDigital.tsx` - Componente obsoleto reemplazado por `PartidaCard`
+- **Eliminado:** `GameCard.tsx` - Componente obsoleto reemplazado por `PartidaCard`
+- **Razón:** Todos los componentes ya migraron a `PartidaCard` unificado
+- **Beneficio:** Código más limpio, menos confusión, mantenimiento simplificado
+
+#### Limpieza de Importaciones
+
+- **Eliminado:** Importación no usada de `GameCard` en `MasterDetail.tsx`
+- **Verificado:** No quedan referencias a componentes antiguos en el proyecto
+- **Resultado:** 0 importaciones obsoletas, código 100% limpio
+
+### ✅ Migración Completada
+
+- **Confirmado:** Todas las páginas y componentes usan `PartidaCard`:
+  - ✅ `UpcomingGamesCarousel.tsx`
+  - ✅ `NextGames.tsx` (componente)
+  - ✅ `NextGames.tsx` (página)
+  - ✅ `MasterDetail.tsx`
+  - ✅ `UserDetail.tsx`
+- **Estado:** Migración v1.2.0 completada al 100%
+
+### 📊 Estadísticas v1.2.0
+
+- **Archivos eliminados:** 2 (`CardDigital.tsx`, `GameCard.tsx`)
+- **Importaciones limpiadas:** 1 (`MasterDetail.tsx`)
+- **Referencias obsoletas:** 0
+- **Errores:** 0
+- **Estado del proyecto:** Listo para v1.3.0 (integración API)
+
+---
+
 ## [1.1.0] - 2025-10-25 (20:47)
 
 ### ✨ Nuevas Características
@@ -147,12 +184,12 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 
 ## 🔮 Roadmap Futuro
 
-### v1.2.0 (Planeado)
+### v1.2.0 ✅ (Completado)
 
-- [ ] Migrar páginas restantes a usar PartidaCard
-- [ ] Deprecar y eliminar CardDigital completamente
-- [ ] Agregar animaciones de entrada (fade-in)
-- [ ] Implementar skeleton loading
+- [x] Migrar páginas restantes a usar PartidaCard
+- [x] Deprecar y eliminar CardDigital completamente
+- [ ] Agregar animaciones de entrada (fade-in) - Movido a v1.3.0
+- [ ] Implementar skeleton loading - Movido a v1.3.0
 
 ### v1.3.0 (Planeado)
 

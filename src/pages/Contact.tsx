@@ -21,7 +21,7 @@ const ContactoV: FunctionComponent = () => {
           </span>
         </h1>
         <div className="self-stretch relative text-[1.125rem] leading-[1.625rem] z-[2]">
-          Si quieres ser Master, escríbenos a email@fantasyexperience.com
+          Si quieres ser Master, escríbenos a contacto@fantasyexperience.com
         </div>
         <h3
           className="m-0 self-stretch h-[3.625rem] relative text-[1.5rem] [text-decoration:underline] font-bold font-[inherit] flex items-center justify-center shrink-0 cursor-pointer z-[2] mq450:text-[1.188rem]"

@@ -43,7 +43,63 @@ export const usePartidas = (filtros?: FiltrosPartida) => {
     totalPages: number;
   } | null>(null);
 
-  const cargarPartidas = useCallback(async () => {
+  useEffect(() => {
+    let isMounted = true;
+
+    const cargarPartidas = async () => {
+      try {
+        setLoading(true);
+        setEstado("loading");
+        setError(null);
+
+        const respuesta: RespuestaPartidas =
+          await PartidasService.obtenerPartidas(filtros);
+
+        // Solo actualizar estado si el componente sigue montado
+        if (isMounted) {
+          setPartidas(respuesta.partidas);
+          setPaginacion({
+            total: respuesta.total,
+            page: respuesta.page,
+            limit: respuesta.limit,
+            totalPages: respuesta.totalPages,
+          });
+          setEstado("success");
+        }
+      } catch (err) {
+        if (isMounted) {
+          const mensaje =
+            err instanceof Error
+              ? err.message
+              : "Error desconocido al cargar partidas";
+          setError(mensaje);
+          setEstado("error");
+          console.error("Error en usePartidas:", err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    cargarPartidas();
+
+    // Cleanup para evitar actualizaciones si el componente se desmonta
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    filtros?.tipo,
+    filtros?.sistemaJuego,
+    filtros?.masterId,
+    filtros?.ratingMin,
+    filtros?.limit,
+    filtros?.page,
+    filtros?.busqueda,
+  ]);
+
+  const recargar = useCallback(async () => {
     try {
       setLoading(true);
       setEstado("loading");
@@ -67,19 +123,11 @@ export const usePartidas = (filtros?: FiltrosPartida) => {
           : "Error desconocido al cargar partidas";
       setError(mensaje);
       setEstado("error");
-      console.error("Error en usePartidas:", err);
+      console.error("Error en usePartidas (recargar):", err);
     } finally {
       setLoading(false);
     }
   }, [filtros]);
-
-  useEffect(() => {
-    cargarPartidas();
-  }, [cargarPartidas]);
-
-  const recargar = useCallback(() => {
-    cargarPartidas();
-  }, [cargarPartidas]);
 
   return {
     partidas,

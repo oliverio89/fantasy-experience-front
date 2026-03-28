@@ -15,6 +15,9 @@ export interface Partida {
   imagenUrl: string;
   tipoPartida: TipoPartida;
   rating: number; // de 0 a 5
+  tags?: string[];
+  jugadores?: string; // Total plazas
+  jugadoresActuales?: number;
 }
 
 export type PartidaCardProps = {
@@ -22,6 +25,7 @@ export type PartidaCardProps = {
   partida: Partida;
   mostrarDescripcion?: boolean;
   onClick?: () => void;
+  backgroundColor?: string;
 };
 
 // Componente interno para el rating con estrellas
@@ -50,7 +54,9 @@ RatingStars.displayName = "RatingStars";
 const BadgeTipoPartida: FunctionComponent<{ tipo: TipoPartida }> = memo(
   ({ tipo }) => {
     const getBadgeConfig = () => {
-      switch (tipo) {
+      const normalizedTipo = tipo ? tipo.toLowerCase() : "digital";
+
+      switch (normalizedTipo) {
         case "digital":
           return {
             icon: "/star-1.svg",
@@ -101,14 +107,20 @@ const BadgeTipoPartida: FunctionComponent<{ tipo: TipoPartida }> = memo(
 BadgeTipoPartida.displayName = "BadgeTipoPartida";
 
 const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
-  ({ className = "", partida, mostrarDescripcion = false, onClick }) => {
+  ({
+    className = "",
+    partida,
+    mostrarDescripcion = false,
+    onClick,
+    backgroundColor = "#1a1a1a",
+  }) => {
     const navigate = useNavigate();
 
-    const handleDoubleClick = () => {
+    const handleCardClick = () => {
       if (onClick) {
         onClick();
       } else {
-        // Navegación por defecto a los detalles de la partida (doble click)
+        // Navegación a los detalles de la partida
         navigate(`/detailsgame/${partida.id}`);
       }
     };
@@ -118,18 +130,29 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
       navigate(`/detailsgame/${partida.id}`);
     };
 
+    // Determinar color de texto según el fondo
+    const isDarkBackground =
+      backgroundColor === "#1a1a1a" || backgroundColor === "#darkslategray";
+    const textColor = isDarkBackground ? "text-oldlace-100" : "text-black";
+
+    // Calcular vacantes
+    const maxJugadores = Number(partida.jugadores || 0);
+    const actuales = partida.jugadoresActuales || 0;
+    const vacantes = Math.max(0, maxJugadores - actuales);
+
     return (
       <div
-        className={`w-[360px] min-h-[536px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-darkslategray shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 max-w-full text-center text-base text-oldlace-100 font-titulo-2 hover:scale-[1.02] transition-transform duration-200 ${className}`}
-        onDoubleClick={handleDoubleClick}
+        className={`w-[360px] min-h-[536px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 max-w-full text-center text-base ${textColor} font-titulo-2 hover:scale-[1.02] transition-transform duration-200 ${className}`}
+        style={{ backgroundColor }}
+        onClick={handleCardClick}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
-            handleDoubleClick();
+            handleCardClick();
           }
         }}
-        aria-label={`Doble click para ver detalles de ${partida.titulo} por ${partida.masterName}`}
+        aria-label={`Click para ver detalles de ${partida.titulo} por ${partida.masterName}`}
       >
         {/* Header con imagen y badge */}
         <div
@@ -143,6 +166,11 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
 
         {/* Contenido de la tarjeta */}
         <div className="self-stretch flex flex-col items-center justify-start pt-0 px-4 pb-0 gap-3 relative min-h-[196px]">
+          {/* Vacantes - Badge top right of content */}
+          <div className="absolute top-[-10px] right-[10px] bg-dark-gold text-black font-bold px-3 py-1 rounded-full text-xs box-shadow-md z-[5]">
+            {vacantes > 0 ? `${vacantes} libres` : "COMPLETA"}
+          </div>
+
           {/* Título - Máximo 2 líneas */}
           <h2 className="m-0 self-stretch relative text-13xl font-bold font-[inherit] text-goldenrod z-[1] mq1050:text-7xl mq450:text-lgi overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] h-[80px]">
             {partida.titulo}
@@ -166,9 +194,37 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
           )}
 
           {/* Rating de estrellas */}
-          <div className="mt-2">
+          <div className="mt-2 text-center w-full">
             <RatingStars rating={partida.rating} />
           </div>
+
+          {/* Tags */}
+          {partida.tags && partida.tags.length > 0 && (
+            <div className="self-stretch flex flex-row flex-wrap items-center justify-center gap-1.5 mt-2 overflow-hidden h-auto max-h-[60px]">
+              {partida.tags.slice(0, 4).map((tag, index) => (
+                <span
+                  key={index}
+                  className={`px-2 py-0.5 text-xs rounded-full border border-solid ${
+                    isDarkBackground
+                      ? "border-goldenrod text-goldenrod"
+                      : "border-black text-black"
+                  } truncate max-w-[100px]`}
+                  title={tag}
+                >
+                  {tag}
+                </span>
+              ))}
+              {partida.tags.length > 4 && (
+                <span
+                  className={`text-xs ${
+                    isDarkBackground ? "text-goldenrod" : "text-black"
+                  }`}
+                >
+                  +{partida.tags.length - 4}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Descripción (opcional) - Máximo 2 líneas */}
@@ -184,12 +240,16 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
         <div className="self-stretch flex flex-row items-start justify-start py-0 px-5 box-border max-w-full mt-auto">
           <button
             onClick={handleButtonClick}
-            className="flex-1 cursor-pointer [border:none] py-2 px-4 bg-oldlace-100 rounded-xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] hover:bg-goldenrod transition-colors duration-200 z-[1]"
+            className={`flex-1 cursor-pointer [border:none] py-2 px-4 rounded-xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] transition-colors duration-200 z-[1] ${
+              isDarkBackground
+                ? "bg-oldlace-100 hover:bg-goldenrod"
+                : "bg-white hover:bg-oldlace-100"
+            }`}
             aria-label={`Ver detalles de ${partida.titulo}`}
             tabIndex={0}
           >
             <b className="relative text-lg font-titulo-2 text-black1 text-center">
-              Ver más detalles
+              Ver detalles
             </b>
           </button>
         </div>
