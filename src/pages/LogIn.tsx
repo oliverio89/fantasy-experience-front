@@ -6,7 +6,7 @@ const LogInV: FunctionComponent = () => {
   const navigate = useNavigate();
 
   const onVolverAHomeClick = useCallback(() => {
-    navigate("/home-v12");
+    navigate("/");
   }, [navigate]);
 
   return (
