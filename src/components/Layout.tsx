@@ -5,11 +5,13 @@ import UnderConstruction from "./UnderConstruction";
 import Footer from "./Footer";
 import FeedbackWidget from "./FeedbackWidget";
 
+const showBanner = import.meta.env.VITE_SHOW_CONSTRUCTION_BANNER === "true";
+
 const Layout: FunctionComponent = () => {
   return (
     <>
       <Navbar />
-      <UnderConstruction />
+      {showBanner && <UnderConstruction />}
       <Outlet />
       <Footer />
       <FeedbackWidget />

@@ -7,6 +7,7 @@ export interface Profile {
   fullName: string;
   avatarUrl: string | null;
   bio?: string;
+  // Arrays de preferencias
   sistemas: string[];
   tiposPartida: string[];
   tags: string[];
@@ -14,10 +15,17 @@ export interface Profile {
   duracionSesion: string[];
   numeroJugadores: string[];
   idiomas: string[];
-  updatedAt: string;
-  // Computed fields
+  // Campos de master
+  experiencia?: string | null;
+  disponibilidad?: string | null;
+  precioPorSesion?: string | null;
+  timezone?: string | null;
+  // Métricas
   rating?: number;
+  totalReviews?: number;
+  // Computed
   totalPartidas?: number;
+  updatedAt: string;
 }
 
 export class ProfileService {
@@ -39,6 +47,12 @@ export class ProfileService {
       duracionSesion: row.duracion_sesion || [],
       numeroJugadores: row.numero_jugadores || [],
       idiomas: row.idiomas || [],
+      experiencia: row.experiencia ?? null,
+      disponibilidad: row.disponibilidad ?? null,
+      precioPorSesion: row.precio_por_sesion ?? null,
+      timezone: row.timezone ?? null,
+      rating: row.rating ?? 0,
+      totalReviews: row.total_reviews ?? 0,
       updatedAt: row.updated_at,
     };
   }
@@ -164,6 +178,13 @@ export class ProfileService {
       if (updates.numeroJugadores !== undefined)
         dbUpdates.numero_jugadores = updates.numeroJugadores;
       if (updates.idiomas !== undefined) dbUpdates.idiomas = updates.idiomas;
+      if (updates.experiencia !== undefined)
+        dbUpdates.experiencia = updates.experiencia;
+      if (updates.disponibilidad !== undefined)
+        dbUpdates.disponibilidad = updates.disponibilidad;
+      if (updates.precioPorSesion !== undefined)
+        dbUpdates.precio_por_sesion = updates.precioPorSesion;
+      if (updates.timezone !== undefined) dbUpdates.timezone = updates.timezone;
 
       const { error } = await supabase
         .from("profiles")
