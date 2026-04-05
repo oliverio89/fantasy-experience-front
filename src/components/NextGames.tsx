@@ -1,71 +1,23 @@
-import { FunctionComponent, memo, useRef, useState, useEffect } from "react";
-import PartidaCard, { Partida } from "./PartidaCard";
+import { FunctionComponent, memo, useRef, useEffect } from "react";
+import PartidaCard from "./PartidaCard";
 import { useNavigate } from "react-router-dom";
+import { useProximasPartidas } from "../hooks/usePartidas";
 
 export type UpcomingCarouselType = {
   className?: string;
 };
-
-// Datos de ejemplo hardcodeados (En el futuro vendrán de una API)
-const proximasPartidas: Partida[] = [
-  {
-    id: 7,
-    titulo: "Reinos de Hierro",
-    masterName: "Master Thorin",
-    sistemaJuego: "D&D 5e",
-    fecha: "28 Octubre 2025",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 5,
-    descripcion:
-      "Una campaña épica en un mundo de fantasía medieval lleno de magia, dragones y guerras entre reinos.",
-  },
-  {
-    id: 8,
-    titulo: "Los Horrores de Innsmouth",
-    masterName: "Master Lovecraft",
-    sistemaJuego: "Call of Cthulhu",
-    fecha: "30 Octubre 2025",
-    imagenUrl: "/konradkollerlctjo2d9-2cunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 4,
-    descripcion:
-      "Investigación en un pueblo costero donde nada es lo que parece. Los secretos oscuros aguardan.",
-  },
-  {
-    id: 9,
-    titulo: "Neon Dreams",
-    masterName: "Master Deckard",
-    sistemaJuego: "Shadowrun",
-    fecha: "1 Noviembre 2025",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 4,
-    descripcion:
-      "Corre las sombras en un futuro distópico donde la magia y la tecnología se entrelazan.",
-  },
-  {
-    id: 10,
-    titulo: "La Frontera Salvaje",
-    masterName: "Master Winchester",
-    sistemaJuego: "Deadlands",
-    fecha: "5 Noviembre 2025",
-    imagenUrl: "/konradkollerlctjo2d9-2cunsplash-1@2x.png",
-    tipoPartida: "presencial",
-    rating: 3,
-    descripcion:
-      "El Salvaje Oeste como nunca lo has visto: con zombies, hechiceros y tecnología imposible.",
-  },
-];
 
 const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
   ({ className = "" }) => {
     const navigate = useNavigate();
     const cardContainerRef = useRef<HTMLDivElement>(null);
     const isScrollingRef = useRef(false);
+    const { partidas, loading } = useProximasPartidas(8);
 
-    // Crear duplicado para bucle infinito
-    const extendedGameCards = [...proximasPartidas, ...proximasPartidas];
+    // Duplicar para efecto de bucle infinito (solo si hay datos)
+    const extendedGameCards = partidas.length > 0
+      ? [...partidas, ...partidas]
+      : [];
 
     // Efecto de desplazamiento infinito
     useEffect(() => {
@@ -132,13 +84,23 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
             onMouseDown={handleMouseDown}
             className="w-auto overflow-x-auto flex flex-row items-start justify-start pt-0 px-12 pb-[40px] box-border gap-[20.4px] max-w-full z-[1] mq750:pb-10 mq750:box-border scrollbar-hide cursor-pointer"
           >
-            {extendedGameCards.map((partida, index) => (
-              <PartidaCard
-                key={`${partida.id}-${index}`}
-                partida={partida}
-                mostrarDescripcion={false}
-              />
-            ))}
+            {loading ? (
+              <div className="flex items-center justify-center w-full py-12">
+                <div className="loader" />
+              </div>
+            ) : extendedGameCards.length === 0 ? (
+              <div className="text-darkslategray text-xl py-12 px-6 font-titulo-2">
+                No hay próximas partidas disponibles aún.
+              </div>
+            ) : (
+              extendedGameCards.map((partida, index) => (
+                <PartidaCard
+                  key={`${partida.id}-${index}`}
+                  partida={partida}
+                  mostrarDescripcion={false}
+                />
+              ))
+            )}
           </div>
 
           <div className="w-[507px] flex flex-row items-start justify-end py-0 px-20 box-border max-w-full mq750:pl-10 mq750:pr-10 mq750:box-border">

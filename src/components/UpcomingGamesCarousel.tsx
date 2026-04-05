@@ -1,79 +1,11 @@
 import { FunctionComponent, memo, useRef, useState } from "react";
-import PartidaCard, { Partida } from "./PartidaCard";
+import PartidaCard from "./PartidaCard";
 import { useNavigate } from "react-router-dom";
+import { usePartidasDestacadas } from "../hooks/usePartidas";
 
 export type UpcomingGamesCarouselType = {
   className?: string;
 };
-
-// Datos de ejemplo hardcodeados (En el futuro vendrán de una API)
-const partidasDestacadas: Partida[] = [
-  {
-    id: 1,
-    titulo: "La Cripta del Lich",
-    masterName: "Master Darius",
-    sistemaJuego: "D&D 5e",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 4,
-    descripcion:
-      "Una aventura épica en las profundidades de una cripta maldita. Los héroes deberán enfrentar hordas de no-muertos y resolver antiguos acertijos.",
-  },
-  {
-    id: 2,
-    titulo: "Sombras de Arkham",
-    masterName: "Master Elena",
-    sistemaJuego: "Call of Cthulhu",
-    imagenUrl: "/konradkollerlctjo2d9-2cunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 5,
-    descripcion:
-      "Investigación de misterios sobrenaturales en los años 20. ¿Podrán los investigadores mantener su cordura?",
-  },
-  {
-    id: 3,
-    titulo: "Cyberpunk 2077",
-    masterName: "Master Alex",
-    sistemaJuego: "Cyberpunk RED",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 3,
-    descripcion:
-      "Adéntrate en Night City, donde la tecnología y la corrupción van de la mano.",
-  },
-  {
-    id: 4,
-    titulo: "La Marca del Este",
-    masterName: "Master Sofia",
-    sistemaJuego: "Pathfinder 2e",
-    imagenUrl: "/konradkollerlctjo2d9-2cunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 4,
-    descripcion:
-      "Una campaña de exploración en tierras salvajes llenas de magia y peligro.",
-  },
-  {
-    id: 5,
-    titulo: "Vampiro: La Mascarada",
-    masterName: "Master Victor",
-    sistemaJuego: "Vampiro V5",
-    imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 5,
-    descripcion:
-      "Intrigas políticas y sobrevivencia en el mundo de las tinieblas.",
-  },
-  {
-    id: 6,
-    titulo: "El Anillo Único",
-    masterName: "Master Gandalf",
-    sistemaJuego: "El Anillo Único",
-    imagenUrl: "/konradkollerlctjo2d9-2cunsplash-1@2x.png",
-    tipoPartida: "digital",
-    rating: 4,
-    descripcion: "Aventuras épicas en la Tierra Media durante la Tercera Edad.",
-  },
-];
 
 const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
   memo(({ className = "" }) => {
@@ -81,9 +13,8 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
     const cardContainerRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [initialMouseX, setInitialMouseX] = useState<number | null>(null);
-    const [initialScrollLeft, setInitialScrollLeft] = useState<number | null>(
-      null
-    );
+    const [initialScrollLeft, setInitialScrollLeft] = useState<number | null>(null);
+    const { partidas, loading } = usePartidasDestacadas(6);
 
     const handleMouseDown = (e: React.MouseEvent) => {
       if (!cardContainerRef.current) return;
@@ -129,13 +60,23 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
           ref={cardContainerRef}
           onMouseDown={handleMouseDown}
         >
-          {partidasDestacadas.map((partida) => (
-            <PartidaCard
-              key={partida.id}
-              partida={partida}
-              mostrarDescripcion={true}
-            />
-          ))}
+          {loading ? (
+            <div className="flex items-center justify-center w-full py-12">
+              <div className="loader" />
+            </div>
+          ) : partidas.length === 0 ? (
+            <div className="text-black text-xl py-12 px-6 font-titulo-2">
+              No hay partidas destacadas disponibles aún.
+            </div>
+          ) : (
+            partidas.map((partida) => (
+              <PartidaCard
+                key={partida.id}
+                partida={partida}
+                mostrarDescripcion={true}
+              />
+            ))
+          )}
         </div>
 
         <div className="w-[507px] flex flex-row items-start justify-end py-0 px-20 box-border max-w-full mq750:pl-10 mq750:pr-10 mq750:box-border">

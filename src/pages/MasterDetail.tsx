@@ -6,58 +6,73 @@ import {
   useState,
 } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Master } from "../types/masters";
-import { MASTERS_DATA } from "../data/mastersData";
+import {
+  Master,
+  ExperienciaMaster,
+  DisponibilidadMaster,
+  RangoPrecio,
+  SistemaJuego,
+} from "../types/masters";
+import { ProfileService, Profile } from "../services/profileService";
 import PartidaCard, { Partida } from "../components/PartidaCard";
+import PartidasService from "../services/partidasService";
 
 export type MasterDetailType = {
   className?: string;
 };
+
+const mapProfileToMaster = (profile: Profile): Master => ({
+  id: profile.id,
+  username: profile.fullName?.toLowerCase().replace(/\s+/g, "") || profile.id,
+  displayName: profile.fullName || "Master",
+  email: "hidden",
+  avatar: profile.avatarUrl || "/default-avatar.png",
+  bio: profile.bio || "Sin biografía.",
+  experiencia: (profile.experiencia as ExperienciaMaster) || "Intermedio",
+  sistemas: (profile.sistemas as SistemaJuego[]) || [],
+  tiposPartida: (profile.tiposPartida as any[]) || [],
+  disponibilidad: (profile.disponibilidad as DisponibilidadMaster) || "Disponible",
+  estilos: (profile.estilos as any[]) || [],
+  idiomas: (profile.idiomas as any[]) || [],
+  precioPorSesion: (profile.precioPorSesion as RangoPrecio) || "Gratis",
+  duracionSesion: (profile.duracionSesion as any[]) || [],
+  numeroJugadores: (profile.numeroJugadores as any[]) || [],
+  rating: profile.rating || 0,
+  totalReviews: profile.totalReviews || 0,
+  timezone: profile.timezone || "Europe/Madrid",
+  createdAt: new Date(profile.updatedAt || Date.now()),
+  lastActive: new Date(),
+});
 
 const MasterDetail: FunctionComponent<MasterDetailType> = memo(
   ({ className = "" }) => {
     const { masterId } = useParams<{ masterId: string }>();
     const navigate = useNavigate();
     const [master, setMaster] = useState<Master | null>(null);
-
-    // Datos de partidas de ejemplo para este master
-    const partidasEjemplo: Partida[] = [
-      {
-        id: "partida-upcoming-1",
-        titulo: "La Torre Perdida de Eldoria",
-        masterName: master?.displayName || "Master Name",
-        sistemaJuego: "Dungeons & Dragons 5e",
-        fecha: "15/12/2024",
-        descripcion:
-          "Una aventura épica en las ruinas de una antigua torre mágica donde los secretos del pasado esperan ser descubiertos.",
-        imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-        tipoPartida: "presencial",
-        rating: 4.5,
-      },
-      {
-        id: "partida-upcoming-2",
-        titulo: "Misterios de Cthulhu",
-        masterName: master?.displayName || "Master Name",
-        sistemaJuego: "Call of Cthulhu",
-        fecha: "22/12/2024",
-        descripcion:
-          "Investiga los horrores cósmicos que acechan en las sombras de Arkham. ¿Podrás mantener tu cordura?",
-        imagenUrl: "/cedericvandenberghe21dp3hytvhwunsplash-1@2x.png",
-        tipoPartida: "online",
-        rating: 4.8,
-      },
-    ];
+    const [partidas, setPartidas] = useState<Partida[]>([]);
+    const [loadingPartidas, setLoadingPartidas] = useState(false);
 
     useEffect(() => {
-      if (masterId) {
-        const foundMaster = MASTERS_DATA.find((m) => m.id === masterId);
-        if (foundMaster) {
-          setMaster(foundMaster);
-        } else {
-          navigate("/ourmasters");
-        }
-      }
+      if (!masterId) return;
+      ProfileService.getProfile(masterId)
+        .then((profile) => {
+          if (profile) {
+            setMaster(mapProfileToMaster(profile));
+          } else {
+            navigate("/ourmasters");
+          }
+        })
+        .catch(() => navigate("/ourmasters"));
     }, [masterId, navigate]);
+
+    useEffect(() => {
+      if (!masterId) return;
+      setLoadingPartidas(true);
+      PartidasService.obtenerPartidas({ masterId, limit: 4 })
+        .then((resp) => setPartidas(resp.partidas))
+        .catch(() => setPartidas([]))
+        .finally(() => setLoadingPartidas(false));
+    }, [masterId]);
 
     const handleBackClick = useCallback(() => {
       navigate("/ourmasters");
@@ -199,56 +214,43 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                   </div>
                 </div>
 
-                <div className="self-stretch flex flex-col items-end justify-start gap-[10.5px] max-w-full">
-                  <b className="self-stretch relative text-light-gold z-[1] mq450:text-lgi">
-                    Tags:
-                  </b>
-                  <div className="self-stretch flex flex-row items-start justify-end py-0 px-[67px] text-base mq450:pl-5 mq450:pr-5 mq450:box-border">
-                    <div className="flex-1 flex flex-row items-start justify-start gap-2.5">
-                      <div className="h-[30px] flex-1 [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-start justify-start py-[3px] px-0 z-[1]">
-                        <div className="ml-[-1px] flex-1 relative leading-[20px] shrink-0 text-nude">
-                          Dungeons & Dragons
-                        </div>
-                      </div>
-                      <div className="h-[30px] w-[71px] [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden shrink-0 flex flex-row items-start justify-start py-[3px] px-0 z-[1]">
-                        <div className="ml-[-7px] w-[86px] relative leading-[20px] flex items-center justify-center shrink-0 text-nude">
-                          Cthulhu
-                        </div>
-                      </div>
+                {master.sistemas.length > 0 && (
+                  <div className="self-stretch flex flex-col items-start justify-start gap-2">
+                    <b className="self-stretch relative text-light-gold z-[1] mq450:text-lgi">
+                      Tags:
+                    </b>
+                    <div className="flex flex-row flex-wrap gap-2">
+                      {master.sistemas.slice(0, 4).map((sistema) => (
+                        <span
+                          key={sistema}
+                          className="h-[30px] [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid px-3 flex items-center text-nude text-sm z-[1]"
+                        >
+                          {sistema}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                  <div className="flex flex-row items-start justify-end py-0 px-[94px] box-border max-w-full text-xs mq450:pl-5 mq450:pr-5 mq450:box-border">
-                    <div className="h-[30px] w-[139px] [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden shrink-0 flex flex-row items-start justify-start py-[3px] px-0 z-[1]">
-                      <div className="ml-[-17.5px] w-[175px] relative leading-[20px] flex items-center justify-center shrink-0 text-nude">
-                        Vampiro la mascarada
-                      </div>
+                )}
+              </div>
+
+              {/* Partidas del master */}
+              {loadingPartidas ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="loader" />
+                </div>
+              ) : partidas.length > 0 ? (
+                <div className="self-stretch flex flex-col items-start justify-start gap-4">
+                  {partidas.map((partida) => (
+                    <div
+                      key={partida.id}
+                      className="self-stretch rounded-xl bg-nude border border-darkslategray cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => handleGameClick(String(partida.id))}
+                    >
+                      <PartidaCard partida={partida} mostrarDescripcion={false} />
                     </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-
-              {/* Partidas jugadas - Partida 2 y Partida 3 */}
-              <div className="self-stretch flex flex-col items-start justify-start gap-4">
-                {/* Partida 2 */}
-                <div
-                  className="self-stretch rounded-xl bg-nude border border-darkslategray flex flex-col items-center justify-center py-12 px-6 cursor-pointer hover:bg-gray-100 transition-colors"
-                  onClick={() => handleGameClick("partida-2")}
-                >
-                  <div className="text-black text-lg font-semibold">
-                    Partida 2
-                  </div>
-                </div>
-
-                {/* Partida 3 */}
-                <div
-                  className="self-stretch rounded-xl bg-nude border border-darkslategray flex flex-col items-center justify-center py-12 px-6 cursor-pointer hover:bg-gray-100 transition-colors"
-                  onClick={() => handleGameClick("partida-3")}
-                >
-                  <div className="text-black text-lg font-semibold">
-                    Partida 3
-                  </div>
-                </div>
-              </div>
+              ) : null}
             </div>
 
             {/* COLUMNA DERECHA */}
@@ -307,9 +309,17 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl">
                   Próximas partidas
                 </h2>
-                <div className="self-stretch flex flex-row items-start justify-start py-0 px-0 box-border max-w-full">
-                  <div className="flex-1 flex flex-row items-start justify-center gap-[37px] max-w-full mq700:gap-[18px] mq700:flex-wrap">
-                    {partidasEjemplo.map((partida) => (
+                {loadingPartidas ? (
+                  <div className="flex items-center justify-center w-full py-6">
+                    <div className="loader" />
+                  </div>
+                ) : partidas.length === 0 ? (
+                  <p className="text-nude/60 font-titulo-2">
+                    Este master no tiene partidas publicadas aún.
+                  </p>
+                ) : (
+                  <div className="self-stretch flex flex-row items-start justify-center gap-[37px] max-w-full mq700:gap-[18px] mq700:flex-wrap">
+                    {partidas.map((partida) => (
                       <PartidaCard
                         key={partida.id}
                         partida={partida}
@@ -319,7 +329,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                       />
                     ))}
                   </div>
-                </div>
+                )}
               </div>
             </section>
           </div>

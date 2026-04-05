@@ -413,7 +413,7 @@ const UserDetail: FunctionComponent = () => {
                   Valoración
                 </div>
                 <div className="flex flex-row items-center justify-center gap-2 mt-2">
-                  {renderStars(4.8)}
+                  {renderStars(profile.rating || 0)}
                 </div>
               </div>
 
@@ -423,8 +423,7 @@ const UserDetail: FunctionComponent = () => {
                   Bio
                 </h2>
                 <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-center font-texto-2">
-                  {profile.bio ||
-                    "Alpha de Hombre Lobo: El Apocalipsis. Experta en crear historias de supervivencia, naturaleza y conflicto entre tradición y modernidad."}
+                  {profile.bio || "Sin biografía todavía."}
                 </div>
               </div>
 
@@ -438,23 +437,23 @@ const UserDetail: FunctionComponent = () => {
                     <strong className="text-dark-gold">
                       Duración de sesión:
                     </strong>{" "}
-                    {profile.duracionSesion?.join(", ") || "4-6 horas"}
+                    {profile.duracionSesion?.join(", ") || "No especificado"}
                   </p>
                   <p className="mb-4">
                     <strong className="text-dark-gold">
                       Número de jugadores:
                     </strong>{" "}
-                    {profile.numeroJugadores?.join(", ") || "5-6 jugadores"}
+                    {profile.numeroJugadores?.join(", ") || "No especificado"}
                   </p>
                   <p className="mb-4">
                     <strong className="text-dark-gold">
                       Estilos de juego:
                     </strong>{" "}
-                    {profile.estilos?.join(", ") || "Serio, Narrativo, Campaña"}
+                    {profile.estilos?.join(", ") || "No especificado"}
                   </p>
                   <p>
                     <strong className="text-dark-gold">Idiomas:</strong>{" "}
-                    {profile.idiomas?.join(", ") || "Español"}
+                    {profile.idiomas?.join(", ") || "No especificado"}
                   </p>
                 </div>
               </div>

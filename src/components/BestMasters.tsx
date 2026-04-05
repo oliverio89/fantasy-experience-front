@@ -1,23 +1,60 @@
-import { FunctionComponent, memo, useCallback, useRef } from "react";
+import { FunctionComponent, memo, useCallback, useRef, useState, useEffect } from "react";
 import UnifiedMasterCard from "./UnifiedMasterCard";
 import { useNavigate } from "react-router-dom";
-import { MASTERS_DATA } from "../data/mastersData";
-import { Master } from "../types/masters";
+import {
+  Master,
+  ExperienciaMaster,
+  DisponibilidadMaster,
+  RangoPrecio,
+  SistemaJuego,
+} from "../types/masters";
+import { ProfileService, Profile } from "../services/profileService";
 
 export type FrameComponent2Type = {
   className?: string;
 };
 
+const mapProfileToMaster = (profile: Profile): Master => ({
+  id: profile.id,
+  username: profile.fullName?.toLowerCase().replace(/\s+/g, "") || profile.id,
+  displayName: profile.fullName || "Master",
+  email: "hidden",
+  avatar: profile.avatarUrl || "/default-avatar.png",
+  bio: profile.bio || "Sin biografía.",
+  experiencia: (profile.experiencia as ExperienciaMaster) || "Intermedio",
+  sistemas: (profile.sistemas as SistemaJuego[]) || [],
+  tiposPartida: (profile.tiposPartida as any[]) || [],
+  disponibilidad: (profile.disponibilidad as DisponibilidadMaster) || "Disponible",
+  estilos: (profile.estilos as any[]) || [],
+  idiomas: (profile.idiomas as any[]) || [],
+  precioPorSesion: (profile.precioPorSesion as RangoPrecio) || "Gratis",
+  duracionSesion: (profile.duracionSesion as any[]) || [],
+  numeroJugadores: (profile.numeroJugadores as any[]) || [],
+  rating: profile.rating || 0,
+  totalReviews: profile.totalReviews || 0,
+  timezone: profile.timezone || "Europe/Madrid",
+  createdAt: new Date(profile.updatedAt || Date.now()),
+  lastActive: new Date(),
+});
+
 const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
   ({ className = "" }) => {
-    const navigate = useNavigate(); // Hook para redireccionar
+    const navigate = useNavigate();
     const cardContainerRef = useRef<HTMLDivElement>(null);
+    const [bestMasters, setBestMasters] = useState<Master[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // Obtener los mejores masters (top 6 por rating)
-    const bestMasters = MASTERS_DATA.sort((a, b) => b.rating - a.rating).slice(
-      0,
-      6
-    );
+    useEffect(() => {
+      ProfileService.getMasters()
+        .then((profiles) => {
+          const masters = profiles
+            .map(mapProfileToMaster)
+            .sort((a, b) => b.rating - a.rating)
+            .slice(0, 6);
+          setBestMasters(masters);
+        })
+        .finally(() => setLoading(false));
+    }, []);
 
     const onSlide1ContainerClick = useCallback(
       (master: Master) => {
@@ -73,20 +110,28 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
 
           {/* Contenedor de las tarjetas */}
           <div className="relative mx-[70px]">
-            {" "}
-            {/* Márgenes a los lados */}
             <div
               className="flex flex-row items-start justify-start pt-0 px-0 pb-[62px] box-border gap-[20.4px] max-w-full overflow-x-auto scroll-hidden scrollbar-hide"
               ref={cardContainerRef}
             >
-              {bestMasters.map((master) => (
-                <UnifiedMasterCard
-                  key={master.id}
-                  master={master}
-                  onMasterClick={onSlide1ContainerClick}
-                  useImageFormat={true}
-                />
-              ))}
+              {loading ? (
+                <div className="flex items-center justify-center w-full py-12">
+                  <div className="loader" />
+                </div>
+              ) : bestMasters.length === 0 ? (
+                <div className="text-nude text-xl py-12 font-titulo-2">
+                  Aún no hay masters registrados.
+                </div>
+              ) : (
+                bestMasters.map((master) => (
+                  <UnifiedMasterCard
+                    key={master.id}
+                    master={master}
+                    onMasterClick={onSlide1ContainerClick}
+                    useImageFormat={true}
+                  />
+                ))
+              )}
             </div>
           </div>
 

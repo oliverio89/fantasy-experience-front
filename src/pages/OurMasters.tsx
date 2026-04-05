@@ -62,18 +62,18 @@ const Root: FunctionComponent = () => {
       avatar: profile.avatarUrl || "/default-avatar.png",
       bio: profile.bio || "Sin biografía.",
       // Aggregated Data from ProfileService
-      experiencia: "Experto" as ExperienciaMaster,
+      experiencia: (profile.experiencia as ExperienciaMaster) || "Intermedio",
       sistemas: (profile.sistemas as SistemaJuego[]) || [],
       tiposPartida: (profile.tiposPartida as any[]) || [],
-      disponibilidad: "Disponible" as DisponibilidadMaster,
+      disponibilidad: (profile.disponibilidad as DisponibilidadMaster) || "Disponible",
       estilos: (profile.estilos as any[]) || [],
       idiomas: (profile.idiomas as any[]) || [],
-      precioPorSesion: "11-20€" as RangoPrecio, // Placeholder
+      precioPorSesion: (profile.precioPorSesion as RangoPrecio) || "Gratis",
       duracionSesion: (profile.duracionSesion as any[]) || [],
       numeroJugadores: (profile.numeroJugadores as any[]) || [],
-      rating: 4.8, // Placeholder
-      totalReviews: 12, // Placeholder
-      timezone: "CET",
+      rating: profile.rating || 0,
+      totalReviews: profile.totalReviews || 0,
+      timezone: profile.timezone || "Europe/Madrid",
       createdAt: new Date(profile.updatedAt || Date.now()),
       lastActive: new Date(),
     };

@@ -1,7 +1,6 @@
 import { FunctionComponent, memo, useMemo } from "react";
 import UnifiedMasterCard from "./UnifiedMasterCard";
 import MasterPagination from "./MasterPagination";
-import { MASTERS_DATA } from "../data/mastersData";
 import { Master, MasterFilters, SistemaJuego } from "../types/masters";
 
 export type MasterListType = {
@@ -27,7 +26,7 @@ const MasterList: FunctionComponent<MasterListType> = memo(
   }) => {
     // Función para filtrar masters
     const filteredMasters = useMemo(() => {
-      let result = masters || MASTERS_DATA;
+      let result = masters || [];
 
       if (!filters) return result;
 
