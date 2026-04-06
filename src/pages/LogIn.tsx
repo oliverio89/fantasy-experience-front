@@ -12,8 +12,8 @@ const LogInV: FunctionComponent = () => {
   }, [navigate]);
 
   return (
-    <div className="w-full relative bg-white overflow-hidden flex flex-row items-start justify-start leading-[normal] tracking-[normal] [row-gap:20px] text-center text-[6.25rem] text-dark-gold font-milonga mq1025:flex-wrap">
-      <div className="bg-black flex flex-col items-start justify-start pt-[20.375rem] px-[0rem] pb-[12.5rem] box-border gap-[7.812rem] min-w-[38.75rem] max-w-full mq725:gap-[3.875rem] mq725:pt-[13.25rem] mq725:pb-[8.125rem] mq725:box-border mq725:min-w-full mq450:gap-[1.938rem] mq1025:flex-1">
+    <div className="w-full min-h-screen relative bg-black overflow-hidden flex flex-row items-stretch justify-start leading-[normal] tracking-[normal] text-center text-[6.25rem] text-dark-gold font-milonga mq1025:flex-wrap">
+      <div className="w-1/2 bg-black flex flex-col items-center justify-center px-8 box-border gap-[4rem] mq1025:w-full mq1025:py-20">
         <div className="self-stretch h-[52rem] relative bg-black hidden" />
         <h1 className="m-0 self-stretch relative text-inherit leading-[76.6%] font-normal font-[inherit] z-[1] mq450:text-[1.875rem] mq450:leading-[1.938rem] mq975:text-[3.125rem] mq975:leading-[2.875rem]">
           <p className="m-0">{`Fantasy `}</p>

@@ -124,7 +124,7 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
         </Modal>
 
         <form
-          className={`m-0 flex-1 bg-nude flex flex-col items-start justify-start pt-[11.375rem] px-[0rem] pb-[10.25rem] box-border gap-[3rem] min-w-[26.813rem] max-w-full mq725:gap-[1.5rem] mq725:pt-[7.375rem] mq725:pb-[6.688rem] mq725:box-border mq725:min-w-full ${className}`}
+          className={`m-0 flex-1 bg-nude flex flex-col items-center justify-center px-8 py-16 box-border gap-[3rem] min-w-[26.813rem] max-w-full mq725:gap-[1.5rem] mq725:min-w-full ${className}`}
           onSubmit={(e) => {
             e.preventDefault();
             onLoginClick();
