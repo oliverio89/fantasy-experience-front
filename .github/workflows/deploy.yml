@@ -35,12 +35,6 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Create environment file
-        run: |
-          rm -f .env .env.local .env.production .env.production.local
-          echo "VITE_PUBLIC_SUPABASE_URL=${{ secrets.VITE_PUBLIC_SUPABASE_URL }}" > .env
-          echo "VITE_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.VITE_ANON_KEY }}" >> .env
-
       - name: Build
         run: npm run build
 
@@ -54,4 +48,7 @@ jobs:
 
     steps:
       - name: Deploy on VPS
+        env:
+          VITE_PUBLIC_SUPABASE_URL: ${{ secrets.VITE_PUBLIC_SUPABASE_URL }}
+          VITE_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.VITE_ANON_KEY }}
         run: /opt/deploy/fantasyexperience.sh
