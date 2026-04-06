@@ -38,4 +38,6 @@ pids
 
 # OS-specific
 Thumbs.db
-  
+
+.sql
+
