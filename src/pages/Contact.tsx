@@ -46,7 +46,7 @@ const ContactoV: FunctionComponent = () => {
     <div className="w-full relative bg-black overflow-hidden flex flex-row items-start justify-start leading-[normal] tracking-[normal] [row-gap:20px] text-center text-[6.25rem] text-nude font-titulo-2 mq1025:flex-wrap">
       <div className="bg-black flex w-1/2 flex-col items-start justify-start pt-[20.375rem] px-[0rem] pb-[10.687rem] box-border gap-[2.343rem] min-w-[38.75rem] max-w-full z-[1] mq725:gap-[1.188rem] mq725:pt-[13.25rem] mq725:pb-[6.938rem] mq725:box-border mq725:min-w-full mq1025:flex-1">
         <div className="self-stretch relative h-full bg-black hidden" />
-        <h1 className="m-0 self-stretch h-[11.313rem] relative text-inherit leading-[76.6%] font-normal font-milonga text-dark-gold items-center shrink-0 z-[2] mq450:text-[1.875rem] mq450:leading-[1.938rem] mq975:text-[3.125rem] mq975:leading-[2.875rem]">
+        <h1 className="m-0 self-stretch relative leading-[76.6%] font-normal font-milonga text-dark-gold z-[2] mq450:text-[1.875rem] mq450:leading-[1.938rem] mq975:text-[3.125rem] mq975:leading-[2.875rem]">
           <span>
             <p className="m-0 ">Fantasy</p>
             <p className="m-0">Experience</p>

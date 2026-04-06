@@ -133,14 +133,12 @@ const Registerv: FunctionComponent = () => {
 
       <div className="w-1/2 bg-black flex flex-col items-center justify-center px-8 box-border gap-[4rem] mq1025:w-full mq1025:py-20">
         <div className="self-stretch h-[52rem] relative bg-black hidden" />
-        <h1 className="m-0 self-stretch h-[11.313rem] relative text-inherit leading-[76.6%] font-normal font-[inherit] flex items-center shrink-0 z-[2] mq450:text-[1.875rem] mq450:leading-[1.938rem] mq975:text-[3.125rem] mq975:leading-[2.875rem]">
-          <span>
-            <p className="m-0">{`Fantasy `}</p>
-            <p className="m-0">Experience</p>
-          </span>
+        <h1 className="m-0 relative leading-[76.6%] font-normal font-[inherit] text-center z-[2] mq450:text-[1.875rem] mq450:leading-[1.938rem] mq975:text-[3.125rem] mq975:leading-[2.875rem]">
+          <p className="m-0">{`Fantasy `}</p>
+          <p className="m-0">Experience</p>
         </h1>
         <b
-          className="self-stretch h-[3.625rem] relative text-[1.5rem] [text-decoration:underline] flex font-titulo-2 text-nude items-center justify-center shrink-0 cursor-pointer z-[2] mq450:text-[1.188rem]"
+          className="relative text-[1.5rem] [text-decoration:underline] font-titulo-2 text-nude cursor-pointer z-[2] mq450:text-[1.188rem] text-center"
           onClick={onBackHomeClick}
         >
           {t.common.backHome}
