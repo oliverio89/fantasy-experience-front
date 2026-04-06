@@ -6,6 +6,7 @@ export type ModalProps = {
   title?: string;
   children: ReactNode;
   type?: "error" | "info" | "success";
+  actions?: ReactNode;
 };
 
 const Modal: FunctionComponent<ModalProps> = ({
@@ -14,6 +15,7 @@ const Modal: FunctionComponent<ModalProps> = ({
   title,
   children,
   type = "info",
+  actions,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -117,12 +119,24 @@ const Modal: FunctionComponent<ModalProps> = ({
             {children}
           </div>
 
-          <button
-            onClick={onClose}
-            className="mt-6 px-8 py-2 bg-dark-gold text-black font-bold font-titulo-2 rounded-full hover:bg-darkgoldenrod transition-colors shadow-lg"
-          >
-            Entendido
-          </button>
+          {actions ? (
+            <div className="mt-6 flex flex-col gap-3 w-full items-center">
+              {actions}
+              <button
+                onClick={onClose}
+                className="px-8 py-2 text-gray-400 font-titulo-2 text-sm hover:text-white transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onClose}
+              className="mt-6 px-8 py-2 bg-dark-gold text-black font-bold font-titulo-2 rounded-full hover:bg-darkgoldenrod transition-colors shadow-lg"
+            >
+              Entendido
+            </button>
+          )}
         </div>
       </div>
     </div>

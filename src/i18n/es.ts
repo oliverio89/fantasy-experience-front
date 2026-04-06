@@ -127,6 +127,10 @@ export const es = {
       genericTitle: "Error",
       genericMsg: "Ha ocurrido un problema al iniciar sesión. Inténtalo de nuevo más tarde.",
     },
+    resendButton: "Reenviar correo de confirmación",
+    resendSending: "Enviando...",
+    resendSent: "¡Correo reenviado! Revisa tu bandeja de entrada.",
+    resendError: "No se pudo reenviar el correo. Inténtalo de nuevo.",
   },
 
   emailConfirmation: {

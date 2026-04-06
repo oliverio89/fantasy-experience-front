@@ -1,4 +1,4 @@
-import { FunctionComponent, memo, useState, useCallback } from "react";
+import { FunctionComponent, memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "../i18n";
 import EmailField from "./email-field";
@@ -20,20 +20,34 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
       password: "",
     });
     const [loading, setLoading] = useState(false);
+    const [unconfirmedEmail, setUnconfirmedEmail] = useState("");
+    const [resendStatus, setResendStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
     // Modal state
     const [errorModal, setErrorModal] = useState<{
       show: boolean;
       title: string;
       message: string;
-    }>({ show: false, title: "", message: "" });
+      isUnconfirmed: boolean;
+    }>({ show: false, title: "", message: "", isUnconfirmed: false });
 
-    const showModal = (title: string, message: string) => {
-      setErrorModal({ show: true, title, message });
+    const showModal = (title: string, message: string, isUnconfirmed = false) => {
+      setErrorModal({ show: true, title, message, isUnconfirmed });
     };
 
     const closeModal = () => {
       setErrorModal({ ...errorModal, show: false });
+      setResendStatus("idle");
+    };
+
+    const handleResend = async () => {
+      if (!unconfirmedEmail || resendStatus === "sending" || resendStatus === "sent") return;
+      setResendStatus("sending");
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: unconfirmedEmail,
+      });
+      setResendStatus(error ? "error" : "sent");
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +80,9 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
 
         // Handle specific Supabase errors
         if (errorMessage.includes("Email not confirmed")) {
-          showModal(t.login.errors.unconfirmedTitle, t.login.errors.unconfirmedMsg);
+          setUnconfirmedEmail(formData.email);
+          setResendStatus("idle");
+          showModal(t.login.errors.unconfirmedTitle, t.login.errors.unconfirmedMsg, true);
         } else if (errorMessage.includes("Invalid login credentials")) {
           // This error is generic for security (wrong password OR user not found)
           showModal(t.login.errors.invalidTitle, t.login.errors.invalidMsg);
@@ -85,6 +101,24 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
           onClose={closeModal}
           title={errorModal.title}
           type="error"
+          actions={
+            errorModal.isUnconfirmed ? (
+              <div className="flex flex-col items-center gap-2 w-full">
+                {resendStatus === "sent" ? (
+                  <p className="text-green-400 font-titulo-2 text-sm">{t.login.resendSent}</p>
+                ) : resendStatus === "error" ? (
+                  <p className="text-red-400 font-titulo-2 text-sm">{t.login.resendError}</p>
+                ) : null}
+                <button
+                  onClick={handleResend}
+                  disabled={resendStatus === "sending" || resendStatus === "sent"}
+                  className="w-full px-8 py-2 bg-dark-gold text-black font-bold font-titulo-2 rounded-full hover:bg-darkgoldenrod transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {resendStatus === "sending" ? t.login.resendSending : t.login.resendButton}
+                </button>
+              </div>
+            ) : undefined
+          }
         >
           {errorModal.message}
         </Modal>
