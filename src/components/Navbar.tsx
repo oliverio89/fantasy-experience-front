@@ -65,7 +65,11 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
       >
         <header className="self-stretch flex-1 bg-black overflow-auto flex flex-row items-start justify-between py-1 px-20 box-border gap-5 max-w-full z-[1] text-center text-9xl text-dark-gold font-milonga mq750:pl-10 mq750:pr-10 mq750:box-border">
           <div className="self-stretch w-full relative bg-black hidden" />
-          <h3 className="m-1 self-stretch w-[150px] p-1 relative text-inherit leading-[76.6%] font-normal font-[inherit] [display:-webkit-inline-box] items-center overflow-hidden text-ellipsis [-webkit-line-clamp:3] [-webkit-box-orient:vertical] shrink-0 z-[1]">
+          <h3
+            className="m-1 self-stretch w-[150px] p-1 relative text-inherit leading-[76.6%] font-normal font-[inherit] [display:-webkit-inline-box] items-center overflow-hidden text-ellipsis [-webkit-line-clamp:3] [-webkit-box-orient:vertical] shrink-0 z-[1] cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={onHomeTextClick}
+            aria-label={t.navbar.ariaHome}
+          >
             <span className="[line-break:anywhere] w-full">
               <p className="m-1">Fantasy</p>
               <p className="m-1">Experience</p>

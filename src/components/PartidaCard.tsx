@@ -145,17 +145,17 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
 
     return (
       <div
-        className={`w-[360px] min-h-[536px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border gap-3.5 max-w-full text-center text-base ${textColor} font-titulo-2 hover:scale-[1.02] transition-transform duration-200 ${className}`}
+        className={`w-[360px] h-[536px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border max-w-full text-center text-base ${textColor} font-titulo-2 hover:scale-[1.02] transition-transform duration-200 overflow-hidden ${className}`}
         style={{ backgroundColor }}
-        onClick={handleCardClick}
+        onDoubleClick={handleCardClick}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
+          if (e.key === "Enter") {
             handleCardClick();
           }
         }}
-        aria-label={`Click para ver detalles de ${partida.titulo} por ${partida.masterName}`}
+        aria-label={`Doble click para ver detalles de ${partida.titulo} por ${partida.masterName}`}
       >
         {/* Header con imagen y badge */}
         <div
@@ -168,7 +168,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
         </div>
 
         {/* Contenido de la tarjeta */}
-        <div className="self-stretch flex flex-col items-center justify-start pt-6 px-4 pb-0 gap-3 relative min-h-[196px]">
+        <div className="self-stretch flex-1 flex flex-col items-center justify-start pt-6 px-4 pb-0 gap-3 relative overflow-hidden">
           {/* Vacantes - Badge top right of content */}
           <div className="absolute top-[-10px] right-[10px] bg-dark-gold text-black font-bold px-3 py-1 rounded-full text-xs shadow-md z-[5]">
             {vacantes > 0 ? `${vacantes} ${t.partidaCard.spotsLeft}` : t.partidaCard.full}

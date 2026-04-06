@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="10" fill="#000000"/>
+  <text x="32" y="24" font-family="serif" font-size="16" font-weight="bold" fill="#CD9C20" text-anchor="middle" dominant-baseline="middle">Fantasy</text>
+  <text x="32" y="44" font-family="serif" font-size="13" font-weight="normal" fill="#DAB16A" text-anchor="middle" dominant-baseline="middle">Experience</text>
+</svg>

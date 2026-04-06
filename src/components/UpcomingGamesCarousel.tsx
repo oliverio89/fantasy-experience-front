@@ -13,24 +13,20 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
     const navigate = useNavigate();
     const cardContainerRef = useRef<HTMLDivElement>(null);
     const isDraggingRef = useRef(false);
-    const startXRef = useRef(0);
-    const hasDraggedRef = useRef(false);
     const initialScrollLeftRef = useRef(0);
+    const startXRef = useRef(0);
     const { partidas, loading } = usePartidasDestacadas(6);
 
     const handleMouseDown = (e: React.MouseEvent) => {
       if (!cardContainerRef.current) return;
       isDraggingRef.current = true;
       startXRef.current = e.clientX;
-      hasDraggedRef.current = false;
       initialScrollLeftRef.current = cardContainerRef.current.scrollLeft;
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
       if (!isDraggingRef.current || !cardContainerRef.current) return;
-      const deltaX = e.clientX - startXRef.current;
-      if (Math.abs(deltaX) > 5) hasDraggedRef.current = true;
-      cardContainerRef.current.scrollLeft = initialScrollLeftRef.current - deltaX;
+      cardContainerRef.current.scrollLeft = initialScrollLeftRef.current - (e.clientX - startXRef.current);
     };
 
     const handleMouseUp = () => {
@@ -70,11 +66,6 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
                 key={partida.id}
                 partida={partida}
                 mostrarDescripcion={true}
-                onClick={() => {
-                  if (!hasDraggedRef.current) {
-                    navigate(`/detailsgame/${partida.id}`);
-                  }
-                }}
               />
             ))
           )}

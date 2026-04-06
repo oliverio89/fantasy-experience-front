@@ -2,9 +2,14 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
+
+    <!-- Performance hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
 
     <!-- SEO Primary -->
     <title>Fantasy Experience | Encuentra tu Máster de Rol Online</title>
@@ -34,22 +39,56 @@
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Fantasy Experience",
-      "url": "https://fantasyexperience.es",
-      "description": "Plataforma de rol online donde jugadores encuentran Másters expertos en diferentes sistemas de juego.",
-      "inLanguage": "es-ES",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://fantasyexperience.es/ourmasters?q={search_term_string}"
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Fantasy Experience",
+        "url": "https://fantasyexperience.es",
+        "description": "Plataforma de rol online donde jugadores encuentran Másters expertos en diferentes sistemas de juego.",
+        "inLanguage": "es-ES",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://fantasyexperience.es/ourmasters?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Fantasy Experience",
+        "url": "https://fantasyexperience.es",
+        "logo": "https://fantasyexperience.es/favicon.svg",
+        "description": "Plataforma online que conecta jugadores de rol con Másters expertos en D&D, Call of Cthulhu, Vampiro: La Mascarada y más sistemas de juego.",
+        "sameAs": [],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "url": "https://fantasyexperience.es/contacto",
+          "availableLanguage": "Spanish"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Partidas de Rol Online",
+        "provider": {
+          "@type": "Organization",
+          "name": "Fantasy Experience"
         },
-        "query-input": "required name=search_term_string"
+        "serviceType": "Juego de rol en línea",
+        "description": "Partidas de rol dirigidas por Másters expertos en D&D 5e, Call of Cthulhu, Pathfinder, Vampiro: La Mascarada y otros sistemas.",
+        "areaServed": {
+          "@type": "Country",
+          "name": "España"
+        },
+        "inLanguage": "es-ES",
+        "url": "https://fantasyexperience.es/nextgames"
       }
-    }
+    ]
     </script>
   </head>
   <body>
