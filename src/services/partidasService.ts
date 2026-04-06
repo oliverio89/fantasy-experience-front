@@ -92,6 +92,7 @@ export class PartidasService {
       game_system: partida.sistemaJuego,
       game_type: partida.tipoPartida,
       start_date: partida.fecha,
+      status: 'active',
       max_players: Number(partida.jugadores || 0),
       price: Number(partida.precio || 0),
       city: partida.ciudad,
@@ -321,16 +322,42 @@ export class PartidasService {
   }
 
   static async obtenerPartidasDestacadas(limit: number = 6): Promise<Partida[]> {
-    const respuesta = await this.obtenerPartidas({ limit, ratingMin: 4 });
-    return respuesta.partidas;
+    try {
+      const { data, error } = await supabase
+        .from("games")
+        .select("*, profiles:master_id(full_name), game_participants(count)")
+        .eq("game_type", "Digital")
+        .eq("status", "active")
+        .order("rating", { ascending: false })
+        .limit(limit);
+
+      if (error) throw new Error(error.message);
+
+      return (data || []).map((row) => this.mapGameFromDB(row));
+    } catch (error) {
+      console.error("Error al obtener partidas destacadas:", error);
+      return [];
+    }
   }
 
-  static async obtenerProximasPartidas(limit: number = 4): Promise<Partida[]> {
-    const respuesta = await this.obtenerPartidas({
-      limit,
-      fechaInicio: new Date().toISOString(),
-    });
-    return respuesta.partidas;
+  static async obtenerProximasPartidas(limit: number = 6): Promise<Partida[]> {
+    try {
+      const { data, error } = await supabase
+        .from("games")
+        .select("*, profiles:master_id(full_name), game_participants(count)")
+        .in("game_type", ["Online", "Digital", "Presencial"])
+        .eq("status", "active")
+        .gte("start_date", new Date().toISOString())
+        .order("start_date", { ascending: true })
+        .limit(limit);
+
+      if (error) throw new Error(error.message);
+
+      return (data || []).map((row) => this.mapGameFromDB(row));
+    } catch (error) {
+      console.error("Error al obtener próximas partidas:", error);
+      return [];
+    }
   }
 
   static async verificarInscripcion(gameId: string | number): Promise<boolean> {

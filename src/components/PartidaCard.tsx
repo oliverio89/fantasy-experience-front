@@ -1,5 +1,6 @@
 import { FunctionComponent, memo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "../i18n";
 
 // Tipo de partida que vendrá de la API en el futuro
 export type TipoPartida = "digital" | "presencial" | "online";
@@ -31,6 +32,7 @@ export type PartidaCardProps = {
 // Componente interno para el rating con estrellas
 const RatingStars: FunctionComponent<{ rating: number }> = memo(
   ({ rating }) => {
+    const { t } = useTranslation();
     const stars = Array.from({ length: 5 }, (_, index) => index + 1);
 
     return (
@@ -39,7 +41,7 @@ const RatingStars: FunctionComponent<{ rating: number }> = memo(
           <img
             key={star}
             className="w-[30px] h-[30px] rounded-12xs"
-            alt={`${star <= rating ? "Estrella llena" : "Estrella vacía"}`}
+            alt={star <= rating ? "Estrella llena" : "Estrella vacía"}
             src={star <= rating ? "/rating-star.svg" : "/rating-star-empty.svg"}
           />
         ))}
@@ -115,6 +117,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
     backgroundColor = "#1a1a1a",
   }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const handleCardClick = () => {
       if (onClick) {
@@ -168,7 +171,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
         <div className="self-stretch flex flex-col items-center justify-start pt-0 px-4 pb-0 gap-3 relative min-h-[196px]">
           {/* Vacantes - Badge top right of content */}
           <div className="absolute top-[-10px] right-[10px] bg-dark-gold text-black font-bold px-3 py-1 rounded-full text-xs box-shadow-md z-[5]">
-            {vacantes > 0 ? `${vacantes} libres` : "COMPLETA"}
+            {vacantes > 0 ? `${vacantes} ${t.partidaCard.spotsLeft}` : t.partidaCard.full}
           </div>
 
           {/* Título - Máximo 2 líneas */}
@@ -249,7 +252,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
             tabIndex={0}
           >
             <b className="relative text-lg font-titulo-2 text-black1 text-center">
-              Ver detalles
+              {t.partidaCard.viewDetails}
             </b>
           </button>
         </div>

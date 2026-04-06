@@ -96,11 +96,15 @@ const CardMaster: FunctionComponent<SlideType> = memo(
       <div
         className={`h-[409px] w-[360px] relative shrink-0 max-w-full cursor-pointer text-center text-13xl text-dark-gold font-titulo-2 ${className}`}
         onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        aria-label={MasterName ? `Ver perfil de ${MasterName}` : "Ver perfil del Máster"}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleClick(); }}
       >
         <img
           className="absolute top-[0px] left-[80px] rounded-[50%] w-[200px] h-[200px] object-cover z-[1] border-[3px] border-solid border-dark-gold"
           loading="lazy"
-          alt="MasterCard"
+          alt={MasterName ? `Foto de perfil de ${MasterName}` : "Foto de perfil del Máster"}
           src={masterCard}
         />
         <div className="absolute top-[49px] left-[0px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black border-dark-gold border-[1px] border-solid box-border w-full flex flex-col items-end justify-start pt-40 px-0 pb-3.5 gap-4">

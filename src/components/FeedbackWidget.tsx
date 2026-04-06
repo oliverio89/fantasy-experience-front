@@ -1,6 +1,7 @@
 import { FunctionComponent, useState } from "react";
 import { useForm } from "react-hook-form";
 import useWeb3Forms from "@web3forms/react";
+import { useTranslation } from "../i18n";
 
 interface FeedbackFormData {
   name?: string;
@@ -9,6 +10,7 @@ interface FeedbackFormData {
 }
 
 const FeedbackWidget: FunctionComponent = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -35,7 +37,7 @@ const FeedbackWidget: FunctionComponent = () => {
     },
     onError: (error) => {
       console.error("Error al enviar feedback:", error);
-      alert("Error al enviar el feedback. Por favor, inténtalo de nuevo.");
+      alert(t.feedback.errorMsg);
     },
   });
 
@@ -56,7 +58,7 @@ const FeedbackWidget: FunctionComponent = () => {
           textOrientation: "mixed",
         }}
       >
-        <span className="text-sm tracking-wider">FEEDBACK</span>
+        <span className="text-sm tracking-wider">{t.feedback.buttonLabel}</span>
       </button>
 
       {/* Panel del formulario */}
@@ -70,7 +72,7 @@ const FeedbackWidget: FunctionComponent = () => {
           <div className="bg-dark-gold p-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold font-milonga text-black">
-                Feedback
+                {t.feedback.title}
               </h2>
               <button
                 onClick={() => setIsOpen(false)}
@@ -80,7 +82,7 @@ const FeedbackWidget: FunctionComponent = () => {
               </button>
             </div>
             <p className="text-sm text-black mt-2 font-titulo-2">
-              Cuéntanos tu experiencia con Fantasy Experience
+              {t.feedback.subtitle}
             </p>
           </div>
 
@@ -90,11 +92,10 @@ const FeedbackWidget: FunctionComponent = () => {
               <div className="flex flex-col items-center justify-center h-full space-y-4">
                 <div className="text-6xl">✅</div>
                 <h3 className="text-2xl font-bold text-dark-gold font-milonga">
-                  ¡Gracias!
+                  {t.feedback.successTitle}
                 </h3>
                 <p className="text-center text-nude font-titulo-2">
-                  Tu feedback ha sido enviado correctamente. Lo revisaremos
-                  pronto.
+                  {t.feedback.successMsg}
                 </p>
               </div>
             ) : (
@@ -105,14 +106,14 @@ const FeedbackWidget: FunctionComponent = () => {
                     htmlFor="name"
                     className="block text-nude font-medium mb-2 font-titulo-2"
                   >
-                    Tu nombre (opcional)
+                    {t.feedback.nameLabel}
                   </label>
                   <input
                     type="text"
                     id="name"
                     {...register("name")}
                     className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors font-titulo-2"
-                    placeholder="Escribe tu nombre"
+                    placeholder={t.feedback.namePlaceholder}
                   />
                 </div>
 
@@ -122,7 +123,7 @@ const FeedbackWidget: FunctionComponent = () => {
                     htmlFor="email"
                     className="block text-nude font-medium mb-2 font-titulo-2"
                   >
-                    Tu email <span className="text-dark-gold">*</span>
+                    {t.feedback.emailLabel} <span className="text-dark-gold">*</span>
                   </label>
                   <input
                     type="email"
@@ -139,22 +140,21 @@ const FeedbackWidget: FunctionComponent = () => {
                     htmlFor="message"
                     className="block text-nude font-medium mb-2 font-titulo-2"
                   >
-                    Tu mensaje <span className="text-dark-gold">*</span>
+                    {t.feedback.messageLabel} <span className="text-dark-gold">*</span>
                   </label>
                   <textarea
                     id="message"
                     {...register("message", { required: true })}
                     rows={6}
                     className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors resize-none font-titulo-2"
-                    placeholder="Comparte tu feedback, sugerencias o reporta problemas..."
+                    placeholder={t.feedback.messagePlaceholder}
                   />
                 </div>
 
                 {/* Nota informativa */}
                 <div className="bg-darkslategray border border-dark-gold rounded-lg p-4">
                   <p className="text-xs text-nude font-titulo-2">
-                    📧 Tu feedback será enviado directamente a nuestro equipo.
-                    Nos comprometemos a leer cada mensaje.
+                    {t.feedback.privacyNote}
                   </p>
                 </div>
 
@@ -164,7 +164,7 @@ const FeedbackWidget: FunctionComponent = () => {
                   disabled={isSubmitting}
                   className="w-full bg-dark-gold hover:bg-light-gold disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-bold py-4 px-6 rounded-xl transition-colors duration-200 font-titulo-2 text-lg"
                 >
-                  {isSubmitting ? "Enviando..." : "Enviar Feedback"}
+                  {isSubmitting ? t.feedback.submitting : t.feedback.submit}
                 </button>
               </form>
             )}
@@ -173,7 +173,7 @@ const FeedbackWidget: FunctionComponent = () => {
           {/* Footer */}
           <div className="border-t border-darkslategray p-4 bg-darkslategray">
             <p className="text-xs text-center text-nude font-titulo-2">
-              Tu feedback nos ayuda a mejorar 🌟
+              {t.feedback.footerNote}
             </p>
           </div>
         </div>

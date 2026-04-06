@@ -9,34 +9,16 @@ export type UnifiedMasterCardType = {
   master: Master;
   className?: string;
   onMasterClick?: (master: Master) => void;
-  // Opción para usar formato de imagen (placeholders) o datos reales
-  useImageFormat?: boolean;
 };
 
 const UnifiedMasterCard: FunctionComponent<UnifiedMasterCardType> = memo(
-  ({ master, className = "", onMasterClick, useImageFormat = false }) => {
+  ({ master, className = "", onMasterClick }) => {
     const handleMasterClick = useCallback(() => {
       if (onMasterClick) {
         onMasterClick(master);
       }
     }, [master, onMasterClick]);
 
-    // Si useImageFormat es true, usar el formato exacto de la imagen
-    if (useImageFormat) {
-      return (
-        <CardMaster
-          className={className}
-          onSlide1ContainerClick={handleMasterClick}
-          masterCard={master.avatar}
-          MasterName={master.displayName}
-          rate={master.rating}
-          Sistema="Sistema de partida seleccionada"
-          Preferencia={master.tiposPartida.join(", ")}
-        />
-      );
-    }
-
-    // Formato con datos reales
     return (
       <CardMaster
         className={className}
@@ -44,7 +26,7 @@ const UnifiedMasterCard: FunctionComponent<UnifiedMasterCardType> = memo(
         masterCard={master.avatar}
         MasterName={master.displayName}
         rate={master.rating}
-        Sistema={master.sistemas.join(", ")} // Mostrar todos los sistemas
+        Sistema={master.sistemas.join(", ")}
         Preferencia={master.tiposPartida.join(", ")}
       />
     );

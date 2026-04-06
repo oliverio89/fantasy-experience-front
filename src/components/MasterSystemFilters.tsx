@@ -3,6 +3,7 @@
 
 import { FunctionComponent, memo, useCallback } from "react";
 import { SistemaJuego, SISTEMAS_POPULARES } from "../types/masters";
+import { useTranslation } from "../i18n";
 
 export type MasterSystemFiltersType = {
   className?: string;
@@ -13,6 +14,7 @@ export type MasterSystemFiltersType = {
 
 const MasterSystemFilters: FunctionComponent<MasterSystemFiltersType> = memo(
   ({ className = "", selectedSystems, onSystemToggle, onClearAll }) => {
+    const { t } = useTranslation();
     const handleSystemClick = useCallback(
       (system: SistemaJuego) => {
         onSystemToggle(system);
@@ -40,7 +42,7 @@ const MasterSystemFilters: FunctionComponent<MasterSystemFiltersType> = memo(
       >
         <div className="flex-1 flex flex-col items-start justify-start gap-[0.312rem] max-w-full">
           <div className="w-[12.125rem] relative leading-[1.625rem] flex items-center z-[1] text-white font-titulo-2 mq450:w-full mq450:text-[1rem]">
-            Elije el sistema de juego:
+            {t.masterSystemFilters.label}
           </div>
           <div className="self-stretch flex flex-row items-start justify-start gap-[0.812rem] text-center text-[1rem] text-nude mq750:flex-wrap mq450:gap-[0.5rem] mq450:flex-wrap">
             {currentSystems.map((system) => {
@@ -84,7 +86,7 @@ const MasterSystemFilters: FunctionComponent<MasterSystemFiltersType> = memo(
                 aria-label="Limpiar todos los filtros"
               >
                 <div className="relative leading-[1.25rem] flex items-center justify-center shrink-0 text-[0.75rem] mq450:text-[0.8rem]">
-                  ✕ Limpiar
+                  {t.masterSystemFilters.clearButton}
                 </div>
               </button>
             )}
@@ -93,10 +95,9 @@ const MasterSystemFilters: FunctionComponent<MasterSystemFiltersType> = memo(
           {/* Indicador de filtros activos */}
           {selectedSystems.length > 0 && (
             <div className="self-stretch flex flex-row items-center justify-start gap-[0.5rem] text-sm text-light-gold mq450:text-xs mq450:gap-[0.25rem]">
-              <span>Filtros activos:</span>
+              <span>{t.masterSystemFilters.activeFilters}</span>
               <span className="bg-dark-gold px-2 py-1 rounded text-xs mq450:px-1 mq450:py-0.5">
-                {selectedSystems.length} sistema
-                {selectedSystems.length > 1 ? "s" : ""}
+                {selectedSystems.length} {selectedSystems.length > 1 ? t.masterSystemFilters.systems : t.masterSystemFilters.system}
               </span>
             </div>
           )}

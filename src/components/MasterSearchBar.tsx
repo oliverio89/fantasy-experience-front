@@ -1,4 +1,5 @@
 import { FunctionComponent, memo, useState, useCallback } from "react";
+import { useTranslation } from "../i18n";
 
 export type MasterSearchBarType = {
   className?: string;
@@ -13,10 +14,12 @@ const MasterSearchBar: FunctionComponent<MasterSearchBarType> = memo(
     className = "",
     onSearch,
     onClear,
-    placeholder = "Escribe el nombre del Master o sistema de juego",
+    placeholder = "",
     initialValue = "",
   }) => {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState(initialValue);
+    const resolvedPlaceholder = placeholder || t.masterSearch.placeholder;
 
     const handleSearch = useCallback(() => {
       if (onSearch) {
@@ -53,7 +56,7 @@ const MasterSearchBar: FunctionComponent<MasterSearchBarType> = memo(
       >
         <div className="flex-1 flex flex-col items-start justify-start gap-[0.312rem] max-w-full">
           <div className="w-[33.813rem] relative leading-[1.625rem] flex items-center max-w-full z-[1] mq450:w-full mq450:text-[0.9rem] mq450:leading-[1.4rem]">
-            Busca un Master por nombre o sistema de juego:
+            {t.masterSearch.label}
           </div>
           <div className="self-stretch flex flex-row items-start justify-start gap-[2.531rem] max-w-full text-[0.875rem] text-nude mq750:gap-[1.25rem] mq1225:flex-wrap mq450:flex-col mq450:gap-[1rem]">
             <div className="w-[45.813rem] rounded-xl border-nude border-[1px] border-solid box-border flex flex-row items-start justify-start py-[0rem] px-[0.812rem] max-w-full z-[1] mq450:w-full mq450:px-[0.5rem]">
@@ -62,7 +65,7 @@ const MasterSearchBar: FunctionComponent<MasterSearchBarType> = memo(
                 value={searchQuery}
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
-                placeholder={placeholder}
+                placeholder={resolvedPlaceholder}
                 className="h-[3.125rem] w-[32.938rem] relative font-light bg-transparent border-none outline-none text-white placeholder-nude shrink-0 max-w-full z-[2] mq450:h-[2.5rem] mq450:w-full mq450:text-[0.9rem]"
                 aria-label="Buscar Master"
               />
@@ -84,7 +87,7 @@ const MasterSearchBar: FunctionComponent<MasterSearchBarType> = memo(
                 </div>
                 <div className="flex flex-col items-start justify-start py-[0rem] px-[0rem]">
                   <b className="ml-[-0.188rem] w-[4.5rem] relative text-[1.125rem] flex font-titulo-2 text-nude text-center items-center justify-center">
-                    Limpiar
+                    {t.common.clear}
                   </b>
                 </div>
               </button>
@@ -105,7 +108,7 @@ const MasterSearchBar: FunctionComponent<MasterSearchBarType> = memo(
                   </svg>
                 </div>
                 <b className="flex-1 relative text-[1.125rem] inline-block font-titulo-2 text-black text-center min-w-[3.375rem]">
-                  Buscar
+                  {t.common.search}
                 </b>
               </button>
             </div>

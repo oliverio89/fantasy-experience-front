@@ -1,11 +1,13 @@
 import { FunctionComponent } from "react";
 import Header from "../components/Header";
+import { useTranslation } from "../i18n";
 import BestMasters from "../components/BestMasters";
 import NextGames from "../components/NextGames";
 import UpcomingGamesCarousel from "../components/UpcomingGamesCarousel";
 import OurComunityOnline from "../components/OurComunityOnline";
 
 const HomeV: FunctionComponent = () => {
+  const { t } = useTranslation();
   return (
     <div className="w-full relative bg-white overflow-y-auto flex flex-col items-start justify-start leading-[normal] tracking-[normal]">
       <Header />
@@ -14,21 +16,15 @@ const HomeV: FunctionComponent = () => {
         <img
           className="h-[431px] flex-1 relative rounded-xl max-w-full overflow-hidden object-cover min-w-[352px] z-[1] mq750:min-w-full"
           loading="lazy"
-          alt=""
+          alt={t.home.heroImageAlt}
           src="/konradkollerlctjo2d9-2cunsplash-1@2x.png"
         />
         <div className="flex-1 flex flex-col items-start justify-start min-w-[352px] min-h-[431px] max-w-full mq750:min-w-full mq1050:min-h-[auto]">
           <h1 className="m-0 relative text-inherit leading-[80px] font-extrabold font-[inherit] z-[1] mq1050:text-[50px] mq1050:leading-[48px] mq450:text-11xl mq450:leading-[32px]">
-            <p className="m-0">Somos Fantasy Experience</p>
+            <p className="m-0">{t.home.sectionTitle}</p>
           </h1>
           <div className="m-2 self-stretch relative text-lg leading-[26px] text-darkslategray z-[2]">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
-            quae ab illo inventore veritatis et quasi architecto beatae vitae
-            dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
-            aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
-            eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est,
-            qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.
+            {t.home.sectionDescription}
           </div>
         </div>
       </section>

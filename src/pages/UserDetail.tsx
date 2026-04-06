@@ -12,6 +12,7 @@ import { Profile, ProfileService } from "../services/profileService";
 import { ImageUpload } from "../components/ImageUpload";
 import { useToast } from "../context/ToastContext";
 import PartidaCard, { Partida } from "../components/PartidaCard";
+import { useTranslation } from "../i18n";
 
 // Helper for Array inputs (Systems, Tags, etc.)
 const ArrayInput: FunctionComponent<{
@@ -78,6 +79,7 @@ const UserDetail: FunctionComponent = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,7 +125,7 @@ const UserDetail: FunctionComponent = () => {
       }
     } catch (error) {
       console.error(error);
-      showToast("Error al cargar perfil", "error");
+      showToast(t.userDetail.errorLoading, "error");
     }
   };
 
@@ -144,10 +146,10 @@ const UserDetail: FunctionComponent = () => {
       await ProfileService.updateProfile(targetUserId, formData);
       setProfile((prev) => ({ ...prev!, ...formData } as Profile));
       setIsEditing(false);
-      showToast("Perfil actualizado correctamente", "success");
+      showToast(t.userDetail.successUpdate, "success");
     } catch (error) {
       console.error(error);
-      showToast("Error al actualizar perfil", "error");
+      showToast(t.userDetail.errorUpdate, "error");
     } finally {
       setIsSaving(false);
     }
@@ -254,7 +256,7 @@ const UserDetail: FunctionComponent = () => {
   if (!profile) {
     return (
       <div className="w-full min-h-screen bg-black flex items-center justify-center text-nude">
-        Perfil no encontrado
+        {t.userDetail.notFound}
       </div>
     );
   }
@@ -282,7 +284,7 @@ const UserDetail: FunctionComponent = () => {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Volver a Masters
+            {t.userDetail.backToMasters}
           </button>
 
           {isMyProfile && (
@@ -291,13 +293,13 @@ const UserDetail: FunctionComponent = () => {
                 onClick={() => setIsEditing(true)}
                 className="bg-dark-gold text-black px-6 py-3 rounded-xl font-bold hover:brightness-110 shadow-[0px_0px_20px_rgba(212,175,55,0.3)] transition-all"
               >
-                Editar Mi Perfil
+                {t.userDetail.editProfile}
               </button>
               <button
                 onClick={handleLogout}
                 className="border border-red-500 text-red-500 px-6 py-3 rounded-xl hover:bg-red-500/10 transition-colors"
               >
-                Cerrar Sesión
+                {t.userDetail.signOut}
               </button>
             </div>
           )}
@@ -321,24 +323,24 @@ const UserDetail: FunctionComponent = () => {
               {/* Información sobre el Master */}
               <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 flex flex-col items-start justify-start p-6 box-border gap-[26.7px] max-w-full shadow-[0px_4px_10px_rgba(0,0,0,0.5)] mq450:p-4">
                 <h2 className="m-0 self-stretch relative text-15xl font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-center text-nude w-full font-titulo-2">
-                  Sobre el Máster
+                  {t.userDetail.about}
                 </h2>
 
                 <div className="self-stretch flex flex-col items-center justify-start gap-2 text-dark-gold text-center w-full">
                   <b className="self-stretch relative z-[1] text-xl font-titulo-2">
-                    Sistemas preferidos
+                    {t.userDetail.preferredSystems}
                   </b>
                   <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] font-texto-2">
                     {(profile.sistemas?.length
                       ? profile.sistemas
-                      : ["Sin sistemas definidos"]
+                      : [t.userDetail.noSystems]
                     ).join(", ")}
                   </div>
                 </div>
 
                 <div className="self-stretch flex flex-col items-center justify-start gap-1.5 text-dark-gold text-center w-full">
                   <b className="self-stretch relative z-[1] text-xl font-titulo-2">
-                    Preferencia de partidas
+                    {t.userDetail.gamePreference}
                   </b>
                   <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] font-texto-2">
                     {getDisplayGameTypes().length
@@ -349,7 +351,7 @@ const UserDetail: FunctionComponent = () => {
 
                 <div className="self-stretch flex flex-col items-center justify-start gap-[10.5px] max-w-full w-full">
                   <b className="self-stretch relative text-dark-gold z-[1] text-xl text-center w-full font-titulo-2">
-                    Tags:
+                    {t.userDetail.tagsViewLabel}
                   </b>
                   <div className="self-stretch flex flex-row flex-wrap items-center justify-center gap-2 text-base w-full">
                     {getDisplayTags().map((tag, idx) => (
@@ -362,7 +364,7 @@ const UserDetail: FunctionComponent = () => {
                     ))}
                     {!getDisplayTags().length && (
                       <span className="text-gray-500 italic text-sm">
-                        Sin tags definidos
+                        {t.userDetail.noTags}
                       </span>
                     )}
                   </div>
@@ -410,7 +412,7 @@ const UserDetail: FunctionComponent = () => {
                   {profile.fullName}
                 </h1>
                 <div className="self-stretch relative text-xl font-medium text-nude flex items-center justify-center shrink-0 z-[1] font-titulo-2">
-                  Valoración
+                  {t.userDetail.rating}
                 </div>
                 <div className="flex flex-row items-center justify-center gap-2 mt-2">
                   {renderStars(profile.rating || 0)}
@@ -420,40 +422,40 @@ const UserDetail: FunctionComponent = () => {
               {/* Bio */}
               <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 shadow-[0px_4px_10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-start p-8 gap-4 text-15xl">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-titulo-2 z-[1] mq450:text-xl mq900:text-8xl text-nude text-center w-full">
-                  Bio
+                  {t.userDetail.bio}
                 </h2>
                 <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-center font-texto-2">
-                  {profile.bio || "Sin biografía todavía."}
+                  {profile.bio || t.userDetail.noBio}
                 </div>
               </div>
 
               {/* Estilo de juego */}
               <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 shadow-[0px_4px_10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-start p-8 gap-6 text-15xl">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-titulo-2 z-[1] mq450:text-xl mq900:text-8xl text-nude text-center w-full">
-                  Estilo de juego
+                  {t.userDetail.gameStyle}
                 </h2>
                 <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-left px-8 w-full font-texto-2">
                   <p className="mb-4">
                     <strong className="text-dark-gold">
-                      Duración de sesión:
+                      {t.userDetail.sessionDuration}
                     </strong>{" "}
-                    {profile.duracionSesion?.join(", ") || "No especificado"}
+                    {profile.duracionSesion?.join(", ") || t.common.notSpecified}
                   </p>
                   <p className="mb-4">
                     <strong className="text-dark-gold">
-                      Número de jugadores:
+                      {t.userDetail.numPlayers}
                     </strong>{" "}
-                    {profile.numeroJugadores?.join(", ") || "No especificado"}
+                    {profile.numeroJugadores?.join(", ") || t.common.notSpecified}
                   </p>
                   <p className="mb-4">
                     <strong className="text-dark-gold">
-                      Estilos de juego:
+                      {t.userDetail.gameStyles}
                     </strong>{" "}
-                    {profile.estilos?.join(", ") || "No especificado"}
+                    {profile.estilos?.join(", ") || t.common.notSpecified}
                   </p>
                   <p>
-                    <strong className="text-dark-gold">Idiomas:</strong>{" "}
-                    {profile.idiomas?.join(", ") || "No especificado"}
+                    <strong className="text-dark-gold">{t.userDetail.languages}</strong>{" "}
+                    {profile.idiomas?.join(", ") || t.common.notSpecified}
                   </p>
                 </div>
               </div>
@@ -461,7 +463,7 @@ const UserDetail: FunctionComponent = () => {
               {/* Próximas partidas */}
               <div className="self-stretch rounded-xl bg-darkslategray border border-nude/10 shadow-[0px_4px_10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-start p-8 box-border gap-[27px] max-w-full text-15xl text-nude">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-titulo-2 z-[1] mq450:text-xl mq900:text-8xl text-center w-full text-nude">
-                  Próximas partidas
+                  {t.userDetail.upcomingGames}
                 </h2>
                 <div className="self-stretch flex flex-row items-center justify-center py-0 px-0 box-border max-w-full">
                   {/* Render first 2 games as rich cards, if available */}
@@ -506,7 +508,7 @@ const UserDetail: FunctionComponent = () => {
                     </div>
                   ) : (
                     <p className="text-lg text-gray-500 italic font-texto-2">
-                      No tiene próximas partidas.
+                      {t.userDetail.noUpcomingGames}
                     </p>
                   )}
                 </div>
@@ -523,14 +525,14 @@ const UserDetail: FunctionComponent = () => {
     <div className="w-full bg-black min-h-screen pt-[7.75rem] text-nude px-4">
       <div className="max-w-[1120px] mx-auto pb-20">
         <h1 className="text-4xl text-light-gold mb-8 font-titulo-2">
-          Editar Perfil
+          {t.userDetail.editProfileTitle}
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Left Column: Avatar & Basic Info */}
           <div className="md:col-span-1 flex flex-col gap-6">
             <div className="bg-darkslategray p-6 rounded-xl border border-dark-gold/20">
-              <h3 className="text-xl font-bold text-light-gold mb-4">Avatar</h3>
+              <h3 className="text-xl font-bold text-light-gold mb-4">{t.userDetail.avatarSection}</h3>
               <div className="flex flex-col items-center">
                 <img
                   src={
@@ -551,10 +553,10 @@ const UserDetail: FunctionComponent = () => {
 
             <div className="bg-darkslategray p-6 rounded-xl border border-dark-gold/20 flex flex-col gap-4">
               <h3 className="text-xl font-bold text-light-gold">
-                Información Básica
+                {t.userDetail.basicInfo}
               </h3>
               <div className="flex flex-col gap-2">
-                <label className="text-sm text-gray-400">Nombre Público</label>
+                <label className="text-sm text-gray-400">{t.userDetail.publicName}</label>
                 <input
                   className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white"
                   value={formData.fullName || ""}
@@ -564,7 +566,7 @@ const UserDetail: FunctionComponent = () => {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm text-gray-400">Nombre</label>
+                <label className="text-sm text-gray-400">{t.userDetail.firstName}</label>
                 <input
                   className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white opacity-50 cursor-not-allowed"
                   value={profile?.firstName || ""}
@@ -572,7 +574,7 @@ const UserDetail: FunctionComponent = () => {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm text-gray-400">Apellidos</label>
+                <label className="text-sm text-gray-400">{t.userDetail.lastName}</label>
                 <input
                   className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white opacity-50 cursor-not-allowed"
                   value={profile?.lastName || ""}
@@ -586,7 +588,7 @@ const UserDetail: FunctionComponent = () => {
           <div className="md:col-span-2 flex flex-col gap-6">
             <div className="bg-darkslategray p-6 rounded-xl border border-dark-gold/20">
               <h3 className="text-xl font-bold text-light-gold mb-4">
-                Biografía
+                {t.userDetail.bioLabel}
               </h3>
               <textarea
                 className="w-full h-40 bg-black/50 border border-dark-gold rounded-lg p-4 text-white resize-none"
@@ -594,72 +596,72 @@ const UserDetail: FunctionComponent = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, bio: e.target.value })
                 }
-                placeholder="Cuéntanos sobre ti, tu experiencia en rol, etc..."
+                placeholder={t.userDetail.bioPlaceholder}
               />
             </div>
 
             <div className="bg-darkslategray p-6 rounded-xl border border-dark-gold/20 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="col-span-2">
                 <h3 className="text-xl font-bold text-light-gold mb-4">
-                  Detalles de Master
+                  {t.userDetail.masterDetails}
                 </h3>
               </div>
 
               <ArrayInput
-                label="Sistemas que diriges"
+                label={t.userDetail.systemsLabel}
                 values={formData.sistemas || []}
                 onChange={(vals) =>
                   setFormData({ ...formData, sistemas: vals })
                 }
-                placeholder="D&D 5e, Pathfinder..."
+                placeholder={t.userDetail.systemsPlaceholder}
               />
 
               <ArrayInput
-                label="Estilos de juego"
+                label={t.userDetail.gameStylesLabel}
                 values={formData.estilos || []}
                 onChange={(vals) => setFormData({ ...formData, estilos: vals })}
-                placeholder="Narrativo, Combate tactico..."
+                placeholder={t.userDetail.gameStylesPlaceholder}
               />
 
               <ArrayInput
-                label="Tipos de partida"
+                label={t.userDetail.gameTypesLabel}
                 values={formData.tiposPartida || []}
                 onChange={(vals) =>
                   setFormData({ ...formData, tiposPartida: vals })
                 }
-                placeholder="Online, Presencial, One-shot..."
+                placeholder={t.userDetail.gameTypesPlaceholder}
               />
 
               <ArrayInput
-                label="Idiomas"
+                label={t.userDetail.languagesLabel}
                 values={formData.idiomas || []}
                 onChange={(vals) => setFormData({ ...formData, idiomas: vals })}
-                placeholder="Español, Inglés..."
+                placeholder={t.userDetail.languagesPlaceholder}
               />
 
               <ArrayInput
-                label="Duración de sesión habitual"
+                label={t.userDetail.sessionDurationLabel}
                 values={formData.duracionSesion || []}
                 onChange={(vals) =>
                   setFormData({ ...formData, duracionSesion: vals })
                 }
-                placeholder="3-4 horas..."
+                placeholder={t.userDetail.sessionDurationPlaceholder}
               />
 
               <ArrayInput
-                label="Número de jugadores"
+                label={t.userDetail.numPlayersLabel}
                 values={formData.numeroJugadores || []}
                 onChange={(vals) =>
                   setFormData({ ...formData, numeroJugadores: vals })
                 }
-                placeholder="4-5 jugadores..."
+                placeholder={t.userDetail.numPlayersPlaceholder}
               />
 
               <ArrayInput
-                label="Tags / Etiquetas"
+                label={t.userDetail.tagsLabel}
                 values={formData.tags || []}
                 onChange={(vals) => setFormData({ ...formData, tags: vals })}
-                placeholder="Terror, Fantasía..."
+                placeholder={t.userDetail.tagsPlaceholder}
               />
             </div>
 
@@ -668,14 +670,14 @@ const UserDetail: FunctionComponent = () => {
                 onClick={handleCancel}
                 className="border border-dark-gold text-dark-gold px-8 py-3 rounded-full hover:bg-dark-gold/10 transition-colors"
               >
-                Cancelar
+                {t.common.cancel}
               </button>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
                 className="bg-dark-gold text-black px-8 py-3 rounded-full font-bold hover:brightness-110 shadow-[0px_0px_20px_rgba(212,175,55,0.4)] transition-all"
               >
-                {isSaving ? "Guardando..." : "Guardar Cambios"}
+                {isSaving ? t.common.saving : t.userDetail.saveChanges}
               </button>
             </div>
           </div>

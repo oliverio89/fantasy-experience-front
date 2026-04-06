@@ -2,6 +2,7 @@ import { FunctionComponent, memo, useRef, useEffect } from "react";
 import PartidaCard from "./PartidaCard";
 import { useNavigate } from "react-router-dom";
 import { useProximasPartidas } from "../hooks/usePartidas";
+import { useTranslation } from "../i18n";
 
 export type UpcomingCarouselType = {
   className?: string;
@@ -10,9 +11,10 @@ export type UpcomingCarouselType = {
 const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
   ({ className = "" }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const cardContainerRef = useRef<HTMLDivElement>(null);
     const isScrollingRef = useRef(false);
-    const { partidas, loading } = useProximasPartidas(8);
+    const { partidas, loading } = useProximasPartidas(6);
 
     // Duplicar para efecto de bucle infinito (solo si hay datos)
     const extendedGameCards = partidas.length > 0
@@ -72,7 +74,7 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
         <div className="self-stretch h-[1829px] relative bg-oldlace-100 hidden" />
         <div className="w-[796px] flex flex-row items-start justify-end py-0 pl-[78px] pr-[79px] box-border max-w-full mq1050:pl-[39px] mq1050:pr-[39px] mq1050:box-border">
           <h1 className="m-0 flex-1 relative text-inherit font-extrabold font-[inherit] inline-block max-w-full z-[2] mq1050:text-21xl mq450:text-5xl">
-            Próximas partidas
+            {t.nextGamesCarousel.title}
           </h1>
         </div>
 
@@ -90,7 +92,7 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
               </div>
             ) : extendedGameCards.length === 0 ? (
               <div className="text-darkslategray text-xl py-12 px-6 font-titulo-2">
-                No hay próximas partidas disponibles aún.
+                {t.nextGamesCarousel.empty}
               </div>
             ) : (
               extendedGameCards.map((partida, index) => (
@@ -106,7 +108,7 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
           <div className="w-[507px] flex flex-row items-start justify-end py-0 px-20 box-border max-w-full mq750:pl-10 mq750:pr-10 mq750:box-border">
             <button className="cursor-pointer [border:none] py-[15.5px] pl-[93px] pr-[92px] bg-dark-gold flex-1 shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden flex flex-row items-start justify-center box-border max-w-full z-[2] hover:bg-darkgoldenrod mq450:pl-5 mq450:pr-5 mq450:box-border">
               <b className="flex-1 relative text-5xl font-titulo-2 text-black text-center">
-                Ver más partidas
+                {t.nextGamesCarousel.viewMore}
               </b>
             </button>
           </div>

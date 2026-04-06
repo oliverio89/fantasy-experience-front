@@ -1,5 +1,6 @@
 import { FunctionComponent, memo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "../i18n";
 import EmailField from "./email-field";
 import Button from "./button";
 import { supabase } from "../lib/supabase";
@@ -12,6 +13,7 @@ export type LoginFormType = {
 const LoginForm: FunctionComponent<LoginFormType> = memo(
   ({ className = "" }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState({
       email: "",
@@ -40,10 +42,7 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
 
     const onLoginClick = async () => {
       if (!formData.email || !formData.password) {
-        showModal(
-          "Datos Incompletos",
-          "Por favor, ingresa tu correo y contraseña."
-        );
+        showModal(t.login.errors.incompleteTitle, t.login.errors.incompleteMsg);
         return;
       }
 
@@ -67,21 +66,12 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
 
         // Handle specific Supabase errors
         if (errorMessage.includes("Email not confirmed")) {
-          showModal(
-            "Correo no confirmado",
-            "Debes confirmar tu correo electrónico antes de entrar. Por favor revisa tu bandeja de entrada o spam."
-          );
+          showModal(t.login.errors.unconfirmedTitle, t.login.errors.unconfirmedMsg);
         } else if (errorMessage.includes("Invalid login credentials")) {
           // This error is generic for security (wrong password OR user not found)
-          showModal(
-            "Error de Acceso",
-            "No pudimos iniciar sesión. Verifica que:\n1. Tu correo esté registrado.\n2. Hayas confirmado tu cuenta.\n3. La contraseña sea correcta."
-          );
+          showModal(t.login.errors.invalidTitle, t.login.errors.invalidMsg);
         } else {
-          showModal(
-            "Error",
-            "Ha ocurrido un problema al iniciar sesión. Inténtalo de nuevo más tarde."
-          );
+          showModal(t.login.errors.genericTitle, t.login.errors.genericMsg);
         }
       } finally {
         setLoading(false);
@@ -108,18 +98,18 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
         >
           <div className="self-stretch h-[52rem] relative bg-nude hidden" />
           <h1 className="m-0 self-stretch relative text-[2.25rem] font-bold font-titulo-2 text-black text-center z-[1] mq450:text-[1.375rem] mq975:text-[1.813rem]">
-            Entra a tu cuenta
+            {t.login.title}
           </h1>
           <EmailField
-            correoElectrnico="Correo electrónico"
-            ingresaTuEmailPlaceholder="Ingresa tu email"
+            correoElectrnico={t.login.emailLabel}
+            ingresaTuEmailPlaceholder={t.login.emailPlaceholder}
             name="email"
             value={formData.email}
             onChange={handleChange}
           />
           <EmailField
-            correoElectrnico="Contraseña"
-            ingresaTuEmailPlaceholder="Ingresa tu contraseña"
+            correoElectrnico={t.login.passwordLabel}
+            ingresaTuEmailPlaceholder={t.login.passwordPlaceholder}
             name="password"
             type="password"
             value={formData.password}
@@ -128,7 +118,7 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
           />
           <div className="flex flex-row items-start justify-start pt-[0rem] px-[9.812rem] pb-[2.625rem] box-border max-w-full mq725:pl-[4.875rem] mq725:pr-[4.875rem] mq725:box-border mq450:pl-[1.25rem] mq450:pr-[1.25rem] mq450:box-border">
             <Button
-              button1={loading ? "Entrando..." : "Ingresar"}
+              button1={loading ? t.login.submitting : t.login.submit}
               button1Padding="0.312rem 8.906rem"
               button1Height="2rem"
               button1Width="21.625rem"
@@ -139,12 +129,12 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
             />
           </div>
           <div className="self-stretch relative text-[1.25rem] text-black text-center z-[1] mq450:text-[1rem]">
-            <span className="font-titulo-2">{`Si no tienes cuenta, `}</span>
+            <span className="font-titulo-2">{t.login.noAccount} </span>
             <span
               className="[text-decoration:underline] font-medium font-titulo-2 cursor-pointer hover:opacity-70"
               onClick={() => navigate("/register")}
             >
-              Regístrate aquí.
+              {t.login.registerLink}
             </span>
           </div>
         </form>

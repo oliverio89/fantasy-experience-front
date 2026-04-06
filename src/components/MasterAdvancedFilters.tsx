@@ -11,6 +11,7 @@ import {
   RANGOS_PRECIO,
   DISPONIBILIDAD_MASTER,
 } from "../types/masters";
+import { useTranslation } from "../i18n";
 
 export type MasterAdvancedFiltersType = {
   className?: string;
@@ -20,6 +21,7 @@ export type MasterAdvancedFiltersType = {
 
 const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
   memo(({ className = "", filters, onFiltersChange }) => {
+    const { t } = useTranslation();
     const handleExperienciaToggle = useCallback(
       (experiencia: ExperienciaMaster) => {
         const newExperiencia = filters.experiencia.includes(experiencia)
@@ -89,7 +91,7 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
       >
         {/* Filtros de Experiencia */}
         <div className="w-full flex flex-col items-start justify-start gap-3">
-          <h3 className="text-lg text-white font-titulo-2">Experiencia</h3>
+          <h3 className="text-lg text-white font-titulo-2">{t.masterAdvancedFilters.experience}</h3>
           <div className="flex flex-row items-start justify-start gap-2 flex-wrap">
             {EXPERIENCIA_MASTER.map((experiencia) => {
               const isSelected = filters.experiencia.includes(experiencia);
@@ -113,7 +115,7 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
         {/* Filtros de Precio */}
         <div className="w-full flex flex-col items-start justify-start gap-3">
           <h3 className="text-lg text-white font-titulo-2">
-            Precio por Sesión
+            {t.masterAdvancedFilters.price}
           </h3>
           <div className="flex flex-row items-start justify-start gap-2 flex-wrap">
             {RANGOS_PRECIO.map((precio) => {
@@ -137,7 +139,7 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
 
         {/* Filtros de Disponibilidad */}
         <div className="w-full flex flex-col items-start justify-start gap-3">
-          <h3 className="text-lg text-white font-titulo-2">Disponibilidad</h3>
+          <h3 className="text-lg text-white font-titulo-2">{t.masterAdvancedFilters.availability}</h3>
           <div className="flex flex-row items-start justify-start gap-2 flex-wrap">
             {DISPONIBILIDAD_MASTER.map((disponibilidad) => {
               const isSelected =
@@ -161,7 +163,7 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
 
         {/* Filtro de Rating */}
         <div className="w-full flex flex-col items-start justify-start gap-3">
-          <h3 className="text-lg text-white font-titulo-2">Rating Mínimo</h3>
+          <h3 className="text-lg text-white font-titulo-2">{t.masterAdvancedFilters.minRating}</h3>
           <div className="flex flex-row items-center justify-start gap-2">
             <span className="text-nude text-sm">0⭐</span>
             <input
@@ -186,13 +188,13 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
               onClick={clearAllFilters}
               className="px-4 py-2 rounded-lg border border-red-400 text-red-400 hover:bg-red-400 hover:text-white transition-all duration-200 hover:scale-105"
             >
-              ✕ Limpiar Filtros Avanzados
+              {t.masterAdvancedFilters.clearButton}
             </button>
             <span className="text-light-gold text-sm">
               {filters.experiencia.length +
                 filters.disponibilidad.length +
                 (filters.ratingMin > 0 ? 1 : 0)}{" "}
-              filtros activos
+              {t.masterAdvancedFilters.activeFilters}
             </span>
           </div>
         )}

@@ -4,9 +4,11 @@ import PartidasService from "../services/partidasService";
 import { Partida } from "../components/PartidaCard";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useTranslation } from "../i18n";
 
 const DetailsGame: FunctionComponent = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { partidaId } = useParams<{ partidaId: string }>();
 
   // Usamos 'any' para permitir campos extra que puedan venir del backend aunque no estén en la interfaz base
@@ -34,13 +36,13 @@ const DetailsGame: FunctionComponent = () => {
           }
         } catch (err) {
           console.error("Error cargando partida:", err);
-          setError("No se pudo cargar la información de la partida.");
+          setError(t.detailsGame.loadError);
         } finally {
           setLoading(false);
         }
       } else {
         setLoading(false);
-        setError("ID de partida no válido");
+        setError(t.detailsGame.invalidId);
       }
     };
 
@@ -57,19 +59,17 @@ const DetailsGame: FunctionComponent = () => {
 
   const handleEliminar = useCallback(async () => {
     if (
-      confirm(
-        "¿Estás seguro de que deseas eliminar esta partida? Esta acción no se puede deshacer."
-      )
+      confirm(t.detailsGame.confirmDelete)
     ) {
       try {
         if (partidaId) {
           await PartidasService.eliminarPartida(partidaId);
-          alert("Partida eliminada correctamente.");
+          alert(t.detailsGame.deleteSuccess);
           navigate("/nextgames");
         }
       } catch (err) {
         console.error("Error al eliminar:", err);
-        alert("Hubo un error al intentar eliminar la partida.");
+        alert(t.detailsGame.deleteError);
       }
     }
   }, [partidaId, navigate]);
@@ -88,16 +88,16 @@ const DetailsGame: FunctionComponent = () => {
         // Salir
         await PartidasService.salirPartida(partidaId);
         setIsJoined(false);
-        showToast("Has salido de la partida", "info");
+        showToast(t.detailsGame.leftGame, "info");
       } else {
         // Unirse
         // Check if full
         if (Number(partida.jugadoresActuales) >= Number(partida.jugadores)) {
-          throw new Error("La partida está completa");
+          throw new Error(t.detailsGame.gameFull);
         }
         await PartidasService.unirsePartida(partidaId);
         setIsJoined(true);
-        showToast("¡Te has apuntado a la partida!", "success");
+        showToast(t.detailsGame.joinedGame, "success");
       }
 
       // Refrescar datos de la partida para actualizar slots
@@ -107,7 +107,7 @@ const DetailsGame: FunctionComponent = () => {
       setPartida(updatedPartida);
     } catch (error: any) {
       console.error("Error al cambiar estado unirse:", error);
-      showToast(error.message || "Error al realizar la acción", "error");
+      showToast(error.message || t.detailsGame.actionError, "error");
     } finally {
       setJoinLoading(false);
     }
@@ -117,7 +117,7 @@ const DetailsGame: FunctionComponent = () => {
     return (
       <div className="w-full h-screen bg-black flex items-center justify-center">
         <div className="text-white text-xl font-radio-option">
-          Cargando detalles de la partida...
+          {t.detailsGame.loading}
         </div>
       </div>
     );
@@ -127,13 +127,13 @@ const DetailsGame: FunctionComponent = () => {
     return (
       <div className="w-full h-screen bg-black flex flex-col items-center justify-center gap-4">
         <div className="text-red-500 text-xl font-radio-option">
-          {error || "Partida no encontrada"}
+          {error || t.detailsGame.notFound}
         </div>
         <button
           onClick={handleVolver}
           className="py-2 px-4 bg-dark-gold rounded-xl cursor-pointer"
         >
-          Volver
+          {t.detailsGame.back}
         </button>
       </div>
     );
@@ -152,8 +152,8 @@ const DetailsGame: FunctionComponent = () => {
               {partida.titulo}
             </h1>
             <div className="self-stretch h-[2.688rem] relative text-[1.125rem] leading-[1.625rem] whitespace-pre-wrap flex items-center shrink-0 z-[2] mt-[-0.625rem]">
-              Detalles de la partida organizada por{" "}
-              {partida.masterName || "Master Desconocido"}
+              {t.detailsGame.organizedBy}{" "}
+              {partida.masterName || t.detailsGame.unknownMaster}
             </div>
           </div>
 
@@ -171,7 +171,7 @@ const DetailsGame: FunctionComponent = () => {
                       src="/group-95.svg"
                     />
                     <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
-                      Información de la partida
+                      {t.detailsGame.gameInfo}
                     </b>
                   </div>
 
@@ -180,7 +180,7 @@ const DetailsGame: FunctionComponent = () => {
                     <div className="self-stretch flex flex-col items-start justify-start gap-[2rem] mq450:gap-[1rem]">
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[15.688rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Imagen de partida
+                          {t.detailsGame.imageAlt}
                         </div>
                         <img
                           className="self-stretch flex-1 relative rounded-xl max-w-full overflow-hidden max-h-[300px] object-cover z-[2]"
@@ -197,7 +197,7 @@ const DetailsGame: FunctionComponent = () => {
                       <div className="self-stretch flex flex-col items-start justify-start gap-[1.312rem]">
                         <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                           <div className="w-[15.044rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                            Descripción
+                            {t.detailsGame.description}
                           </div>
                           <div className="border-nude border-[1px] border-solid bg-[transparent] h-[9.375rem] w-auto [outline:none] self-stretch rounded-3xs box-border flex flex-row items-start justify-start py-[0.25rem] px-[0.562rem] font-radio-option font-light text-[0.875rem] text-nude z-[2] overflow-auto">
                             {partida.descripcion}
@@ -206,7 +206,7 @@ const DetailsGame: FunctionComponent = () => {
 
                         <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                           <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                            Tags
+                            {t.detailsGame.tags}
                           </div>
                           <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-end justify-between py-[0rem] pl-[0.562rem] pr-[0.75rem] gap-[1.25rem] z-[2]">
                             <div className="h-[2.5rem] w-[18rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -224,7 +224,7 @@ const DetailsGame: FunctionComponent = () => {
                     <div className="self-stretch flex flex-col items-start justify-start gap-[2.225rem] mq450:gap-[1.125rem]">
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.106rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Título de la partida
+                          {t.detailsGame.titleField}
                         </div>
                         <div className="self-stretch flex flex-row items-start justify-start py-[0rem] px-[0.875rem] relative">
                           <div className="h-full w-full absolute !m-[0] top-[0rem] right-[0rem] bottom-[0rem] left-[0rem] [filter:blur(1px)] rounded-xl border-dark-gold border-[1px] border-solid box-border mix-blend-normal z-[2]" />
@@ -236,7 +236,7 @@ const DetailsGame: FunctionComponent = () => {
 
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[13.288rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Tipo de partida
+                          {t.detailsGame.type}
                         </div>
                         <div className="flex items-center gap-3 mt-1 cursor-default">
                           <div className="w-4 h-4 rounded-full flex items-center justify-center border border-nude bg-nude">
@@ -253,7 +253,7 @@ const DetailsGame: FunctionComponent = () => {
 
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Idioma
+                          {t.detailsGame.language}
                         </div>
                         <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -265,7 +265,7 @@ const DetailsGame: FunctionComponent = () => {
 
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Edad mínima
+                          {t.detailsGame.minAge}
                         </div>
                         <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -277,7 +277,7 @@ const DetailsGame: FunctionComponent = () => {
 
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Número de jugadores
+                          {t.detailsGame.numPlayers}
                         </div>
                         <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -289,7 +289,7 @@ const DetailsGame: FunctionComponent = () => {
 
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Temporalidad
+                          {t.detailsGame.temporality}
                         </div>
                         <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -314,14 +314,14 @@ const DetailsGame: FunctionComponent = () => {
                         src="/settings.svg"
                       />
                       <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
-                        Información de la sesión
+                        {t.detailsGame.sessionInfo}
                       </b>
                     </div>
 
                     <div className="w-[18.125rem] flex flex-col items-start justify-start gap-[3.687rem] mq450:gap-[1.813rem]">
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
-                          Recomendaciones para la partida
+                          {t.detailsGame.recommendations}
                         </div>
                         <div className="border-nude border-[1px] border-solid bg-[transparent] h-[9.375rem] w-auto [outline:none] self-stretch rounded-3xs box-border flex flex-row items-start justify-start py-[0.25rem] px-[0.562rem] font-radio-option font-light text-[0.875rem] text-nude z-[2] overflow-auto">
                           {partida.recomendaciones}
@@ -332,7 +332,7 @@ const DetailsGame: FunctionComponent = () => {
                     <div className="flex-1 flex flex-col items-start justify-start gap-[1.481rem]">
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[13.288rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Ciudad (si es presencial)
+                          {t.detailsGame.city}
                         </div>
                         <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.625rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -344,7 +344,7 @@ const DetailsGame: FunctionComponent = () => {
 
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Contacto del máster
+                          {t.detailsGame.masterContact}
                         </div>
                         <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.562rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -356,7 +356,7 @@ const DetailsGame: FunctionComponent = () => {
 
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Precio
+                          {t.detailsGame.price}
                         </div>
                         <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.562rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -368,7 +368,7 @@ const DetailsGame: FunctionComponent = () => {
 
                       <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[12.425rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Horario
+                          {t.detailsGame.schedule}
                         </div>
                         <div className="self-stretch [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.562rem] z-[2]">
                           <div className="h-[2.5rem] w-[19.25rem] relative [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
@@ -391,14 +391,14 @@ const DetailsGame: FunctionComponent = () => {
                         src="/tool.svg"
                       />
                       <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
-                        Información técnica
+                        {t.detailsGame.technicalInfo}
                       </b>
                     </div>
 
                     <div className="flex-1 flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq1050:min-w-full mq750:gap-[1.25rem] mq750:flex-wrap">
                       <div className="flex-1 flex flex-col items-start justify-start gap-[0.375rem]">
                         <div className="w-[15.044rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          Herramientas necesarias
+                          {t.detailsGame.tools}
                         </div>
                         <div className="border-nude border-[1px] border-solid bg-[transparent] h-[9.375rem] w-auto [outline:none] self-stretch rounded-3xs box-border flex flex-row items-start justify-start py-[0.625rem] px-[0.437rem] font-radio-option font-light text-[0.875rem] text-nude z-[2] overflow-auto">
                           {partida.herramientas}
@@ -408,7 +408,7 @@ const DetailsGame: FunctionComponent = () => {
                       <div className="w-[15.875rem] flex flex-col items-start justify-start gap-[1.937rem] mq450:gap-[0.938rem] mq750:flex-1">
                         <div className="self-stretch flex flex-col items-start justify-start pt-[0rem] px-[0rem] pb-[0.562rem] gap-[0.812rem]">
                           <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
-                            Uso de tarjeta X
+                            {t.detailsGame.xCardUsage}
                           </div>
                           <div className="w-[9.75rem] flex flex-row items-start justify-start py-[0rem] px-[0.125rem] box-border">
                             <div className="flex-1 flex flex-row items-start justify-between gap-[1.25rem]">
@@ -426,7 +426,7 @@ const DetailsGame: FunctionComponent = () => {
                                   </div>
                                 </div>
                                 <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
-                                  Si
+                                  {t.detailsGame.yes}
                                 </div>
                               </div>
                               <div className="flex flex-row items-start justify-start gap-[0.562rem]">
@@ -443,7 +443,7 @@ const DetailsGame: FunctionComponent = () => {
                                   </div>
                                 </div>
                                 <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
-                                  No
+                                  {t.detailsGame.no}
                                 </div>
                               </div>
                             </div>
@@ -452,7 +452,7 @@ const DetailsGame: FunctionComponent = () => {
 
                         <div className="self-stretch flex flex-col items-start justify-start gap-[0.812rem]">
                           <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
-                            ¿Uso obligatorio de cámara?
+                            {t.detailsGame.cameraRequired}
                           </div>
                           <div className="w-[9.75rem] flex flex-row items-start justify-start py-[0rem] px-[0.125rem] box-border">
                             <div className="flex-1 flex flex-row items-start justify-between gap-[1.25rem]">
@@ -471,7 +471,7 @@ const DetailsGame: FunctionComponent = () => {
                                   </div>
                                 </div>
                                 <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
-                                  Si
+                                  {t.detailsGame.yes}
                                 </div>
                               </div>
                               <div className="flex flex-row items-start justify-start gap-[0.562rem]">
@@ -489,7 +489,7 @@ const DetailsGame: FunctionComponent = () => {
                                   </div>
                                 </div>
                                 <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
-                                  No
+                                  {t.detailsGame.no}
                                 </div>
                               </div>
                             </div>
@@ -498,7 +498,7 @@ const DetailsGame: FunctionComponent = () => {
 
                         <div className="self-stretch flex flex-col items-start justify-start gap-[0.812rem]">
                           <div className="self-stretch relative text-[1.125rem] font-medium font-radio-option text-nude text-left z-[2]">
-                            ¿Uso obligatorio de micrófono?
+                            {t.detailsGame.micRequired}
                           </div>
                           <div className="w-[9.5rem] flex flex-row items-start justify-between gap-[1.25rem]">
                             <div className="w-[3.625rem] flex flex-row items-start justify-start gap-[0.562rem]">
@@ -516,7 +516,7 @@ const DetailsGame: FunctionComponent = () => {
                                 </div>
                               </div>
                               <div className="h-[2rem] flex-1 relative text-[1.125rem] font-radio-option text-nude text-left flex items-center z-[2]">
-                                Si
+                                {t.detailsGame.yes}
                               </div>
                             </div>
                             <div className="flex flex-row items-start justify-start gap-[0.562rem]">
@@ -534,7 +534,7 @@ const DetailsGame: FunctionComponent = () => {
                                 </div>
                               </div>
                               <div className="h-[2rem] relative text-[1.125rem] font-radio-option text-nude text-left flex items-center min-w-[1.625rem] z-[2]">
-                                No
+                                {t.detailsGame.no}
                               </div>
                             </div>
                           </div>
@@ -547,7 +547,7 @@ const DetailsGame: FunctionComponent = () => {
                 {/* SECCIÓN NUEVA: Jugadores Inscritos */}
                 <div className="w-full max-w-[54.5rem] flex flex-col items-start justify-start gap-[1.5rem]">
                   <b className="relative text-[1.25rem] font-radio-option text-nude whitespace-pre-wrap text-left z-[3]">
-                    Jugadores Inscritos ({partida.jugadoresActuales}/
+                    {t.detailsGame.playersEnrolled} ({partida.jugadoresActuales}/
                     {partida.jugadores})
                   </b>
                   <div className="flex flex-row flex-wrap gap-4 items-start justify-start">
@@ -576,8 +576,8 @@ const DetailsGame: FunctionComponent = () => {
                             </div>
                             <span className="text-xs text-nude text-center truncate w-full">
                               {player
-                                ? player.nombre?.split(" ")[0] || "Jugador"
-                                : "Libre"}
+                                ? player.nombre?.split(" ")[0] || t.detailsGame.playerDefault
+                                : t.detailsGame.freeSlot}
                             </span>
                           </div>
                         );
@@ -606,13 +606,13 @@ const DetailsGame: FunctionComponent = () => {
                     }`}
                   >
                     {joinLoading
-                      ? "Procesando..."
+                      ? t.detailsGame.processingButton
                       : isJoined
-                      ? "Desapuntarse"
+                      ? t.detailsGame.leaveButton
                       : Number(partida.jugadoresActuales) >=
                         Number(partida.jugadores)
-                      ? "Completa"
-                      : "Apuntarse"}
+                      ? t.detailsGame.fullButton
+                      : t.detailsGame.joinButton}
                   </b>
                 </button>
               )}
@@ -624,7 +624,7 @@ const DetailsGame: FunctionComponent = () => {
                     className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-nude/10 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-nude/20 hover:border-darkgoldenrod-100"
                   >
                     <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-white text-center min-w-[4rem]">
-                      Editar
+                      {t.detailsGame.editButton}
                     </b>
                   </button>
                   <button
@@ -632,7 +632,7 @@ const DetailsGame: FunctionComponent = () => {
                     className="cursor-pointer border-red-500 border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-red-900/20 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-red-900/40"
                   >
                     <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-red-500 text-center min-w-[4rem]">
-                      Eliminar
+                      {t.detailsGame.deleteButton}
                     </b>
                   </button>
                 </>
@@ -642,7 +642,7 @@ const DetailsGame: FunctionComponent = () => {
                 className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-[transparent] h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-darkgoldenrod-200 hover:border-darkgoldenrod-100 hover:border-[1px] hover:border-solid hover:box-border"
               >
                 <b className="flex-1 relative text-[1.125rem] inline-block font-radio-option text-dark-gold text-center min-w-[4rem]">
-                  Volver
+                  {t.detailsGame.back}
                 </b>
               </button>
             </div>

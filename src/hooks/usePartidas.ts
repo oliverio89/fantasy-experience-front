@@ -97,6 +97,8 @@ export const usePartidas = (filtros?: FiltrosPartida) => {
     filtros?.limit,
     filtros?.page,
     filtros?.busqueda,
+    filtros?.fechaInicio,
+    filtros?.fechaFin,
   ]);
 
   const recargar = useCallback(async () => {

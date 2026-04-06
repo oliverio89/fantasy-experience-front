@@ -6,6 +6,7 @@ import { useToast } from "../context/ToastContext";
 import { CustomRadio } from "../components/ui/CustomRadio";
 import { useAuth } from "../context/AuthContext";
 import { ImageUpload } from "../components/ImageUpload";
+import { useTranslation } from "../i18n";
 
 const NewGame: FunctionComponent = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const NewGame: FunctionComponent = () => {
   const isEditing = !!partidaId;
   const { showToast } = useToast();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
 
   // Wizard Step State
   const [currentStep, setCurrentStep] = useState(1);
@@ -45,18 +47,14 @@ const NewGame: FunctionComponent = () => {
   // Nuevos estados para Horario desglosado
   const [horarioDia, setHorarioDia] = useState("");
   const [horarioFrecuencia, setHorarioFrecuencia] = useState("");
+  const [sistemaJuego, setSistemaJuego] = useState("");
+  const [fechaPartida, setFechaPartida] = useState("");
 
   // UI States
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // Auth Protection
-  useEffect(() => {
-    if (!authLoading && !user) {
-      showToast("Debes iniciar sesión para crear una partida", "error");
-      navigate("/login");
-    }
-  }, [user, authLoading, navigate, showToast]);
+  // Auth state — rendering is handled via conditional return below
 
   // Sincronizar horarioDia y horarioFrecuencia con el string final horario
   useEffect(() => {
@@ -102,14 +100,7 @@ const NewGame: FunctionComponent = () => {
             partidaId
           );
           setTitulo(data.titulo || "");
-          // Normalize tipoPartida to match Radio Button values (Title Case)
-          let loadedTipo = data.tipoPartida || "";
-          if (loadedTipo) {
-            loadedTipo =
-              loadedTipo.charAt(0).toUpperCase() +
-              loadedTipo.slice(1).toLowerCase();
-          }
-          setTipoPartida(loadedTipo);
+          setTipoPartida(data.tipoPartida || "");
           setDescripcion(data.descripcion || "");
           setImagenUrl(data.imagenUrl || "");
           setIdioma(data.idioma || "");
@@ -153,6 +144,8 @@ const NewGame: FunctionComponent = () => {
           setUsoTarjetaX(!!data.usoTarjetaX);
           setObligatorioCamara(!!data.obligatorioCamara);
           setObligatorioMicrofono(!!data.obligatorioMicrofono);
+          setSistemaJuego(data.sistemaJuego || "");
+          setFechaPartida(data.fecha ? data.fecha.split("T")[0] : "");
         } catch (err) {
           console.error("Error cargando partida:", err);
           showToast("Error al cargar la partida", "error");
@@ -231,13 +224,13 @@ const NewGame: FunctionComponent = () => {
 
       const datosPartida: any = {
         titulo,
-        sistemaJuego: "D&D 5e",
-        fecha: new Date().toISOString().split("T")[0],
+        sistemaJuego: sistemaJuego || "Sin especificar",
+        fecha: fechaPartida || new Date().toISOString().split("T")[0],
         descripcion,
         imagenUrl:
           imagenUrl ||
           "https://images.unsplash.com/photo-1642132652859-3ef5a92e6f45?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-        tipoPartida: tipoPartida.toLowerCase(),
+        tipoPartida: tipoPartida,
         rating: 0,
         idioma,
         edadMinima,
@@ -292,12 +285,70 @@ const NewGame: FunctionComponent = () => {
     obligatorioMicrofono,
     imagenUrl,
     tags,
+    sistemaJuego,
+    fechaPartida,
     isEditing,
     partidaId,
     navigate,
     showToast,
     currentStep,
   ]);
+
+  // Cargando sesión
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="loader" />
+      </div>
+    );
+  }
+
+  // No hay sesión activa → pantalla de aviso
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6 py-20 text-center">
+        <div className="max-w-lg flex flex-col items-center gap-8">
+          {/* Icono */}
+          <div className="w-24 h-24 rounded-full bg-dark-gold/10 border border-dark-gold/30 flex items-center justify-center">
+            <svg className="w-12 h-12 text-dark-gold" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z" />
+            </svg>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h1 className="m-0 text-oldlace-100 font-extrabold font-titulo-2 whitespace-pre-line" style={{ fontSize: "2rem" }}>
+              {t.newGame.authTitle}
+            </h1>
+            <p className="m-0 text-oldlace-100/60 text-lg font-titulo-2 leading-relaxed">
+              {t.newGame.authDescription}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+            <button
+              onClick={() => navigate("/register")}
+              className="flex-1 py-3 px-6 bg-dark-gold text-black font-bold rounded-full font-titulo-2 text-lg cursor-pointer border-none hover:bg-goldenrod transition-colors duration-200"
+            >
+              {t.newGame.createAccount}
+            </button>
+            <button
+              onClick={() => navigate("/login")}
+              className="flex-1 py-3 px-6 bg-transparent text-dark-gold font-bold rounded-full font-titulo-2 text-lg cursor-pointer border border-dark-gold hover:bg-dark-gold/10 transition-colors duration-200"
+            >
+              {t.newGame.loginButton}
+            </button>
+          </div>
+
+          <button
+            onClick={() => navigate("/nextgames")}
+            className="text-oldlace-100/40 text-base font-titulo-2 cursor-pointer bg-transparent border-none hover:text-oldlace-100/70 transition-colors underline"
+          >
+            {t.newGame.browseGames}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full relative bg-white overflow-hidden flex flex-col items-start justify-start leading-[normal] tracking-[normal]">
@@ -311,12 +362,10 @@ const NewGame: FunctionComponent = () => {
           {/* Header Title */}
           <div className="self-stretch flex flex-col items-start justify-start">
             <h1 className="m-0 self-stretch relative text-inherit font-extrabold font-[inherit] z-[2] mq1050:text-[1.813rem] mq1050:leading-[1.75rem] mq450:text-[1.375rem] mq450:leading-[1.313rem]">
-              {isEditing ? "Editar Partida" : "Nueva Partida"}
+              {isEditing ? t.newGame.titleEdit : t.newGame.titleCreate}
             </h1>
             <div className="self-stretch h-[2.688rem] relative text-[1.125rem] leading-[1.625rem] flex items-center shrink-0 z-[2] mt-[-0.625rem]">
-              {isEditing
-                ? "Modifica los datos de tu partida existente"
-                : "Rellena los campos para crear una nueva partida"}
+              {isEditing ? t.newGame.subtitleEdit : t.newGame.subtitleCreate}
             </div>
           </div>
 
@@ -327,7 +376,7 @@ const NewGame: FunctionComponent = () => {
                   {/* Title */}
                   <div>
                     <label className="block text-nude mb-2 font-radio-option">
-                      Título de la Partida *
+                      {t.newGame.titleLabel}
                     </label>
                     <input
                       className={`${INPUT_STYLE} ${
@@ -335,7 +384,7 @@ const NewGame: FunctionComponent = () => {
                       }`}
                       value={titulo}
                       onChange={(e) => setTitulo(e.target.value)}
-                      placeholder="Ej: La Maldición de Strahd"
+                      placeholder={t.newGame.titlePlaceholder}
                     />
                     {renderError("titulo")}
                   </div>
@@ -343,7 +392,7 @@ const NewGame: FunctionComponent = () => {
                   {/* Description */}
                   <div>
                     <label className="block text-nude mb-2 font-radio-option">
-                      Descripción *
+                      {t.newGame.descriptionLabel}
                     </label>
                     <textarea
                       className={`${INPUT_STYLE} h-32 ${
@@ -351,7 +400,7 @@ const NewGame: FunctionComponent = () => {
                       }`}
                       value={descripcion}
                       onChange={(e) => setDescripcion(e.target.value)}
-                      placeholder="Describe de qué va tu partida..."
+                      placeholder={t.newGame.descriptionPlaceholder}
                     />
                     {renderError("descripcion")}
                   </div>
@@ -359,7 +408,7 @@ const NewGame: FunctionComponent = () => {
                   {/* Image URL - Drag & Drop */}
                   <div>
                     <label className="block text-nude mb-2 font-radio-option">
-                      Imagen de Portada *
+                      {t.newGame.imageLabel}
                     </label>
                     <div className="mb-2">
                       <ImageUpload
@@ -369,10 +418,23 @@ const NewGame: FunctionComponent = () => {
                     </div>
                   </div>
 
+                  {/* Sistema de Juego */}
+                  <div>
+                    <label className="block text-nude mb-2 font-radio-option">
+                      {t.newGame.systemLabel}
+                    </label>
+                    <input
+                      className={INPUT_STYLE}
+                      value={sistemaJuego}
+                      onChange={(e) => setSistemaJuego(e.target.value)}
+                      placeholder={t.newGame.systemPlaceholder}
+                    />
+                  </div>
+
                   {/* Tipo Partida */}
                   <div>
                     <label className="block text-nude mb-4 font-radio-option">
-                      Tipo de Partida *
+                      {t.newGame.typeLabel}
                     </label>
                     <div className="flex gap-4">
                       {["Presencial", "Digital", "Online"].map((type) => (
@@ -395,7 +457,7 @@ const NewGame: FunctionComponent = () => {
                   </div>
 
                   <div>
-                    <label className="block text-nude mb-4">Etiquetas</label>
+                    <label className="block text-nude mb-4">{t.newGame.tagsLabel}</label>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {PRESET_TAGS.map((tag) => (
                         <button
@@ -453,7 +515,7 @@ const NewGame: FunctionComponent = () => {
                   <div className="rounded-xl bg-oldlace-300 flex items-center p-4 gap-2 z-[2] w-fit">
                     <img src="/settings.svg" alt="" className="w-6 h-6" />
                     <b className="text-[1.25rem] text-nude">
-                      Detalles de la Sesión
+                      {t.newGame.step2Header}
                     </b>
                   </div>
 
@@ -464,7 +526,7 @@ const NewGame: FunctionComponent = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-nude mb-2 font-radio-option">
-                            Nº Jugadores *
+                            {t.newGame.playersLabel}
                           </label>
                           <input
                             type="number"
@@ -481,7 +543,7 @@ const NewGame: FunctionComponent = () => {
 
                         <div>
                           <label className="block text-nude mb-2 font-radio-option">
-                            Edad Mínima
+                            {t.newGame.ageLabel}
                           </label>
                           <input
                             className={INPUT_STYLE.replace("w-full", "w-32")}
@@ -495,7 +557,7 @@ const NewGame: FunctionComponent = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-nude mb-2 font-radio-option">
-                            Sesiones
+                            {t.newGame.sessionsLabel}
                           </label>
                           <input
                             type="number"
@@ -507,7 +569,7 @@ const NewGame: FunctionComponent = () => {
                         </div>
                         <div>
                           <label className="block text-nude mb-2 font-radio-option">
-                            Precio (€)
+                            {t.newGame.priceLabel}
                           </label>
                           <input
                             type="number"
@@ -521,7 +583,21 @@ const NewGame: FunctionComponent = () => {
 
                       <div>
                         <label className="block text-nude mb-2 font-radio-option">
-                          Ciudad (Si es presencial)
+                          {t.newGame.dateLabel}
+                        </label>
+                        <input
+                          type="date"
+                          className={INPUT_STYLE}
+                          value={fechaPartida}
+                          min={new Date().toISOString().split("T")[0]}
+                          onChange={(e) => setFechaPartida(e.target.value)}
+                          style={{ colorScheme: "dark" }}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-nude mb-2 font-radio-option">
+                          {t.newGame.cityLabel}
                         </label>
                         <input
                           className={`${INPUT_STYLE} ${
@@ -539,15 +615,15 @@ const NewGame: FunctionComponent = () => {
                     <div className="flex flex-col gap-6">
                       <div>
                         <label className="block text-nude mb-4 text-lg font-radio-option">
-                          Horario
+                          {t.newGame.scheduleLabel}
                         </label>
                         <div className="grid grid-cols-2 gap-8">
                           {/* Momento */}
                           <div className="flex flex-col gap-2">
                             <span className="text-nude/70 text-xs font-bold uppercase tracking-wider font-radio-option">
-                              Momento
+                              {t.newGame.scheduleMoment}
                             </span>
-                            {["Mañana", "Tarde", "A convenir"].map((opt) => (
+                            {[t.newGame.scheduleMorning, t.newGame.scheduleAfternoon, t.newGame.scheduleToBeAgreed].map((opt) => (
                               <label
                                 key={opt}
                                 className="flex items-center text-nude gap-2 cursor-pointer hover:opacity-80 font-radio-option"
@@ -570,12 +646,12 @@ const NewGame: FunctionComponent = () => {
                           {/* Frecuencia */}
                           <div className="flex flex-col gap-2">
                             <span className="text-nude/70 text-xs font-bold uppercase tracking-wider font-radio-option">
-                              Frecuencia
+                              {t.newGame.scheduleFrequency}
                             </span>
                             {[
-                              "Semanalmente",
-                              "Quincenalmente",
-                              "A convenir",
+                              t.newGame.scheduleWeekly,
+                              t.newGame.scheduleFortnightly,
+                              t.newGame.scheduleToBeAgreed,
                             ].map((opt) => (
                               <label
                                 key={opt}
@@ -600,10 +676,10 @@ const NewGame: FunctionComponent = () => {
 
                       <div>
                         <label className="block text-nude mb-2 font-radio-option">
-                          Idioma *
+                          {t.newGame.languageLabel}
                         </label>
                         <div className="flex gap-4">
-                          {["Español", "Inglés"].map((lang) => (
+                          {[t.newGame.languageSpanish, t.newGame.languageEnglish].map((lang) => (
                             <label
                               key={lang}
                               className="flex items-center text-nude gap-2 cursor-pointer hover:opacity-80 font-radio-option"
@@ -624,11 +700,11 @@ const NewGame: FunctionComponent = () => {
 
                       <div>
                         <label className="block text-nude mb-2 font-radio-option">
-                          Contacto del Master
+                          {t.newGame.contactLabel}
                         </label>
                         <input
                           className={INPUT_STYLE}
-                          placeholder="Discord, Email..."
+                          placeholder={t.newGame.contactPlaceholder}
                           value={contactoMaster}
                           onChange={(e) => setContactoMaster(e.target.value)}
                         />
@@ -636,11 +712,11 @@ const NewGame: FunctionComponent = () => {
 
                       <div>
                         <label className="block text-nude mb-2 font-radio-option">
-                          Recomendaciones
+                          {t.newGame.recommendationsLabel}
                         </label>
                         <textarea
                           className={`${INPUT_STYLE} h-24`}
-                          placeholder="Traer dados propios, tener webcam..."
+                          placeholder={t.newGame.recommendationsPlaceholder}
                           value={recomendaciones}
                           onChange={(e) => setRecomendaciones(e.target.value)}
                         />
@@ -656,18 +732,18 @@ const NewGame: FunctionComponent = () => {
                   <div className="rounded-xl bg-oldlace-300 flex items-center p-4 gap-2 z-[2] w-fit">
                     <img src="/tool.svg" alt="" className="w-6 h-6" />
                     <b className="text-[1.25rem] text-nude">
-                      Requisitos Técnicos
+                      {t.newGame.step3Header}
                     </b>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                       <label className="block text-nude mb-2 font-radio-option">
-                        Herramientas Necesarias
+                        {t.newGame.toolsLabel}
                       </label>
                       <textarea
                         className={INPUT_STYLE + " h-32"}
-                        placeholder="Roll20, Discord, D&D Beyond..."
+                        placeholder={t.newGame.toolsPlaceholder}
                         value={herramientas}
                         onChange={(e) => setHerramientas(e.target.value)}
                       />
@@ -677,84 +753,54 @@ const NewGame: FunctionComponent = () => {
                       {/* Toggles */}
                       <div className="flex flex-col gap-3">
                         <span className="text-nude text-lg">
-                          Uso de tarjeta X
+                          {t.newGame.xCardLabel}
                         </span>
                         <div className="flex gap-8">
                           <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                             <CustomRadio checked={usoTarjetaX} />
-                            <input
-                              type="radio"
-                              checked={usoTarjetaX}
-                              onChange={() => setUsoTarjetaX(true)}
-                              className="hidden"
-                            />
-                            Si
+                            <input type="radio" checked={usoTarjetaX} onChange={() => setUsoTarjetaX(true)} className="hidden" />
+                            {t.newGame.optionYes}
                           </label>
                           <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                             <CustomRadio checked={!usoTarjetaX} />
-                            <input
-                              type="radio"
-                              checked={!usoTarjetaX}
-                              onChange={() => setUsoTarjetaX(false)}
-                              className="hidden"
-                            />
-                            No
+                            <input type="radio" checked={!usoTarjetaX} onChange={() => setUsoTarjetaX(false)} className="hidden" />
+                            {t.newGame.optionNo}
                           </label>
                         </div>
                       </div>
 
                       <div className="flex flex-col gap-3">
                         <span className="text-nude text-lg">
-                          ¿Uso obligatorio de cámara?
+                          {t.newGame.cameraLabel}
                         </span>
                         <div className="flex gap-8">
                           <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                             <CustomRadio checked={obligatorioCamara} />
-                            <input
-                              type="radio"
-                              checked={obligatorioCamara}
-                              onChange={() => setObligatorioCamara(true)}
-                              className="hidden"
-                            />
-                            Si
+                            <input type="radio" checked={obligatorioCamara} onChange={() => setObligatorioCamara(true)} className="hidden" />
+                            {t.newGame.optionYes}
                           </label>
                           <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                             <CustomRadio checked={!obligatorioCamara} />
-                            <input
-                              type="radio"
-                              checked={!obligatorioCamara}
-                              onChange={() => setObligatorioCamara(false)}
-                              className="hidden"
-                            />
-                            No
+                            <input type="radio" checked={!obligatorioCamara} onChange={() => setObligatorioCamara(false)} className="hidden" />
+                            {t.newGame.optionNo}
                           </label>
                         </div>
                       </div>
 
                       <div className="flex flex-col gap-3">
                         <span className="text-nude text-lg">
-                          ¿Uso obligatorio de micrófono?
+                          {t.newGame.micLabel}
                         </span>
                         <div className="flex gap-8">
                           <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                             <CustomRadio checked={obligatorioMicrofono} />
-                            <input
-                              type="radio"
-                              checked={obligatorioMicrofono}
-                              onChange={() => setObligatorioMicrofono(true)}
-                              className="hidden"
-                            />
-                            Si
+                            <input type="radio" checked={obligatorioMicrofono} onChange={() => setObligatorioMicrofono(true)} className="hidden" />
+                            {t.newGame.optionYes}
                           </label>
                           <label className="flex items-center text-nude gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                             <CustomRadio checked={!obligatorioMicrofono} />
-                            <input
-                              type="radio"
-                              checked={!obligatorioMicrofono}
-                              onChange={() => setObligatorioMicrofono(false)}
-                              className="hidden"
-                            />
-                            No
+                            <input type="radio" checked={!obligatorioMicrofono} onChange={() => setObligatorioMicrofono(false)} className="hidden" />
+                            {t.newGame.optionNo}
                           </label>
                         </div>
                       </div>
@@ -773,7 +819,7 @@ const NewGame: FunctionComponent = () => {
                   }}
                   className="px-6 py-2 border border-dark-gold text-dark-gold rounded-full hover:bg-dark-gold hover:text-black transition-all duration-300 font-radio-option"
                 >
-                  {currentStep === 1 ? "Cancelar" : "Anterior"}
+                  {currentStep === 1 ? t.newGame.btnCancel : t.newGame.btnPrev}
                 </button>
 
                 {currentStep < 3 ? (
@@ -782,7 +828,7 @@ const NewGame: FunctionComponent = () => {
                     onClick={handleNext}
                     className="px-8 py-2 bg-dark-gold text-black rounded-full font-bold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg font-radio-option"
                   >
-                    Siguiente
+                    {t.newGame.btnNext}
                   </button>
                 ) : (
                   <button
@@ -792,10 +838,10 @@ const NewGame: FunctionComponent = () => {
                     className="px-8 py-2 bg-dark-gold text-black rounded-full font-bold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg disabled:opacity-50 flex items-center gap-2 font-radio-option"
                   >
                     {loading
-                      ? "Guardando..."
+                      ? t.common.saving
                       : isEditing
-                      ? "Guardar Cambios"
-                      : "Crear Partida"}
+                      ? t.newGame.btnSave
+                      : t.newGame.btnCreate}
                   </button>
                 )}
               </div>

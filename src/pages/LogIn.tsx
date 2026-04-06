@@ -1,9 +1,11 @@
 import { FunctionComponent, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/login-form";
+import { useTranslation } from "../i18n";
 
 const LogInV: FunctionComponent = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const onVolverAHomeClick = useCallback(() => {
     navigate("/");
@@ -21,7 +23,7 @@ const LogInV: FunctionComponent = () => {
           className="self-stretch relative text-[1.5rem] [text-decoration:underline] font-titulo-2 text-nude cursor-pointer z-[1] mq450:text-[1.188rem]"
           onClick={onVolverAHomeClick}
         >
-          volver a home
+          {t.common.backHome}
         </b>
       </div>
       <LoginForm />

@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/button";
 import PartidaCard, { Partida } from "../components/PartidaCard";
 import { usePartidas } from "../hooks/usePartidas"; // Usar el hook genérico
+import { useTranslation } from "../i18n";
 
 export type RootType = {
   className?: string;
@@ -17,10 +18,13 @@ export type RootType = {
 
 const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [filtroTipo, setFiltroTipo] = useState<string[]>([]);
   const [busqueda, setBusqueda] = useState<string>("");
   const [debouncedBusqueda, setDebouncedBusqueda] = useState<string>("");
   const [filtroTags, setFiltroTags] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const LIMIT = 12;
 
   // States for new filters
   const [filtroSistema, setFiltroSistema] = useState<string>("");
@@ -42,12 +46,14 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
     partidas: proximasPartidas,
     loading,
     error,
+    paginacion,
   } = usePartidas({
-    limit: 12,
+    limit: LIMIT,
+    page: currentPage,
     tipo: filtroTipo.length > 0 ? filtroTipo : undefined,
     busqueda: debouncedBusqueda,
     sistemaJuego: filtroSistema || undefined,
-    fechaInicio: filtroFecha || undefined,
+    fechaInicio: filtroFecha || new Date().toISOString().split("T")[0],
   });
 
   const onButtonClick = useCallback(() => {
@@ -60,6 +66,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
     setFiltroTags([]);
     setFiltroSistema("");
     setFiltroFecha("");
+    setCurrentPage(1);
   }, []);
 
   const handleBuscar = useCallback(() => {
@@ -85,6 +92,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
         return [...prev, tipo];
       }
     });
+    setCurrentPage(1);
   }, []);
 
   const toggleTagFiltro = useCallback((tag: string) => {
@@ -110,10 +118,10 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
         {/* Header con título y botón */}
         <header className="self-stretch flex flex-row items-start justify-between pt-4 px-0 pb-0 gap-4 text-left text-81xl text-dark-gold font-texto mq1050:flex-wrap">
           <h1 className="m-0 text-inherit leading-[80px] font-extrabold font-[inherit] flex items-center whitespace-nowrap mq1050:text-[60px] mq1050:leading-[64px] mq450:text-[40px] mq450:leading-[48px]">
-            Próximas partidas
+            {t.gamesPage.title}
           </h1>
           <Button
-            button1="Crear nueva partida"
+            button1={t.gamesPage.createButton}
             button1Padding="10px 54px"
             button1Height="42px"
             button1Width="250px"
@@ -130,27 +138,21 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
 
         {/* Descripción */}
         <div className="self-stretch text-left text-lg text-white leading-[26px] font-texto">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
+          {t.gamesPage.description}
         </div>
 
         {/* Filtros y búsqueda */}
         <div className="self-stretch flex flex-col items-start justify-start gap-[5px] max-w-full">
           <div className="text-left text-lg text-white leading-[26px] font-texto mb-2">
-            Elije el tipo de partida :
+            {t.gamesPage.filterTypeLabel}
           </div>
 
           {/* Botones de filtro - SIN "Todos" */}
           <div className="flex flex-row items-start justify-start gap-2.5 mb-[27px] flex-wrap">
             <button
-              onClick={() => toggleFiltro("online")}
+              onClick={() => toggleFiltro("Online")}
               className={`h-[30px] px-4 cursor-pointer [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-center justify-center py-[3px] transition-all ${
-                filtroTipo.includes("online")
+                filtroTipo.includes("Online")
                   ? "bg-nude text-black"
                   : "bg-transparent text-nude hover:bg-nude/20"
               }`}
@@ -160,9 +162,9 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               </span>
             </button>
             <button
-              onClick={() => toggleFiltro("presencial")}
+              onClick={() => toggleFiltro("Presencial")}
               className={`h-[30px] px-4 cursor-pointer [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-center justify-center py-[3px] transition-all ${
-                filtroTipo.includes("presencial")
+                filtroTipo.includes("Presencial")
                   ? "bg-nude text-black"
                   : "bg-transparent text-nude hover:bg-nude/20"
               }`}
@@ -172,9 +174,9 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               </span>
             </button>
             <button
-              onClick={() => toggleFiltro("digital")}
+              onClick={() => toggleFiltro("Digital")}
               className={`h-[30px] px-4 cursor-pointer [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-center justify-center py-[3px] transition-all ${
-                filtroTipo.includes("digital")
+                filtroTipo.includes("Digital")
                   ? "bg-nude text-black"
                   : "bg-transparent text-nude hover:bg-nude/20"
               }`}
@@ -188,38 +190,38 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
           {/* Filtros Avanzados: Sistema y Fecha */}
           <div className="self-stretch flex flex-col items-start justify-start gap-[5px] max-w-full mb-[27px]">
             <div className="text-left text-lg text-white leading-[26px] font-texto mb-2">
-              Filtros adicionales:
+              {t.gamesPage.advancedFiltersTitle}
             </div>
             <div className="flex flex-row gap-4 flex-wrap">
               {/* Filtro Sistema */}
               <select
                 value={filtroSistema}
-                onChange={(e) => setFiltroSistema(e.target.value)}
+                onChange={(e) => { setFiltroSistema(e.target.value); setCurrentPage(1); }}
                 className="h-[42px] px-4 rounded-xl border-nude border-[1px] border-solid bg-transparent text-nude font-texto text-base focus:outline-none focus:border-dark-gold cursor-pointer"
               >
                 <option value="" className="bg-black text-nude">
-                  Todos los sistemas
+                  {t.gamesPage.allSystems}
                 </option>
                 <option value="D&D 5e" className="bg-black text-nude">
-                  D&D 5e
+                  {t.gamesPage.systemDnD}
                 </option>
                 <option value="Cthulhu" className="bg-black text-nude">
-                  Cthulhu
+                  {t.gamesPage.systemCthulhu}
                 </option>
                 <option value="Pathfinder 2e" className="bg-black text-nude">
-                  Pathfinder 2e
+                  {t.gamesPage.systemPathfinder}
                 </option>
                 <option value="Vampiro" className="bg-black text-nude">
-                  Vampiro
+                  {t.gamesPage.systemVampiro}
                 </option>
                 <option value="Otro" className="bg-black text-nude">
-                  Otro
+                  {t.gamesPage.systemOther}
                 </option>
               </select>
 
               {/* Filtro Fecha Inicio */}
               <div className="flex flex-row items-center gap-2">
-                <span className="text-nude font-texto">Desde:</span>
+                <span className="text-nude font-texto">{t.gamesPage.dateFromLabel}</span>
                 <input
                   type="date"
                   value={filtroFecha}
@@ -233,14 +235,14 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
           {/* Campo de búsqueda */}
           <div className="self-stretch flex flex-col items-start justify-start gap-[5px] max-w-full">
             <div className="text-left text-lg text-white leading-[26px] font-texto mb-2">
-              Busca una partida por título de la partida o nombre del Máster:
+              {t.gamesPage.searchLabel}
             </div>
             <div className="self-stretch flex flex-row items-center justify-start gap-5 max-w-full mq1050:flex-wrap">
               <input
                 type="text"
                 value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Escribe el título de la partida o el nombre del Máster"
+                onChange={(e) => { setBusqueda(e.target.value); setCurrentPage(1); }}
+                placeholder={t.gamesPage.searchPlaceholder}
                 className="flex-1 min-w-[300px] rounded-xl border-nude border-[1px] border-solid box-border py-3 px-[13px] h-[50px] bg-transparent text-nude text-sm font-light font-texto placeholder:text-nude/60 focus:outline-none focus:border-dark-gold"
               />
               <button
@@ -270,7 +272,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
                   />
                 </svg>
                 <b className="relative text-lg font-texto text-nude group-hover:text-black">
-                  Limpiar
+                  {t.common.clear}
                 </b>
               </button>
               <button
@@ -299,7 +301,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
                     className="text-black"
                   />
                 </svg>
-                <b className="relative text-lg font-texto text-black">Buscar</b>
+                <b className="relative text-lg font-texto text-black">{t.common.search}</b>
               </button>
             </div>
           </div>
@@ -309,25 +311,19 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
         {loading ? (
           <div className="self-stretch flex flex-col items-center justify-center py-20 text-white gap-4">
             <div className="loader"></div>
-            <div className="text-nude font-texto">Cargando partidas...</div>
+            <div className="text-nude font-texto">{t.gamesPage.loading}</div>
           </div>
         ) : error ? (
           <div className="self-stretch flex flex-col items-center justify-center py-20 text-white">
             <div className="text-2xl font-bold mb-4 text-red-500">
-              Error al cargar partidas
+              {t.gamesPage.errorLoading}
             </div>
             <div className="text-nude">{error}</div>
-            <div className="mt-4 text-sm text-gray-400">
-              Asegúrate de haber ejecutado los scripts SQL en Supabase
-            </div>
           </div>
         ) : proximasPartidas.length === 0 ? (
           <div className="self-stretch flex flex-col items-center justify-center py-20 text-white">
             <div className="text-2xl font-bold mb-4">
-              No se encontraron partidas
-            </div>
-            <div className="text-nude">
-              Ejecuta el script seed.sql para insertar datos de prueba
+              {t.gamesPage.noResults}
             </div>
           </div>
         ) : (
@@ -344,48 +340,39 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
         )}
 
         {/* Paginación */}
-        <div className="self-stretch flex flex-row items-center justify-center gap-8 text-lg text-nude font-texto py-10">
-          <button className="cursor-pointer bg-transparent border-none flex flex-row items-center justify-center gap-2 hover:text-dark-gold transition-colors group">
-            <svg
-              className="w-4 h-4"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M10 12L6 8L10 4"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-nude group-hover:text-dark-gold"
-              />
-            </svg>
-            <b className="relative text-lg [text-decoration:underline] font-texto text-nude group-hover:text-dark-gold">
-              Atrás
-            </b>
-          </button>
-          <button className="cursor-pointer bg-transparent border-none flex flex-row items-center justify-center gap-2 hover:text-dark-gold transition-colors group">
-            <b className="relative text-lg [text-decoration:underline] font-texto text-nude group-hover:text-dark-gold">
-              Siguiente
-            </b>
-            <svg
-              className="w-4 h-4"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6 4L10 8L6 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-nude group-hover:text-dark-gold"
-              />
-            </svg>
-          </button>
-        </div>
+        {paginacion && paginacion.totalPages > 1 && (
+          <div className="self-stretch flex flex-row items-center justify-center gap-8 text-lg text-nude font-texto py-10">
+            {currentPage > 1 && (
+              <button
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="cursor-pointer bg-transparent border-none flex flex-row items-center justify-center gap-2 hover:text-dark-gold transition-colors group"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-nude group-hover:text-dark-gold" />
+                </svg>
+                <b className="relative text-lg [text-decoration:underline] font-texto text-nude group-hover:text-dark-gold">
+                  {t.common.back}
+                </b>
+              </button>
+            )}
+            <span className="text-nude font-texto">
+              {t.common.page} {currentPage} {t.common.of} {paginacion.totalPages}
+            </span>
+            {currentPage < paginacion.totalPages && (
+              <button
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="cursor-pointer bg-transparent border-none flex flex-row items-center justify-center gap-2 hover:text-dark-gold transition-colors group"
+              >
+                <b className="relative text-lg [text-decoration:underline] font-texto text-nude group-hover:text-dark-gold">
+                  {t.common.next}
+                </b>
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-nude group-hover:text-dark-gold" />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

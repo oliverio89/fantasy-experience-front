@@ -19,6 +19,7 @@ import NextGames from "./pages/NextGames";
 import OurMasters from "./pages/OurMasters";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
+import { I18nProvider } from "./i18n";
 
 function App() {
   const action = useNavigationType();
@@ -57,6 +58,7 @@ function App() {
   }, [pathname]);
 
   return (
+    <I18nProvider>
     <AuthProvider>
       <ToastProvider>
         <Routes>
@@ -89,6 +91,7 @@ function App() {
         </Routes>
       </ToastProvider>
     </AuthProvider>
+    </I18nProvider>
   );
 }
 export default App;

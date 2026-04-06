@@ -1,4 +1,5 @@
 import { FunctionComponent, memo, useCallback, useRef, useState, useEffect } from "react";
+import { useTranslation } from "../i18n";
 import UnifiedMasterCard from "./UnifiedMasterCard";
 import { useNavigate } from "react-router-dom";
 import {
@@ -40,6 +41,7 @@ const mapProfileToMaster = (profile: Profile): Master => ({
 const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
   ({ className = "" }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const cardContainerRef = useRef<HTMLDivElement>(null);
     const [bestMasters, setBestMasters] = useState<Master[]>([]);
     const [loading, setLoading] = useState(true);
@@ -91,11 +93,11 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
         className={`relative self-stretch bg-darkslategray flex flex-col items-start justify-start py-[100px] pl-[79px] pr-[79px] box-border gap-[62px] max-w-full text-left text-61xl text-dark-gold font-titulo-2 mq750:gap-[31px] mq750:pl-[39px] mq750:pt-[42px] mq750:pb-[42px] mq750:box-border mq1050:pt-[65px] mq1050:pb-[65px] mq1050:box-border mq450:gap-[15px] ${className}`}
       >
         <h1 className="m-0 relative text-inherit leading-[90%] inline-block max-w-full z-[1] font-[inherit] mq1050:text-21xl mq1050:leading-[43px] mq450:text-5xl mq450:leading-[29px]">
-          <p className="m-0 font-extrabold">{`Nuestros `}</p>
+          <p className="m-0 font-extrabold">{t.bestMasters.title1} </p>
           <p className="m-0">
-            <i className="font-medium">mejores</i>
+            <i className="font-medium">{t.bestMasters.title2}</i>
             <i className="font-bold font-titulo-2">{` `}</i>
-            <span className="font-extrabold font-titulo-2">Masters</span>
+            <span className="font-extrabold font-titulo-2">{t.bestMasters.title3}</span>
           </p>
         </h1>
 
@@ -120,7 +122,7 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
                 </div>
               ) : bestMasters.length === 0 ? (
                 <div className="text-nude text-xl py-12 font-titulo-2">
-                  Aún no hay masters registrados.
+                  {t.bestMasters.noMasters}
                 </div>
               ) : (
                 bestMasters.map((master) => (
@@ -128,7 +130,6 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
                     key={master.id}
                     master={master}
                     onMasterClick={onSlide1ContainerClick}
-                    useImageFormat={true}
                   />
                 ))
               )}
@@ -151,7 +152,7 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
             onClick={onViewAllMastersLinkClick}
           >
             <b className="flex-1 relative text-5xl font-titulo-2 text-black text-center">
-              Conoce a nuestros Másters
+              {t.bestMasters.viewAll}
             </b>
           </button>
         </div>

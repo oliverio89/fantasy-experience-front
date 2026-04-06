@@ -16,6 +16,7 @@ import {
 import { ProfileService, Profile } from "../services/profileService";
 import PartidaCard, { Partida } from "../components/PartidaCard";
 import PartidasService from "../services/partidasService";
+import { useTranslation } from "../i18n";
 
 export type MasterDetailType = {
   className?: string;
@@ -48,6 +49,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
   ({ className = "" }) => {
     const { masterId } = useParams<{ masterId: string }>();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [master, setMaster] = useState<Master | null>(null);
     const [partidas, setPartidas] = useState<Partida[]>([]);
     const [loadingPartidas, setLoadingPartidas] = useState(false);
@@ -144,7 +146,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
       return (
         <div className="w-full min-h-screen flex items-center justify-center">
           <div className="text-nude text-xl">
-            Cargando información del master...
+            {t.masterDetail.loading}
           </div>
         </div>
       );
@@ -171,7 +173,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Volver a Masters
+            {t.masterDetail.backToMasters}
           </button>
         </div>
 
@@ -193,12 +195,12 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               {/* Información sobre el Master */}
               <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[26.7px] max-w-full mq450:p-4 mq450:box-border">
                 <h2 className="m-0 self-stretch relative text-15xl font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl">
-                  Sobre el Máster
+                  {t.masterDetail.about}
                 </h2>
 
                 <div className="self-stretch flex flex-col items-start justify-start gap-2 text-light-gold">
                   <b className="self-stretch relative z-[1] mq450:text-lgi">
-                    Sistemas preferidos
+                    {t.masterDetail.preferredSystems}
                   </b>
                   <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1]">
                     {master.sistemas.join(", ")}
@@ -207,7 +209,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
 
                 <div className="self-stretch flex flex-col items-start justify-start gap-1.5 text-light-gold">
                   <b className="self-stretch relative z-[1] mq450:text-lgi mq450:leading-[18px]">
-                    Preferencia de partidas
+                    {t.masterDetail.gamePreference}
                   </b>
                   <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1]">
                     {master.tiposPartida.join(", ")}
@@ -217,7 +219,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                 {master.sistemas.length > 0 && (
                   <div className="self-stretch flex flex-col items-start justify-start gap-2">
                     <b className="self-stretch relative text-light-gold z-[1] mq450:text-lgi">
-                      Tags:
+                      {t.masterDetail.tagsLabel}
                     </b>
                     <div className="flex flex-row flex-wrap gap-2">
                       {master.sistemas.slice(0, 4).map((sistema) => (
@@ -261,7 +263,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                   {master.displayName}
                 </h1>
                 <div className="self-stretch h-10 relative text-xl font-medium text-nude flex items-center justify-center shrink-0 z-[1] mq450:text-base">
-                  Valoración
+                  {t.masterDetail.rating}
                 </div>
                 <div className="self-stretch flex flex-row items-start justify-center py-0 pl-[21px] pr-5">
                   <div className="flex flex-row items-start justify-start gap-[18px]">
@@ -273,7 +275,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               {/* Bio */}
               <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 gap-[27px] text-15xl mq700:p-4 mq700:box-border">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-nude">
-                  Bio
+                  {t.masterDetail.bio}
                 </h2>
                 <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-left">
                   {master.bio}
@@ -283,23 +285,23 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               {/* Estilo de juego */}
               <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 gap-[27px] text-15xl mq700:p-4 mq700:box-border">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-nude">
-                  Estilo de juego
+                  {t.masterDetail.gameStyle}
                 </h2>
                 <div className="self-stretch relative text-lg leading-[26px] text-nude z-[1] text-left">
                   <p className="mb-4">
-                    <strong>Duración de sesión:</strong>{" "}
+                    <strong>{t.masterDetail.sessionDuration}</strong>{" "}
                     {master.duracionSesion.join(", ")}
                   </p>
                   <p className="mb-4">
-                    <strong>Número de jugadores:</strong>{" "}
+                    <strong>{t.masterDetail.numPlayers}</strong>{" "}
                     {master.numeroJugadores.join(", ")}
                   </p>
                   <p className="mb-4">
-                    <strong>Estilos de juego:</strong>{" "}
+                    <strong>{t.masterDetail.gameStyles}</strong>{" "}
                     {master.estilos.join(", ")}
                   </p>
                   <p>
-                    <strong>Idiomas:</strong> {master.idiomas.join(", ")}
+                    <strong>{t.masterDetail.languages}</strong> {master.idiomas.join(", ")}
                   </p>
                 </div>
               </div>
@@ -307,7 +309,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               {/* Próximas partidas */}
               <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[27px] max-w-full text-15xl text-nude mq700:p-4 mq700:box-border">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl">
-                  Próximas partidas
+                  {t.masterDetail.upcomingGames}
                 </h2>
                 {loadingPartidas ? (
                   <div className="flex items-center justify-center w-full py-6">
@@ -315,7 +317,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                   </div>
                 ) : partidas.length === 0 ? (
                   <p className="text-nude/60 font-titulo-2">
-                    Este master no tiene partidas publicadas aún.
+                    {t.masterDetail.noGames}
                   </p>
                 ) : (
                   <div className="self-stretch flex flex-row items-start justify-center gap-[37px] max-w-full mq700:gap-[18px] mq700:flex-wrap">

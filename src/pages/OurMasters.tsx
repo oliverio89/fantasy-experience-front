@@ -22,10 +22,12 @@ import {
 } from "../types/masters";
 import { Profile, ProfileService } from "../services/profileService";
 import { useToast } from "../context/ToastContext";
+import { useTranslation } from "../i18n";
 
 const Root: FunctionComponent = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const [filters, setFilters] = useState<MasterFilters>(DEFAULT_MASTER_FILTERS);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -131,19 +133,17 @@ const Root: FunctionComponent = () => {
       <section className="self-stretch flex flex-row items-start justify-start pt-[0rem] pb-[0.187rem] pl-[0.062rem] pr-[0.437rem] box-border max-w-full text-left text-[6.25rem] text-dark-gold font-titulo-2 mq450:px-[0.5rem] mq450:pb-[0.5rem]">
         <h1 className="m-0 h-[9rem] flex-1 relative text-inherit leading-[5rem] flex items-center max-w-full z-[1] font-[inherit] mq450:text-[1.875rem] mq450:leading-[2rem] mq450:h-auto mq450:py-[1rem] mq750:text-[3.125rem] mq750:leading-[3rem] mq750:h-[6rem]">
           <span>
-            <p className="m-0 font-extrabold">{`Conoce a `}</p>
+            <p className="m-0 font-extrabold">{t.ourMasters.title1}</p>
             <p className="m-0">
-              <i className="font-extrabold">nuestros</i>
-              <span className="font-extrabold font-titulo-2"> Masters</span>
+              <i className="font-extrabold">{t.ourMasters.title2}</i>
+              <span className="font-extrabold font-titulo-2"> {t.ourMasters.title3}</span>
             </p>
           </span>
         </h1>
       </section>
       <section className="self-stretch flex flex-row items-start justify-start py-[0rem] pl-[0.25rem] pr-[0.5rem] box-border min-h-[7.125rem] max-w-full text-left text-[1.125rem] text-nude font-titulo-2 mq450:px-[0.5rem] mq450:min-h-[5rem] mq450:text-[1rem]">
         <div className="flex-1 relative leading-[1.625rem] inline-block max-w-full z-[1] mq450:leading-[1.4rem]">
-          Descubre a nuestros Masters expertos en diferentes sistemas de rol.
-          Cada uno tiene su propio estilo único. Solo mostramos aquí a usuarios
-          que ya han dirigido al menos una partida.
+          {t.ourMasters.description}
         </div>
       </section>
 

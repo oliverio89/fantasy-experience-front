@@ -6,9 +6,11 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import { CustomRadio } from "../components/ui/CustomRadio";
 import Modal from "../components/ui/Modal";
+import { useTranslation } from "../i18n";
 
 const Registerv: FunctionComponent = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -47,26 +49,17 @@ const Registerv: FunctionComponent = () => {
       !formData.email.trim() ||
       !formData.password.trim()
     ) {
-      showError(
-        "Campos Incompletos",
-        "Por favor, completa todos los campos obligatorios para continuar."
-      );
+      showError(t.register.errors.incompleteTitle, t.register.errors.incompleteMsg);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      showError(
-        "Error de Contraseña",
-        "Las contraseñas no coinciden. Por favor, asegúrate de escribirlas correctamente."
-      );
+      showError(t.register.errors.passwordMismatchTitle, t.register.errors.passwordMismatchMsg);
       return;
     }
 
     if (formData.password.length < 6) {
-      showError(
-        "Contraseña Insegura",
-        "La contraseña debe tener al menos 6 caracteres."
-      );
+      showError(t.register.errors.passwordWeakTitle, t.register.errors.passwordWeakMsg);
       return;
     }
 
@@ -105,25 +98,13 @@ const Registerv: FunctionComponent = () => {
         errorMessage.includes("User already registered") ||
         errorMessage.includes("already registered")
       ) {
-        showError(
-          "Usuario Existente",
-          "Este correo electrónico ya está registrado en nuestra plataforma. Por favor, inicia sesión."
-        );
+        showError(t.register.errors.userExistsTitle, t.register.errors.userExistsMsg);
       } else if (errorMessage.includes("valid email")) {
-        showError(
-          "Email Inválido",
-          "Por favor, introduce una dirección de correo electrónico válida."
-        );
+        showError(t.register.errors.invalidEmailTitle, t.register.errors.invalidEmailMsg);
       } else if (errorMessage.includes("password")) {
-        showError(
-          "Problema con la Contraseña",
-          "La contraseña no cumple con los requisitos de seguridad."
-        );
+        showError(t.register.errors.passwordIssueTitle, t.register.errors.passwordIssueMsg);
       } else {
-        showError(
-          "Error de Registro",
-          "Ha ocurrido un problema al crear tu cuenta. Por favor, inténtalo de nuevo."
-        );
+        showError(t.register.errors.genericTitle, t.register.errors.genericMsg);
       }
     } finally {
       setLoading(false);
@@ -162,7 +143,7 @@ const Registerv: FunctionComponent = () => {
           className="self-stretch h-[3.625rem] relative text-[1.5rem] [text-decoration:underline] flex font-titulo-2 text-nude items-center justify-center shrink-0 cursor-pointer z-[2] mq450:text-[1.188rem]"
           onClick={onBackHomeClick}
         >
-          volver a home
+          {t.common.backHome}
         </b>
       </div>
       <form
@@ -175,7 +156,7 @@ const Registerv: FunctionComponent = () => {
         <div className="self-stretch h-[52rem] relative bg-nude hidden" />
         <div className="self-stretch flex flex-row items-start justify-start pt-[0rem] px-[0rem] pb-[0.625rem] box-border max-w-full">
           <h2 className="m-0 h-[3.625rem] flex-1 relative text-[2.25rem] font-bold font-titulo-2 text-black text-center flex items-center justify-center max-w-full z-[2] mq450:text-[1.375rem] mq975:text-[1.813rem]">
-            Crea tu cuenta
+            {t.register.title}
           </h2>
         </div>
 
@@ -183,13 +164,13 @@ const Registerv: FunctionComponent = () => {
         <div className="self-stretch flex flex-row items-start justify-center py-[0rem] px-[1.25rem] box-border max-w-full">
           <div className="w-[21.625rem] flex flex-col items-start justify-start gap-[0.375rem] max-w-full">
             <div className="self-stretch relative text-[1.25rem] font-medium font-titulo-2 text-black text-left z-[1] mq450:text-[1rem]">
-              Nombre
+              {t.register.nameLabel}
             </div>
             <div className="self-stretch flex flex-row items-start justify-start py-[0rem] pl-[0.875rem] pr-[0.5rem] box-border relative max-w-full">
               <div className="h-full w-full absolute !m-[0] top-[0rem] right-[0rem] bottom-[0rem] left-[0rem] [filter:blur(1px)] rounded-xl bg-whitesmoke border-light-gold border-[1px] border-solid box-border mix-blend-normal z-[1]" />
               <input
                 className="w-full [border:none] [outline:none] font-light font-titulo-2 text-[1rem] bg-[transparent] h-[2.5rem] flex-1 relative text-black text-left flex items-center min-w-[12.125rem] p-0 max-w-full z-[2]"
-                placeholder="Ingresa tu nombre"
+                placeholder={t.register.namePlaceholder}
                 type="text"
                 name="name"
                 value={formData.name}
@@ -202,7 +183,7 @@ const Registerv: FunctionComponent = () => {
         <div className="self-stretch flex flex-row items-start justify-center py-[0rem] px-[1.25rem] box-border max-w-full">
           <div className="w-[21.625rem] flex flex-col items-start justify-start gap-[0.375rem] max-w-full">
             <div className="self-stretch relative text-[1.25rem] font-medium font-titulo-2 text-black text-left z-[1] mq450:text-[1rem]">
-              ¿Cómo quieres empezar a participar?
+              {t.register.roleQuestion}
             </div>
             <div className="flex gap-8 mt-2 z-[2] w-full justify-center">
               <label
@@ -221,7 +202,7 @@ const Registerv: FunctionComponent = () => {
                   onChange={() => setFormData({ ...formData, role: "player" })}
                   className="hidden"
                 />
-                Como Jugador
+                {t.register.asPlayer}
               </label>
               <label
                 className={`text-lg flex items-center gap-2 cursor-pointer hover:opacity-80 font-titulo-2 transition-colors duration-200 ${
@@ -239,25 +220,25 @@ const Registerv: FunctionComponent = () => {
                   onChange={() => setFormData({ ...formData, role: "master" })}
                   className="hidden"
                 />
-                Como Master
+                {t.register.asMaster}
               </label>
             </div>
             <div className="text-[0.875rem] font-light text-black/70 font-titulo-2 text-left mt-2 z-[1]">
-              * Tu cuenta te permitirá unirte a partidas y crearlas igualmente.
+              {t.register.roleNote}
             </div>
           </div>
         </div>
 
         <InputFieldsContainer
-          correoElectrnico="Correo electrónico"
-          ingresaTuEmailPlaceholder="Ingresa tu email"
+          correoElectrnico={t.register.emailLabel}
+          ingresaTuEmailPlaceholder={t.register.emailPlaceholder}
           name="email"
           value={formData.email}
           onChange={handleChange}
         />
         <InputFieldsContainer
-          correoElectrnico="Ciudad"
-          ingresaTuEmailPlaceholder="Ingresa tu ciudad"
+          correoElectrnico={t.register.cityLabel}
+          ingresaTuEmailPlaceholder={t.register.cityPlaceholder}
           name="city"
           value={formData.city}
           onChange={handleChange}
@@ -267,8 +248,8 @@ const Registerv: FunctionComponent = () => {
           propMinWidth="12.125rem"
         />
         <InputFieldsContainer
-          correoElectrnico="Contraseña"
-          ingresaTuEmailPlaceholder="Elige tu contraseña"
+          correoElectrnico={t.register.passwordLabel}
+          ingresaTuEmailPlaceholder={t.register.passwordPlaceholder}
           name="password"
           type="password"
           value={formData.password}
@@ -279,8 +260,8 @@ const Registerv: FunctionComponent = () => {
           propMinWidth="12.438rem"
         />
         <InputFieldsContainer
-          correoElectrnico="Repetir contraseña"
-          ingresaTuEmailPlaceholder="Repite tu contraseña"
+          correoElectrnico={t.register.confirmPasswordLabel}
+          ingresaTuEmailPlaceholder={t.register.confirmPasswordPlaceholder}
           name="confirmPassword"
           type="password"
           value={formData.confirmPassword}
@@ -293,7 +274,7 @@ const Registerv: FunctionComponent = () => {
 
         <div className="flex flex-row items-start justify-start pt-[0rem] px-[9.812rem] pb-[1.25rem] box-border max-w-full mq725:pl-[4.875rem] mq725:pr-[4.875rem] mq725:box-border mq450:pl-[1.25rem] mq450:pr-[1.25rem] mq450:box-border">
           <Button
-            button1={loading ? "Creando..." : "Crear cuenta"}
+            button1={loading ? t.register.submitting : t.register.submit}
             button1Padding="0.562rem 7.968rem"
             button1Height="2.5rem"
             button1Width="21.625rem"
@@ -308,9 +289,9 @@ const Registerv: FunctionComponent = () => {
           className="self-stretch relative text-[1.25rem] text-black text-center cursor-pointer z-[2] mq450:text-[1rem]"
           onClick={onAcountClick}
         >
-          <span className="font-titulo-2">{`Si tienes cuenta, `}</span>
+          <span className="font-titulo-2">{t.register.hasAccount} </span>
           <span className="[text-decoration:underline] font-medium font-titulo-2">
-            Ingresa aquí.
+            {t.register.loginLink}
           </span>
         </div>
       </form>

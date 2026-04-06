@@ -1,5 +1,6 @@
 import { FunctionComponent, memo } from "react";
-import { useNavigate } from "react-router-dom"; // Importamos useNavigate
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "../i18n";
 
 export type SocialContainerType = {
   className?: string;
@@ -7,7 +8,8 @@ export type SocialContainerType = {
 
 const Footer: FunctionComponent<SocialContainerType> = memo(
   ({ className = "" }) => {
-    const navigate = useNavigate(); // Hook para redirigir
+    const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // Funciones para manejar las redirecciones
     const onNuestrosMastersClick = () => {
@@ -30,14 +32,14 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
         <div className="h-[141px] w-[250px] flex flex-col items-start justify-end pt-0 px-0 pb-[34px] box-border">
           <div className="self-stretch flex-1 flex flex-col items-end justify-start gap-px">
             <div className="self-stretch relative font-medium z-[1] mq450:text-lgi">
-              Síguenos en redes sociales
+              {t.footer.followUs}
             </div>
             <div className="self-stretch flex flex-row items-start justify-end py-0 pl-[77px] pr-[75px]">
               <div className="flex-1 flex flex-row items-start justify-between gap-5">
                 <img
                   className="h-[30px] w-[30px] relative z-[1] cursor-pointer pt-[15px]"
                   loading="lazy"
-                  alt="Instagram"
+                  alt={t.footer.instagram}
                   src="/instagram.svg"
                   onClick={() =>
                     window.open(
@@ -50,7 +52,7 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
                   <img
                     className="w-[33px] h-[26.9px] relative z-[1] cursor-pointer"
                     loading="lazy"
-                    alt="Twitter"
+                    alt={t.footer.twitter}
                     src="/twitter.svg"
                     onClick={() =>
                       window.open("https://x.com/RolFantasyExp", "_blank")
@@ -65,15 +67,15 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
         <div className="self-stretch w-[236px] flex flex-col items-start justify-start py-0 pl-0 pr-[30px] box-border">
           <div className="self-stretch relative font-medium z-[1] mq450:text-lgi">
             <p className="m-0 cursor-pointer" onClick={onNuestrosMastersClick}>
-              Nuestros másters
+              {t.footer.masters}
             </p>
             <p className="m-0">&nbsp;</p>
             <p className="m-0 cursor-pointer" onClick={onPartidasClick}>
-              Partidas
+              {t.footer.games}
             </p>
             <p className="m-0">&nbsp;</p>
             <p className="m-0 cursor-pointer" onClick={onContactoClick}>
-              Contacto
+              {t.footer.contact}
             </p>
           </div>
         </div>
@@ -81,12 +83,8 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
         <div className="h-[127px] w-[177px] flex flex-col items-start justify-start text-13xl text-dark-gold font-milonga">
           <h2 className="m-0 self-stretch relative text-inherit leading-[76.6%] font-normal font-[inherit] [display:-webkit-inline-box] items-center overflow-hidden text-ellipsis [-webkit-line-clamp:3] [-webkit-box-orient:vertical] z-[1] mq1050:text-7xl mq1050:leading-[20px] mq450:text-lgi mq450:leading-[15px] cursor-pointer">
             <span className="[line-break:anywhere]">
-              <p className="m-1" onClick={() => navigate("/")}>
-                Fantasy
-              </p>
-              <p className="m-1" onClick={() => navigate("/")}>
-                Experience
-              </p>
+              <p className="m-1" onClick={() => navigate("/")}>{t.common.brandName1}</p>
+              <p className="m-1" onClick={() => navigate("/")}>{t.common.brandName2}</p>
             </span>
           </h2>
         </div>
