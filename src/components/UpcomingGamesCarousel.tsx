@@ -1,7 +1,8 @@
-import { FunctionComponent, memo, useRef, useState } from "react";
+import { FunctionComponent, memo, useRef } from "react";
 import PartidaCard from "./PartidaCard";
 import { useNavigate } from "react-router-dom";
 import { usePartidasDestacadas } from "../hooks/usePartidas";
+
 
 export type UpcomingGamesCarouselType = {
   className?: string;
@@ -11,45 +12,40 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
   memo(({ className = "" }) => {
     const navigate = useNavigate();
     const cardContainerRef = useRef<HTMLDivElement>(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [initialMouseX, setInitialMouseX] = useState<number | null>(null);
-    const [initialScrollLeft, setInitialScrollLeft] = useState<number | null>(null);
+    const isDraggingRef = useRef(false);
+    const startXRef = useRef(0);
+    const hasDraggedRef = useRef(false);
+    const initialScrollLeftRef = useRef(0);
     const { partidas, loading } = usePartidasDestacadas(6);
 
     const handleMouseDown = (e: React.MouseEvent) => {
       if (!cardContainerRef.current) return;
-      setIsDragging(true);
-      setInitialMouseX(e.clientX);
-      setInitialScrollLeft(cardContainerRef.current.scrollLeft);
+      isDraggingRef.current = true;
+      startXRef.current = e.clientX;
+      hasDraggedRef.current = false;
+      initialScrollLeftRef.current = cardContainerRef.current.scrollLeft;
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
-      if (
-        !isDragging ||
-        initialMouseX === null ||
-        initialScrollLeft === null ||
-        !cardContainerRef.current
-      )
-        return;
-
-      // Calcular la diferencia del movimiento
-      const deltaX = e.clientX - initialMouseX;
-      cardContainerRef.current.scrollLeft = initialScrollLeft - deltaX; // Movimiento relativo al punto inicial
+      if (!isDraggingRef.current || !cardContainerRef.current) return;
+      const deltaX = e.clientX - startXRef.current;
+      if (Math.abs(deltaX) > 5) hasDraggedRef.current = true;
+      cardContainerRef.current.scrollLeft = initialScrollLeftRef.current - deltaX;
     };
 
     const handleMouseUp = () => {
-      setIsDragging(false);
+      isDraggingRef.current = false;
     };
 
     return (
       <section
-        className={`flex flex-col items-end justify-start py-8 pl-5 pr-0 box-border max-w-full text-right text-45xl text-black font-titulo-2 ${className}`}
+        className={`flex flex-col items-center justify-start py-8 pl-5 pr-5 box-border max-w-full text-center text-45xl text-black font-titulo-2 ${className}`}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseUp}
         onMouseUp={handleMouseUp}
       >
-        <div className="w-auto flex flex-row items-start justify-end pt-0 pb-14 pl-[79px] pr-20 box-border max-w-full mq1050:pl-[39px] mq1050:pr-10 mq1050:box-border">
-          <h1 className="m-0 h-[140px] flex-1 relative text-inherit font-extrabold font-[inherit] inline-block max-w-full z-[2] mq1050:text-32xl mq450:text-19xl">
+        <div className="w-full flex flex-row items-start justify-center pt-0 pb-14 px-[79px] box-border max-w-full mq1050:px-[39px] mq1050:box-border">
+          <h1 className="m-0 h-[140px] flex-1 relative text-inherit font-extrabold font-[inherit] inline-block max-w-full z-[2] mq1050:text-32xl mq450:text-19xl text-center">
             <p className="m-0">Partidas</p>
             <p className="m-0">digitales destacadas</p>
           </h1>
@@ -74,6 +70,11 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
                 key={partida.id}
                 partida={partida}
                 mostrarDescripcion={true}
+                onClick={() => {
+                  if (!hasDraggedRef.current) {
+                    navigate(`/detailsgame/${partida.id}`);
+                  }
+                }}
               />
             ))
           )}

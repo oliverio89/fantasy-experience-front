@@ -7,7 +7,7 @@ export const es = {
   common: {
     brandName1: "Fantasy",
     brandName2: "Experience",
-    backHome: "volver a home",
+    backHome: "Volver al inicio",
     yes: "Si",
     no: "No",
     cancel: "Cancelar",
@@ -123,7 +123,7 @@ export const es = {
         "Debes confirmar tu correo electrónico antes de entrar. Por favor revisa tu bandeja de entrada o spam.",
       invalidTitle: "Error de Acceso",
       invalidMsg:
-        "No pudimos iniciar sesión. Verifica que: 1. Tu correo esté registrado. 2. Hayas confirmado tu cuenta. 3. La contraseña sea correcta.",
+        "No pudimos iniciar sesión. Verifica que:\n• Tu correo esté registrado\n• Hayas confirmado tu cuenta\n• La contraseña sea correcta",
       genericTitle: "Error",
       genericMsg: "Ha ocurrido un problema al iniciar sesión. Inténtalo de nuevo más tarde.",
     },

@@ -14,6 +14,8 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
     const { t } = useTranslation();
     const cardContainerRef = useRef<HTMLDivElement>(null);
     const isScrollingRef = useRef(false);
+    const startXRef = useRef(0);
+    const hasDraggedRef = useRef(false);
     const { partidas, loading } = useProximasPartidas(6);
 
     // Duplicar para efecto de bucle infinito (solo si hay datos)
@@ -49,6 +51,8 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
     // Manejo de arrastre para desplazamiento manual continuo
     const handleMouseDown = (e: React.MouseEvent) => {
       isScrollingRef.current = true;
+      startXRef.current = e.clientX;
+      hasDraggedRef.current = false;
       cardContainerRef.current?.addEventListener("mousemove", handleMouseMove);
     };
 
@@ -62,7 +66,10 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isScrollingRef.current || !cardContainerRef.current) return;
-      cardContainerRef.current.scrollLeft += -e.movementX * 1; // Ajusta velocidad aquí
+      if (Math.abs(e.clientX - startXRef.current) > 5) {
+        hasDraggedRef.current = true;
+      }
+      cardContainerRef.current.scrollLeft += -e.movementX * 1;
     };
 
     return (
@@ -100,6 +107,11 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
                   key={`${partida.id}-${index}`}
                   partida={partida}
                   mostrarDescripcion={false}
+                  onClick={() => {
+                    if (!hasDraggedRef.current) {
+                      navigate(`/detailsgame/${partida.id}`);
+                    }
+                  }}
                 />
               ))
             )}

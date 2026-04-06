@@ -158,7 +158,7 @@ const ContactoV: FunctionComponent = () => {
             </div>
 
             {/* Botón enviar */}
-            <div className="flex flex-row items-start justify-end py-[0rem] px-[9.625rem] box-border max-w-full mq450:pl-[4.813rem] mq450:pr-[4.813rem] mq450:box-border">
+            <div className="flex flex-row items-center justify-center py-[0rem] box-border max-w-full w-full">
               <button
                 type="submit"
                 disabled={isSubmitting}

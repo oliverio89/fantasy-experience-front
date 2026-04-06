@@ -49,13 +49,13 @@ const MasterSystemFilters: FunctionComponent<MasterSystemFiltersType> = memo(
               const isSelected = selectedSystems.includes(system);
               const systemDisplayName =
                 system === "Dungeons & Dragons 5e"
-                  ? "Dungeons& dragons"
+                  ? "D&D 5e"
                   : system === "Call of Cthulhu"
-                  ? "Chuthulu"
+                  ? "Cthulhu"
                   : system === "Vampiro: La Mascarada"
-                  ? "Vampiro la mascarada"
+                  ? "Vampiro: La Mascarada"
                   : system === "Hombre Lobo: El Apocalipsis"
-                  ? "Hombre lobo"
+                  ? "Hombre Lobo"
                   : system === "FATE Core"
                   ? "FATE"
                   : system; // Z-Corp se mantiene igual

@@ -272,7 +272,7 @@ const Registerv: FunctionComponent = () => {
           propMinWidth="12.438rem"
         />
 
-        <div className="flex flex-row items-start justify-start pt-[0rem] px-[9.812rem] pb-[1.25rem] box-border max-w-full mq725:pl-[4.875rem] mq725:pr-[4.875rem] mq725:box-border mq450:pl-[1.25rem] mq450:pr-[1.25rem] mq450:box-border">
+        <div className="flex flex-row items-center justify-center pb-[1.25rem] box-border max-w-full w-full">
           <Button
             button1={loading ? t.register.submitting : t.register.submit}
             button1Padding="0.562rem 7.968rem"

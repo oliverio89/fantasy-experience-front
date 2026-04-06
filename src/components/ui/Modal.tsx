@@ -115,7 +115,7 @@ const Modal: FunctionComponent<ModalProps> = ({
             </h3>
           )}
 
-          <div className="text-nude text-lg font-titulo-2 font-light leading-relaxed">
+          <div className="text-nude text-base font-titulo-2 font-light leading-relaxed break-words whitespace-pre-line w-full">
             {children}
           </div>
 

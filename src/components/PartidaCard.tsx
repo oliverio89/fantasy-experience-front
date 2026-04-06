@@ -168,9 +168,9 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
         </div>
 
         {/* Contenido de la tarjeta */}
-        <div className="self-stretch flex flex-col items-center justify-start pt-0 px-4 pb-0 gap-3 relative min-h-[196px]">
+        <div className="self-stretch flex flex-col items-center justify-start pt-6 px-4 pb-0 gap-3 relative min-h-[196px]">
           {/* Vacantes - Badge top right of content */}
-          <div className="absolute top-[-10px] right-[10px] bg-dark-gold text-black font-bold px-3 py-1 rounded-full text-xs box-shadow-md z-[5]">
+          <div className="absolute top-[-10px] right-[10px] bg-dark-gold text-black font-bold px-3 py-1 rounded-full text-xs shadow-md z-[5]">
             {vacantes > 0 ? `${vacantes} ${t.partidaCard.spotsLeft}` : t.partidaCard.full}
           </div>
 
