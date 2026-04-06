@@ -48,7 +48,7 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
         </div>
 
         <div
-          className="w-auto overflow-x-auto flex flex-row items-start justify-start pt-0 px-12 pb-[40px] box-border gap-[20.4px] max-w-full z-[1] mq750:pb-10 mq750:box-border scrollbar-hide select-none cursor-pointer"
+          className="w-auto overflow-x-auto flex flex-row items-stretch justify-start pt-0 px-12 pb-[40px] box-border gap-[20.4px] max-w-full z-[1] mq750:pb-10 mq750:box-border scrollbar-hide select-none cursor-pointer"
           ref={cardContainerRef}
           onMouseDown={handleMouseDown}
         >

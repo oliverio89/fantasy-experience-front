@@ -84,7 +84,7 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
           <div
             ref={cardContainerRef}
             onMouseDown={handleMouseDown}
-            className="w-auto overflow-x-auto flex flex-row items-start justify-start pt-0 px-12 pb-[40px] box-border gap-[20.4px] max-w-full z-[1] mq750:pb-10 mq750:box-border scrollbar-hide cursor-pointer"
+            className="w-auto overflow-x-auto flex flex-row items-stretch justify-start pt-0 px-12 pb-[40px] box-border gap-[20.4px] max-w-full z-[1] mq750:pb-10 mq750:box-border scrollbar-hide cursor-pointer"
           >
             {loading ? (
               <div className="flex items-center justify-center w-full py-12">
