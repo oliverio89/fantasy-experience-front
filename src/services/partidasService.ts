@@ -227,6 +227,25 @@ export class PartidasService {
       } = await supabase.auth.getSession();
       if (!session?.user) throw new Error("Usuario no autenticado");
 
+      // Comprobar límite de partidas creadas
+      const role = session.user.user_metadata?.role || "player";
+      const maxCreadas = role === "master" ? 5 : 8;
+
+      const { count: creadasCount, error: countError } = await supabase
+        .from("games")
+        .select("id", { count: "exact", head: true })
+        .eq("master_id", session.user.id);
+
+      if (countError) throw new Error(countError.message);
+
+      if ((creadasCount ?? 0) >= maxCreadas) {
+        throw new Error(
+          role === "master"
+            ? `Has alcanzado el límite de ${maxCreadas} partidas publicadas como Master.`
+            : `Has alcanzado el límite de ${maxCreadas} partidas creadas.`
+        );
+      }
+
       const dbData = this.mapGameToDB(partida, session.user.id);
 
       const { data, error } = await supabase
@@ -283,6 +302,20 @@ export class PartidasService {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session?.user) throw new Error("Usuario no autenticado");
+
+      // Comprobar límite de partidas en las que ya participa (máx 5)
+      const { count: participaCount, error: participaError } = await supabase
+        .from("game_participants")
+        .select("id", { count: "exact", head: true })
+        .eq("player_id", session.user.id);
+
+      if (participaError) throw new Error(participaError.message);
+
+      if ((participaCount ?? 0) >= 5) {
+        throw new Error(
+          "Has alcanzado el límite de 5 partidas en las que puedes participar a la vez."
+        );
+      }
 
       const { error } = await supabase.from("game_participants").insert({
         game_id: gameId,
