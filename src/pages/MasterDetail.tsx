@@ -79,7 +79,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
         stars.push(
           <img
             key={i}
-            className="h-[40.7px] w-10"
+            className="h-7 w-7"
             alt="Estrella llena"
             src="/rating-star.svg"
           />
@@ -88,14 +88,14 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
 
       if (hasHalfStar) {
         stars.push(
-          <div key="half" className="relative h-[40.7px] w-10">
+          <div key="half" className="relative h-7 w-7">
             <img
-              className="absolute h-[40.7px] w-10"
+              className="absolute h-7 w-7"
               alt="Estrella vacía"
               src="/rating-star-empty.svg"
             />
             <img
-              className="absolute h-[40.7px] w-10"
+              className="absolute h-7 w-7"
               alt="Media estrella"
               src="/rating-star.svg"
               style={{
@@ -111,7 +111,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
         stars.push(
           <img
             key={`empty-${i}`}
-            className="h-[40.7px] w-10"
+            className="h-7 w-7"
             alt="Estrella vacía"
             src="/rating-star-empty.svg"
           />
@@ -132,12 +132,12 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
     }
 
     return (
-      <div className={`w-full bg-black min-h-screen ${className}`}>
+      <div className={`fe-surface-grid min-h-screen w-full ${className}`}>
         {/* Botón de regreso */}
-        <div className="w-full max-w-[1120px] mx-auto px-6 py-8">
+        <div className="mx-auto w-full max-w-[1180px] px-8 py-10 mq750:px-5 mq750:py-7">
           <button
             onClick={handleBackClick}
-            className="mb-8 px-6 py-3 bg-transparent border border-nude text-nude rounded-xl hover:bg-nude hover:text-black transition-all duration-200 flex items-center gap-3 font-medium"
+            className="fe-button-secondary gap-3 bg-transparent"
           >
             <svg
               className="w-5 h-5"
@@ -157,14 +157,14 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
         </div>
 
         {/* Layout principal de 2 columnas - Diseño Original */}
-        <div className="w-full max-w-[1120px] mx-auto px-6 pb-12">
+        <div className="mx-auto w-full max-w-[1180px] px-8 pb-24 mq750:px-5">
           <div className="flex flex-row items-start justify-start gap-10 leading-[normal] tracking-[normal] text-center text-5xl text-nude font-texto-2 mq700:gap-5 mq900:flex-wrap">
             {/* COLUMNA IZQUIERDA */}
-            <div className="flex flex-col items-start justify-start gap-9 max-w-full mq450:gap-[18px] mq450:min-w-full mq900:flex-1">
+            <aside className="flex w-[340px] shrink-0 flex-col items-start justify-start gap-7 max-w-full mq450:min-w-full mq900:flex-1">
               {/* Foto del Master - Circular completo */}
               <div className="self-stretch flex justify-center">
                 <img
-                  className="w-[347px] h-[347px] rounded-full object-cover border-4 border-light-gold"
+                  className="h-[370px] w-[330px] rounded-[28px] border border-[#d8a651]/55 bg-[#17100b] object-cover p-2 shadow-[0_24px_60px_rgba(0,0,0,.4)]"
                   loading="lazy"
                   alt={`Avatar de ${master.displayName}`}
                   src={master.avatar}
@@ -172,7 +172,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               </div>
 
               {/* Información sobre el Master */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[26.7px] max-w-full mq450:p-4 mq450:box-border">
+              <div className="fe-panel self-stretch rounded-[24px] p-7 text-left mq450:p-5">
                 <h2 className="m-0 self-stretch relative text-15xl font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl">
                   {t.masterDetail.about}
                 </h2>
@@ -232,35 +232,38 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                   ))}
                 </div>
               ) : null}
-            </div>
+            </aside>
 
             {/* COLUMNA DERECHA */}
-            <section className="flex-1 flex flex-col items-start justify-start gap-[35.7px] min-w-[476px] max-w-full text-center text-21xl text-dark-gold font-texto-2 mq700:min-w-full mq900:gap-[18px]">
+            <section className="flex min-w-[476px] max-w-full flex-1 flex-col items-start justify-start gap-6 text-center text-21xl text-dark-gold font-texto-2 mq700:min-w-full mq900:gap-[18px]">
               {/* Nombre del Master y Rating */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-end justify-start p-6 gap-0.5">
+              <div className="fe-panel self-stretch rounded-[24px] p-8 text-left mq700:p-6">
                 {master.isFeatured && (
-                  <span className="self-center mb-2 rounded-full bg-dark-gold px-4 py-1 text-xs font-bold uppercase tracking-wider text-black">
+                  <span className="mb-4 inline-flex rounded-full border border-[#d8a651]/35 bg-[#d9a84f]/10 px-4 py-1 text-xs font-bold uppercase tracking-wider text-[#e1ae4f]">
                     Máster destacado
                   </span>
                 )}
-                <h1 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-5xl mq900:text-13xl text-light-gold">
+                <h1 className="m-0 font-milonga text-[clamp(2.3rem,5vw,4.3rem)] font-normal leading-tight text-[#f2e6cf]">
                   {master.displayName}
                 </h1>
-                <div className="self-stretch h-10 relative text-xl font-medium text-nude flex items-center justify-center shrink-0 z-[1] mq450:text-base">
-                  {t.masterDetail.rating}
-                </div>
-                <div className="self-stretch flex flex-row items-start justify-center py-0 pl-[21px] pr-5">
-                  <div className="flex flex-row items-start justify-start gap-[18px]">
+                <div className="mt-4 flex flex-wrap items-center gap-4">
+                  <div className="flex flex-row items-start justify-start gap-2">
                     {renderStars(master.rating)}
                   </div>
+                  <strong className="text-lg text-[#e1ae4f]">
+                    {master.rating.toFixed(1)} / 5
+                  </strong>
+                  <span className="text-sm text-nude/55">
+                    {master.totalReviews} opiniones verificadas
+                  </span>
                 </div>
-                <p className="self-center m-0 mt-2 text-sm text-nude/70">
-                  {master.totalReviews} valoraciones verificadas
-                </p>
               </div>
 
-              <div className="self-stretch rounded-xl bg-darkslategray p-6 text-left">
-                <h2 className="m-0 mb-4 text-2xl text-nude">Trayectoria verificada</h2>
+              <div className="fe-panel self-stretch rounded-[24px] p-8 text-left mq700:p-6">
+                <p className="fe-kicker">Datos públicos</p>
+                <h2 className="mb-5 mt-3 font-milonga text-3xl font-normal text-nude">
+                  Trayectoria verificada
+                </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {[
                     [master.completedSessions, "Partidas jugadas"],
@@ -270,8 +273,8 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                     [master.digitalProducts, "Aventuras digitales"],
                     [master.digitalSales, "Ventas digitales"],
                   ].map(([value, label]) => (
-                    <div key={String(label)} className="rounded-lg border border-white/10 bg-black/20 p-3 text-center">
-                      <strong className="block text-2xl text-light-gold">{value}</strong>
+                    <div key={String(label)} className="rounded-xl border border-[#d8a651]/14 bg-black/20 p-4 text-center">
+                      <strong className="block font-milonga text-3xl font-normal text-[#e1ae4f]">{value}</strong>
                       <span className="text-xs leading-tight text-nude/70">{label}</span>
                     </div>
                   ))}
@@ -283,7 +286,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               </div>
 
               {/* Bio */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 gap-[27px] text-15xl mq700:p-4 mq700:box-border">
+              <div className="fe-panel self-stretch rounded-[24px] p-8 text-left text-15xl mq700:p-6">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-nude">
                   {t.masterDetail.bio}
                 </h2>
@@ -293,7 +296,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               </div>
 
               {/* Estilo de juego */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 gap-[27px] text-15xl mq700:p-4 mq700:box-border">
+              <div className="fe-panel self-stretch rounded-[24px] p-8 text-left text-15xl mq700:p-6">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl text-nude">
                   {t.masterDetail.gameStyle}
                 </h2>
@@ -317,7 +320,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               </div>
 
               {/* Próximas partidas */}
-              <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[27px] max-w-full text-15xl text-nude mq700:p-4 mq700:box-border">
+              <div className="fe-panel self-stretch rounded-[24px] p-8 text-left text-15xl text-nude mq700:p-6">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl">
                   Partidas y aventuras disponibles
                 </h2>
@@ -344,7 +347,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                 )}
               </div>
 
-              <div className="self-stretch rounded-xl bg-darkslategray p-6 text-left text-nude mq700:p-4">
+              <div className="fe-panel self-stretch rounded-[24px] p-8 text-left text-nude mq700:p-6">
                 <h2 className="m-0 text-3xl">Opiniones de jugadores</h2>
                 <p className="mt-2 mb-5 text-sm text-nude/60">
                   Solo pueden opinar jugadores que participaron en una partida finalizada.

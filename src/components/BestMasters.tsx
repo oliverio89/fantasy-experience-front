@@ -37,7 +37,7 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
 
     const onSlide1ContainerClick = useCallback(
       (master: Master) => {
-        navigate(`/user/${master.id}`);
+        navigate(`/master/${master.id}`);
       },
       [navigate]
     );
@@ -67,30 +67,35 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
 
     return (
       <section
-        className={`relative self-stretch bg-darkslategray flex flex-col items-start justify-start py-[100px] pl-[79px] pr-[79px] box-border gap-[62px] max-w-full text-left text-61xl text-dark-gold font-titulo-2 mq750:gap-[31px] mq750:pl-[39px] mq750:pt-[42px] mq750:pb-[42px] mq750:box-border mq1050:pt-[65px] mq1050:pb-[65px] mq1050:box-border mq450:gap-[15px] ${className}`}
+        className={`relative border-b border-[#d8a651]/15 bg-[#17100b] px-8 py-24 text-left mq750:px-5 mq750:py-16 ${className}`}
       >
-        <h1 className="m-0 relative text-inherit leading-[90%] inline-block max-w-full z-[1] font-[inherit] mq1050:text-21xl mq1050:leading-[43px] mq450:text-5xl mq450:leading-[29px]">
-          <p className="m-0 font-extrabold">{t.bestMasters.title1} </p>
-          <p className="m-0">
-            <i className="font-medium">{t.bestMasters.title2}</i>
-            <i className="font-bold font-titulo-2">{` `}</i>
-            <span className="font-extrabold font-titulo-2">{t.bestMasters.title3}</span>
-          </p>
-        </h1>
+        <div className="mx-auto w-full max-w-[1180px]">
+          <p className="fe-kicker">Reputación verificable</p>
+          <div className="mt-4 flex items-end justify-between gap-8 mq750:flex-col mq750:items-start">
+            <h2 className="fe-section-title max-w-[740px]">
+              Másters que dejan <em>huella</em>
+            </h2>
+            <p className="m-0 max-w-[330px] text-right text-base leading-6 text-[#f2e6cf]/52 mq750:text-left">
+              Ordenados por partidas finalizadas, valoraciones verificadas y
+              constancia en la comunidad.
+            </p>
+          </div>
 
-        <div className="relative w-full">
+        <div className="relative mt-14 w-full">
           {/* Botón para desplazar a la izquierda */}
           <button
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer [border:none] py-4 px-6 bg-dark-gold shadow-lg rounded-full hover:bg-darkgoldenrod text-black"
+            type="button"
+            aria-label="Ver Másters anteriores"
+            className="fe-icon-button absolute left-0 top-1/2 z-10 -translate-y-1/2 bg-[#100c09] text-xl"
             onClick={scrollLeft}
           >
-            &lt;
+            ←
           </button>
 
           {/* Contenedor de las tarjetas */}
-          <div className="relative mx-[70px]">
+          <div className="relative mx-[64px] mq750:mx-0">
             <div
-              className="flex flex-row items-start justify-start pt-0 px-0 pb-[62px] box-border gap-[20.4px] max-w-full overflow-x-auto scroll-hidden scrollbar-hide"
+              className="flex max-w-full flex-row items-stretch justify-start gap-5 overflow-x-auto px-1 pb-8 pt-1 scrollbar-hide"
               ref={cardContainerRef}
             >
               {loading ? (
@@ -115,23 +120,25 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
 
           {/* Botón para desplazar a la derecha */}
           <button
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer [border:none] py-4 px-6 bg-dark-gold shadow-lg rounded-full hover:bg-darkgoldenrod text-black"
+            type="button"
+            aria-label="Ver más Másters"
+            className="fe-icon-button absolute right-0 top-1/2 z-10 -translate-y-1/2 bg-[#100c09] text-xl mq750:hidden"
             onClick={scrollRight}
           >
-            &gt;
+            →
           </button>
         </div>
 
         {/* Botón para ver todos los másters */}
-        <div className="w-[504px] flex flex-row items-start justify-end py-0 px-[79px] box-border max-w-full mq750:pl-[39px] mq750:pr-[39px] mq750:box-border">
+        <div className="mt-2 flex justify-start">
           <button
-            className="cursor-pointer [border:none] py-[15.5px] pl-[47px] pr-[46px] bg-dark-gold flex-1 shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-11xl overflow-hidden flex flex-row items-start justify-start box-border max-w-full z-[1] hover:bg-darkgoldenrod mq450:pl-5 mq450:pr-5 mq450:box-border"
+            type="button"
+            className="fe-button-secondary gap-3"
             onClick={onViewAllMastersLinkClick}
           >
-            <b className="flex-1 relative text-5xl font-titulo-2 text-black text-center">
-              {t.bestMasters.viewAll}
-            </b>
+            {t.bestMasters.viewAll} <span aria-hidden="true">→</span>
           </button>
+        </div>
         </div>
       </section>
     );

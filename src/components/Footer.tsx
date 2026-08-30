@@ -11,97 +11,143 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    // Funciones para manejar las redirecciones
-    const onNuestrosMastersClick = () => {
-      navigate("/ourmasters"); // Redirige a /masters
-    };
-
-    const onPartidasClick = () => {
-      navigate("/nextgames"); // Redirige a /nextgames
-    };
-
-    const onContactoClick = () => {
-      navigate("/contacto"); // Redirige a /contacto
-    };
+    const exploreLinks = [
+      { label: t.footer.masters, path: "/ourmasters" },
+      { label: t.footer.games, path: "/nextgames" },
+      { label: t.footer.contact, path: "/contacto" },
+    ];
+    const legalLinks = [
+      { label: "Aviso legal", path: "/legal" },
+      { label: "Privacidad", path: "/privacidad" },
+      { label: "Cookies", path: "/cookies" },
+      { label: "Términos de uso", path: "/terminos" },
+    ];
 
     return (
       <footer
-        className={`self-stretch h-80 bg-black shrink-0 flex flex-row items-end justify-between pt-[50px] pb-[94px] pl-[186px] pr-[171px] box-border max-w-full gap-5 text-center text-5xl text-oldlace-100 font-titulo-2 mq750:pl-[93px] mq750:pr-[85px] mq750:box-border mq1050:flex-wrap mq450:pl-5 mq450:pr-5 mq450:box-border ${className}`}
+        className={`relative overflow-hidden border-t border-[#d8a651]/20 bg-[#0d0907] text-[#f2e6cf] ${className}`}
       >
-        <div className="h-80 w-[1280px] relative bg-black hidden max-w-full" />
-        <div className="h-[141px] w-[250px] flex flex-col items-start justify-end pt-0 px-0 pb-[34px] box-border">
-          <div className="self-stretch flex-1 flex flex-col items-end justify-start gap-px">
-            <div className="self-stretch relative font-medium z-[1] mq450:text-lgi">
-              {t.footer.followUs}
+        <div className="pointer-events-none absolute left-1/2 top-[-16rem] h-[30rem] w-[52rem] -translate-x-1/2 rounded-full bg-[#a55e28]/10 blur-[110px]" />
+
+        <div className="relative mx-auto w-full max-w-[1200px] px-8 pb-10 pt-16 mq750:px-5 mq750:pt-10">
+          <section className="fe-panel mb-14 flex items-center justify-between gap-8 overflow-hidden rounded-[26px] px-10 py-9 mq750:flex-col mq750:items-start mq750:px-6">
+            <div className="relative z-[1] max-w-[670px]">
+              <p className="fe-kicker">La mesa está preparada</p>
+              <h2 className="mb-3 mt-3 font-milonga text-[clamp(1.8rem,3.6vw,3.4rem)] font-normal leading-tight text-[#f2e6cf]">
+                Tu próxima historia aún no se ha escrito.
+              </h2>
+              <p className="m-0 max-w-[590px] text-lg leading-7 text-[#f2e6cf]/62">
+                Encuentra una mesa, conoce a quien la dirige y entra en una
+                aventura que encaje contigo.
+              </p>
             </div>
-            <div className="self-stretch flex flex-row items-start justify-end py-0 pl-[77px] pr-[75px]">
-              <div className="flex-1 flex flex-row items-start justify-between gap-5">
-                <img
-                  className="h-[30px] w-[30px] relative z-[1] cursor-pointer pt-[15px]"
-                  loading="lazy"
-                  alt={t.footer.instagram}
-                  src="/instagram.svg"
-                  onClick={() =>
-                    window.open(
-                      "https://www.instagram.com/rolfantasyexp/",
-                      "_blank",
-                      "noopener,noreferrer"
-                    )
-                  } // Abre Instagram en una nueva pestaña
-                />
-                <div className="flex flex-col items-start justify-start pt-[15px] px-0 pb-0">
-                  <img
-                    className="w-[33px] h-[26.9px] relative z-[1] cursor-pointer"
-                    loading="lazy"
-                    alt={t.footer.twitter}
-                    src="/twitter.svg"
-                    onClick={() =>
-                      window.open(
-                        "https://x.com/RolFantasyExp",
-                        "_blank",
-                        "noopener,noreferrer"
-                      )
-                    } // Abre Twitter en una nueva pestaña
-                  />
-                </div>
+            <button
+              type="button"
+              onClick={() => navigate("/nextgames")}
+              className="fe-button relative z-[1] shrink-0 gap-3"
+            >
+              Explorar aventuras
+              <span aria-hidden="true">→</span>
+            </button>
+          </section>
+
+          <div className="grid grid-cols-[1.4fr_0.8fr_0.9fr_1fr] gap-10 mq1050:grid-cols-2 mq750:grid-cols-1">
+            <div>
+              <button
+                type="button"
+                onClick={() => navigate("/")}
+                className="bg-transparent p-0 text-left"
+              >
+                <span className="block font-milonga text-3xl text-[#e1ae4f]">
+                  Fantasy Experience
+                </span>
+                <span className="mt-2 block text-xs font-extrabold uppercase tracking-[0.25em] text-[#f2e6cf]/42">
+                  Comunidad rolera
+                </span>
+              </button>
+              <p className="mb-0 mt-5 max-w-[330px] text-base leading-6 text-[#f2e6cf]/56">
+                Partidas en mesa, sesiones online y aventuras digitales creadas
+                por una comunidad de Másters y jugadores.
+              </p>
+            </div>
+
+            <nav aria-label="Explorar">
+              <h2 className="m-0 text-xs font-extrabold uppercase tracking-[0.2em] text-[#d9a84f]">
+                Explorar
+              </h2>
+              <div className="mt-5 flex flex-col items-start gap-3">
+                {exploreLinks.map((link) => (
+                  <button
+                    key={link.path}
+                    type="button"
+                    onClick={() => navigate(link.path)}
+                    className="bg-transparent p-0 text-base font-semibold text-[#f2e6cf]/68 transition-colors hover:text-[#e4b45b]"
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            </nav>
+
+            <nav aria-label="Información legal">
+              <h2 className="m-0 text-xs font-extrabold uppercase tracking-[0.2em] text-[#d9a84f]">
+                Información
+              </h2>
+              <div className="mt-5 flex flex-col items-start gap-3">
+                {legalLinks.map((link) => (
+                  <button
+                    key={link.path}
+                    type="button"
+                    onClick={() => navigate(link.path)}
+                    className="bg-transparent p-0 text-base font-semibold text-[#f2e6cf]/68 transition-colors hover:text-[#e4b45b]"
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            </nav>
+
+            <div>
+              <h2 className="m-0 text-xs font-extrabold uppercase tracking-[0.2em] text-[#d9a84f]">
+                {t.footer.followUs}
+              </h2>
+              <div className="mt-5 flex flex-col items-start gap-3">
+                <a
+                  href="https://www.instagram.com/rolfantasyexp/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-base font-semibold text-[#f2e6cf]/68 no-underline transition-colors hover:text-[#e4b45b]"
+                >
+                  <img className="h-5 w-5" alt="" src="/instagram.svg" />
+                  Instagram
+                </a>
+                <a
+                  href="https://x.com/RolFantasyExp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-base font-semibold text-[#f2e6cf]/68 no-underline transition-colors hover:text-[#e4b45b]"
+                >
+                  <img className="h-5 w-5" alt="" src="/twitter.svg" />
+                  X / Twitter
+                </a>
               </div>
             </div>
           </div>
-        </div>
-        {/* Sección de navegación */}
-        <div className="self-stretch w-[236px] flex flex-col items-start justify-start py-0 pl-0 pr-[30px] box-border">
-          <div className="self-stretch relative font-medium z-[1] mq450:text-lgi">
-            <p className="m-0 cursor-pointer" onClick={onNuestrosMastersClick}>
-              {t.footer.masters}
-            </p>
-            <p className="m-0">&nbsp;</p>
-            <p className="m-0 cursor-pointer" onClick={onPartidasClick}>
-              {t.footer.games}
-            </p>
-            <p className="m-0">&nbsp;</p>
-            <p className="m-0 cursor-pointer" onClick={onContactoClick}>
-              {t.footer.contact}
-            </p>
-            <div className="mt-4 flex flex-col gap-1 text-sm">
-              <button onClick={() => navigate("/legal")}>Aviso legal</button>
-              <button onClick={() => navigate("/privacidad")}>Privacidad</button>
-              <button onClick={() => navigate("/cookies")}>Cookies</button>
-              <button onClick={() => navigate("/terminos")}>Términos</button>
-            </div>
-          </div>
-        </div>
 
-        <div className="h-[127px] w-[177px] flex flex-col items-start justify-start text-13xl text-dark-gold font-milonga">
-          <h2 className="m-0 self-stretch relative text-inherit leading-[76.6%] font-normal font-[inherit] [display:-webkit-inline-box] items-center overflow-hidden text-ellipsis [-webkit-line-clamp:3] [-webkit-box-orient:vertical] z-[1] mq1050:text-7xl mq1050:leading-[20px] mq450:text-lgi mq450:leading-[15px] cursor-pointer">
-            <span className="[line-break:anywhere]">
-              <p className="m-1" onClick={() => navigate("/")}>{t.common.brandName1}</p>
-              <p className="m-1" onClick={() => navigate("/")}>{t.common.brandName2}</p>
-            </span>
-          </h2>
+          <div className="fe-divider mb-7 mt-12" />
+          <div className="flex items-center justify-between gap-5 text-sm text-[#f2e6cf]/38 mq750:flex-col mq750:items-start">
+            <p className="m-0">
+              © {new Date().getFullYear()} Fantasy Experience. Todos los derechos
+              reservados.
+            </p>
+            <p className="m-0">Hecho para quienes todavía creen en la magia de una buena mesa.</p>
+          </div>
         </div>
       </footer>
     );
-  }
+  },
 );
+
+Footer.displayName = "Footer";
 
 export default Footer;

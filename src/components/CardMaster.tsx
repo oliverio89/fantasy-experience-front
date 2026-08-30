@@ -4,15 +4,13 @@ export type SlideType = {
   className?: string;
   masterCard?: string;
   MasterName?: string;
-  rate?: number; // Rating del 1 al 5
+  rate?: number;
   totalReviews?: number;
   completedSessions?: number;
   publishedSessions?: number;
   isFeatured?: boolean;
   Sistema?: string;
   Preferencia?: string;
-
-  /** Action props */
   onSlide1ContainerClick?: () => void;
 };
 
@@ -31,141 +29,91 @@ const CardMaster: FunctionComponent<SlideType> = memo(
     Preferencia,
   }) => {
     const handleClick = useCallback(() => {
-      if (onSlide1ContainerClick) {
-        onSlide1ContainerClick();
-      }
+      onSlide1ContainerClick?.();
     }, [onSlide1ContainerClick]);
 
-    // Normalizamos el rating entre 1 y 5
     const normalizedRating = Math.min(Math.max(rate, 0), 5);
 
-    // Función para renderizar estrellas con soporte para medias estrellas
-    const renderStars = () => {
-      const stars = [];
-      const fullStars = Math.floor(normalizedRating);
-      const hasHalfStar = normalizedRating % 1 >= 0.5;
-
-      // Estrellas completas
-      for (let i = 0; i < fullStars; i++) {
-        stars.push(
-          <img
-            key={`full-${i}`}
-            className="h-[30px] w-[30px] relative rounded-12xs z-[1]"
-            alt={`Star ${i + 1}`}
-            src="/rating-star.svg"
-          />
-        );
-      }
-
-      // Media estrella
-      if (hasHalfStar) {
-        stars.push(
-          <div
-            key="half-star"
-            className="h-[30px] w-[30px] relative rounded-12xs z-[1] overflow-hidden"
-          >
-            <img
-              className="absolute top-0 left-0 h-[30px] w-[30px]"
-              alt="Half star"
-              src="/rating-star.svg"
-              style={{
-                clipPath: "inset(0 50% 0 0)",
-              }}
-            />
-            <img
-              className="absolute top-0 left-0 h-[30px] w-[30px]"
-              alt="Half star empty"
-              src="/rating-star-empty.svg"
-              style={{
-                clipPath: "inset(0 0 0 50%)",
-              }}
-            />
-          </div>
-        );
-      }
-
-      // Estrellas vacías
-      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-      for (let i = 0; i < emptyStars; i++) {
-        stars.push(
-          <img
-            key={`empty-${i}`}
-            className="h-[30px] w-[30px] relative rounded-12xs z-[1]"
-            alt={`Empty star ${i + 1}`}
-            src="/rating-star-empty.svg"
-          />
-        );
-      }
-
-      return stars;
-    };
-
     return (
-      <div
-        className={`h-[445px] w-[360px] relative shrink-0 max-w-full cursor-pointer text-center text-13xl text-dark-gold font-titulo-2 ${className}`}
+      <article
+        className={`fe-panel group relative min-h-[480px] w-[330px] shrink-0 overflow-hidden rounded-[24px] text-[#f2e6cf] transition duration-300 hover:-translate-y-2 hover:border-[#d8a651]/65 hover:shadow-[0_28px_70px_rgba(0,0,0,.42)] ${className}`}
         onClick={handleClick}
         role="button"
         tabIndex={0}
         aria-label={MasterName ? `Ver perfil de ${MasterName}` : "Ver perfil del Máster"}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleClick(); }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") handleClick();
+        }}
       >
+        <div className="relative h-[132px] overflow-hidden border-b border-[#d8a651]/18 bg-[radial-gradient(circle_at_50%_10%,rgba(216,166,81,.2),transparent_54%),linear-gradient(135deg,#291b10,#130e0a)]">
+          <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(30deg,transparent_48%,rgba(230,193,119,.25)_49%,rgba(230,193,119,.25)_51%,transparent_52%)] [background-size:20px_34px]" />
+          {isFeatured && (
+            <span className="absolute right-4 top-4 z-[2] rounded-full border border-[#e7bd69]/30 bg-[#120d09]/85 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#e7bd69]">
+              Destacado
+            </span>
+          )}
+        </div>
+
         <img
-          className="absolute top-[0px] left-[80px] rounded-[50%] w-[200px] h-[200px] object-cover z-[1] border-[3px] border-solid border-dark-gold"
+          className="absolute left-1/2 top-[66px] z-[2] h-[132px] w-[132px] -translate-x-1/2 rounded-full border-[3px] border-[#d9a84f] bg-[#17100b] object-cover p-1 shadow-[0_12px_30px_rgba(0,0,0,.45)]"
           loading="lazy"
           alt={MasterName ? `Foto de perfil de ${MasterName}` : "Foto de perfil del Máster"}
           src={masterCard}
         />
-        {isFeatured && (
-          <span className="absolute top-3 right-3 z-[3] rounded-full bg-dark-gold px-3 py-1 text-xs font-bold uppercase tracking-wide text-black shadow-lg">
-            Máster destacado
-          </span>
-        )}
-        <div className="absolute top-[49px] left-[0px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black border-dark-gold border-[1px] border-solid box-border w-full flex flex-col items-end justify-start pt-40 px-0 pb-3.5 gap-4">
-          <div className="self-stretch h-[360px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black border-dark-gold border-[1px] border-solid box-border hidden" />
-          <h2 className="m-0 self-stretch h-[18px] relative text-inherit font-bold font-[inherit] flex items-center justify-center shrink-0 z-[1] mq1050:text-7xl mq450:text-lgi">
+
+        <div className="relative z-[1] flex min-h-[348px] flex-col px-6 pb-6 pt-[78px] text-center">
+          <p className="m-0 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#d9a84f]">
+            Director de juego
+          </p>
+          <h2 className="mb-2 mt-2 line-clamp-1 font-milonga text-[27px] font-normal text-[#f2e6cf]">
             {MasterName}
           </h2>
 
-          {/* Rating dinámico con estrellas parciales */}
-          <div className="self-stretch flex flex-row items-start justify-center py-0 pl-[21px] pr-5">
-            <div className="flex flex-row items-start justify-start gap-[9.8px]">
-              {renderStars()}
-            </div>
+          <div
+            className="flex items-center justify-center gap-2 text-sm"
+            aria-label={`${normalizedRating.toFixed(1)} de 5 estrellas`}
+          >
+            <span aria-hidden="true" className="tracking-[0.08em] text-[#d9a84f]">
+              {Array.from({ length: 5 }, (_, index) =>
+                index < Math.round(normalizedRating) ? "★" : "☆",
+              ).join("")}
+            </span>
+            <strong className="text-[#f2e6cf]/72">{normalizedRating.toFixed(1)}</strong>
           </div>
 
-          <div className="self-stretch flex flex-col items-center justify-start pt-0 px-4 pb-[9px] gap-[4px] text-xl text-white">
-            <b className="self-stretch relative z-[1] mq450:text-base leading-tight">
-              <span className="line-clamp-2">{Sistema}</span>
-            </b>
-            <div className="self-stretch relative text-base z-[1] text-nude leading-normal font-medium flex items-center justify-center">
-              {Preferencia}
-            </div>
-          </div>
+          <p className="mb-1 mt-4 line-clamp-1 text-base font-bold text-[#f2e6cf]/88">
+            {Sistema || "Sistemas por descubrir"}
+          </p>
+          <p className="m-0 line-clamp-1 text-sm text-[#f2e6cf]/48">
+            {Preferencia || "Modalidad por concretar"}
+          </p>
 
-          <div className="self-stretch grid grid-cols-3 gap-2 px-4 text-nude">
-            <div className="rounded-lg bg-white/5 px-2 py-2">
-              <strong className="block text-lg text-light-gold">{completedSessions}</strong>
-              <span className="block text-[11px] leading-tight">jugadas</span>
-            </div>
-            <div className="rounded-lg bg-white/5 px-2 py-2">
-              <strong className="block text-lg text-light-gold">{publishedSessions}</strong>
-              <span className="block text-[11px] leading-tight">publicadas</span>
-            </div>
-            <div className="rounded-lg bg-white/5 px-2 py-2">
-              <strong className="block text-lg text-light-gold">{totalReviews}</strong>
-              <span className="block text-[11px] leading-tight">opiniones</span>
-            </div>
-          </div>
+          <dl className="my-5 grid grid-cols-3 gap-2 border-y border-[#d8a651]/14 py-4">
+            {[
+              [completedSessions, "jugadas"],
+              [publishedSessions, "publicadas"],
+              [totalReviews, "opiniones"],
+            ].map(([value, label]) => (
+              <div key={label}>
+                <dt className="order-2 text-[11px] uppercase tracking-wide text-[#f2e6cf]/40">
+                  {label}
+                </dt>
+                <dd className="order-1 m-0 font-milonga text-2xl text-[#e2b45d]">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-          <div className="self-stretch flex flex-row items-start justify-center py-0 px-5 text-lg mt-auto">
-            <div className="w-[80%] rounded-full border border-dark-gold py-1 px-4 text-dark-gold hover:bg-dark-gold hover:text-black transition-colors z-[1]">
-              Ver perfil
-            </div>
-          </div>
+          <span className="mt-auto inline-flex items-center justify-center gap-2 text-sm font-extrabold text-[#d9a84f] transition-all group-hover:gap-3">
+            Abrir ficha <span aria-hidden="true">→</span>
+          </span>
         </div>
-      </div>
+      </article>
     );
-  }
+  },
 );
+
+CardMaster.displayName = "CardMaster";
 
 export default CardMaster;

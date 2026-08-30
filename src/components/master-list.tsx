@@ -153,9 +153,7 @@ const MasterList: FunctionComponent<MasterListType> = memo(
         className={`w-full flex flex-col items-start justify-start ${className}`}
       >
         {/* Lista de masters */}
-        <section
-          className={`self-stretch flex flex-row items-start justify-start flex-wrap content-start pt-[0rem] px-[0rem] pb-[2.937rem] box-border gap-x-[1.187rem] gap-y-[3.812rem] max-w-full text-center text-[2.125rem] text-dark-gold font-titulo-2 mq450:pb-[1.938rem] mq450:box-border mq450:gap-x-[0.5rem] mq450:gap-y-[1.5rem] mq450:px-[0.5rem]`}
-        >
+        <section className="grid w-full grid-cols-1 gap-5 pb-10 md:grid-cols-2 xl:grid-cols-3">
           {paginatedMasters.length > 0 ? (
             paginatedMasters.map((master) => (
               <UnifiedMasterCard
@@ -165,16 +163,13 @@ const MasterList: FunctionComponent<MasterListType> = memo(
               />
             ))
           ) : (
-            <div className="w-full flex flex-col items-center justify-center py-8 text-center mq450:py-4">
-              <div className="text-2xl text-nude mb-4 mq450:text-xl mq450:mb-2">
-                🔍
-              </div>
-              <h3 className="text-xl text-white font-titulo-2 mb-2 mq450:text-lg mq450:mb-1">
-                No se encontraron masters
+            <div className="fe-panel col-span-full flex flex-col items-center justify-center px-6 py-14 text-center">
+              <div className="mb-4 text-2xl text-[#d6a64c]" aria-hidden="true">◇</div>
+              <h3 className="mb-2 font-titulo-1 text-2xl text-[#f3e7d1]">
+                No encontramos Másters con esos filtros
               </h3>
-              <p className="text-nude text-sm mq450:text-xs">
-                Intenta ajustar los filtros o la búsqueda para encontrar más
-                resultados.
+              <p className="max-w-md text-sm leading-6 text-[#b8a894]">
+                Prueba con otro sistema o abre los filtros avanzados para ampliar la búsqueda.
               </p>
             </div>
           )}

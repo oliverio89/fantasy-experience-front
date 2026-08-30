@@ -5,11 +5,182 @@
 @tailwind utilities;
 body {
   @apply leading-[normal] m-0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: #f2e6cf;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(171, 101, 40, 0.16), transparent 28rem),
+    radial-gradient(circle at 88% 18%, rgba(107, 45, 30, 0.12), transparent 32rem),
+    #100c09;
+  font-family: "Alegreya Sans", system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 *,
 ::before,
 ::after {
+  box-sizing: border-box;
   border-width: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  margin: 0;
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  color: #150f0a;
+  background: #ddb15a;
+}
+
+:focus-visible {
+  outline: 2px solid #e0af4f;
+  outline-offset: 4px;
+}
+
+.fe-app-shell {
+  min-height: 100vh;
+  color: #f2e6cf;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    radial-gradient(circle at 12% 8%, rgba(171, 101, 40, 0.13), transparent 28rem),
+    #100c09;
+  background-size: 42px 42px, 42px 42px, auto, auto;
+}
+
+.fe-panel {
+  position: relative;
+  border: 1px solid rgba(216, 166, 81, 0.32);
+  background:
+    linear-gradient(145deg, rgba(255, 244, 218, 0.055), transparent 42%),
+    rgba(30, 22, 16, 0.94);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.32),
+    inset 0 1px rgba(255, 236, 192, 0.05);
+}
+
+.fe-panel::before {
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(216, 166, 81, 0.1);
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+}
+
+.fe-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0;
+  color: #d9a84f;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.fe-kicker::before {
+  width: 2.25rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d9a84f);
+  content: "";
+}
+
+.fe-section-title {
+  margin: 0;
+  color: #f2e6cf;
+  font-family: "Milonga", serif;
+  font-size: clamp(2rem, 4.4vw, 4.4rem);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.fe-section-title em {
+  color: #d9a84f;
+  font-style: normal;
+}
+
+.fe-button,
+.fe-button-secondary,
+.fe-icon-button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease,
+    background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.fe-button {
+  border: 1px solid #ddb15a;
+  padding: 0.72rem 1.35rem;
+  color: #160f09;
+  background: linear-gradient(135deg, #f0ca76, #bd772c);
+  box-shadow: 0 10px 30px rgba(183, 106, 33, 0.2);
+}
+
+.fe-button-secondary {
+  border: 1px solid rgba(230, 199, 139, 0.4);
+  padding: 0.72rem 1.35rem;
+  color: #f2e6cf;
+  background: rgba(18, 13, 10, 0.66);
+}
+
+.fe-button:hover,
+.fe-button-secondary:hover,
+.fe-icon-button:hover {
+  transform: translateY(-2px);
+}
+
+.fe-button:hover {
+  box-shadow: 0 14px 36px rgba(183, 106, 33, 0.3);
+}
+
+.fe-button-secondary:hover,
+.fe-icon-button:hover {
+  border-color: rgba(229, 178, 87, 0.82);
+  color: #e5b257;
+  background: rgba(216, 166, 81, 0.08);
+}
+
+.fe-icon-button {
+  width: 48px;
+  border: 1px solid rgba(230, 199, 139, 0.34);
+  color: #e7c57f;
+  background: rgba(18, 13, 10, 0.72);
+}
+
+.fe-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(216, 166, 81, 0.55), transparent);
+}
+
+.fe-surface-grid {
+  background:
+    radial-gradient(circle at 25% 0%, rgba(197, 128, 49, 0.12), transparent 25rem),
+    linear-gradient(180deg, #15100c, #0f0c09);
 }
 
 /* Simple Loader */

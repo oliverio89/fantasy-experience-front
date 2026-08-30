@@ -127,19 +127,9 @@ const BadgeTipoPartida: FunctionComponent<{ tipo: TipoPartida }> = memo(
     const config = getBadgeConfig();
 
     return (
-      <div className="h-[120px] w-[120px] relative z-[2]">
-        <img
-          className="w-[120px] h-[120px] absolute !m-[0] right-[-20px] bottom-[-20px]"
-          loading="lazy"
-          alt=""
-          src={config.icon}
-        />
-        <div
-          className={`w-[86.8px] h-[42px] absolute !m-[0] right-[3.2px] bottom-[4.24px] text-base [text-decoration:underline] font-extrabold flex items-center justify-center [transform:_rotate(-20.1deg)] [transform-origin:0_0] z-[3] ${config.color}`}
-        >
-          {config.texto}
-        </div>
-      </div>
+      <span className="relative z-[2] inline-flex rounded-full border border-[#edc777]/45 bg-[#100c09]/88 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#edc777] shadow-lg backdrop-blur-md">
+        {config.texto}
+      </span>
     );
   }
 );
@@ -172,8 +162,9 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
     };
 
     // Determinar color de texto según el fondo
-    const isDarkBackground =
-      backgroundColor === "#1a1a1a" || backgroundColor === "#darkslategray";
+    const isDarkBackground = ["#1a1a1a", "#darkslategray", "#1b130d", "#21170f"].includes(
+      backgroundColor,
+    );
     const textColor = isDarkBackground ? "text-oldlace-100" : "text-black";
 
     // Calcular vacantes
@@ -183,7 +174,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
 
     return (
       <div
-        className={`w-[360px] min-h-[536px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border max-w-full text-center text-base ${textColor} font-titulo-2 hover:scale-[1.02] transition-transform duration-200 ${className}`}
+        className={`fe-panel min-h-[530px] w-full max-w-full shrink-0 cursor-pointer overflow-hidden rounded-[24px] pb-5 text-left text-base ${textColor} font-titulo-2 transition duration-300 hover:-translate-y-1 hover:border-[#d8a651]/60 ${className}`}
         style={{ backgroundColor }}
         onClick={handleCardClick}
         role="button"
@@ -197,7 +188,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
       >
         {/* Header con imagen y badge */}
         <div
-          className="self-stretch rounded-t-xl rounded-b-none flex flex-row items-start justify-end pt-[7px] px-6 pb-[133px] box-border bg-cover bg-no-repeat bg-center max-w-full z-[1] h-[240px]"
+          className="relative z-[1] flex h-[220px] max-w-full items-start justify-end self-stretch bg-cover bg-center bg-no-repeat px-5 pt-5 after:absolute after:inset-0 after:-z-[1] after:bg-[linear-gradient(180deg,rgba(10,7,5,.08),rgba(10,7,5,.72))]"
           style={{
             backgroundImage: `url('${partida.imagenUrl}')`,
           }}
@@ -206,9 +197,9 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
         </div>
 
         {/* Contenido de la tarjeta */}
-        <div className="self-stretch flex-1 flex flex-col items-center justify-start pt-6 px-4 pb-0 gap-3 relative">
+        <div className="relative flex flex-1 flex-col items-start justify-start gap-2.5 self-stretch px-6 pb-0 pt-7">
           {/* Disponibilidad: plazas para sesiones, descarga para productos */}
-          <div className="absolute top-[-10px] right-[10px] bg-dark-gold text-black font-bold px-3 py-1 rounded-full text-xs shadow-md z-[5]">
+          <div className="absolute right-5 top-[-14px] z-[5] rounded-full border border-[#d8a651]/30 bg-[#d9a84f] px-3 py-1 text-xs font-bold text-[#120d09] shadow-md">
             {partida.tipoPartida === "Digital"
               ? partida.digitalFileName
                 ? "Descarga digital"
@@ -219,34 +210,34 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
           </div>
 
           {partida.status && (
-            <span className="text-sm font-bold text-dark-gold">
+            <span className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#d9a84f]">
               {statusLabels[partida.status]}
             </span>
           )}
 
           {/* Título - Máximo 2 líneas */}
-          <h2 className="m-0 self-stretch relative text-13xl font-bold font-[inherit] text-goldenrod z-[1] mq1050:text-7xl mq450:text-lgi overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] h-[80px]">
+          <h2 className="m-0 line-clamp-2 min-h-[64px] self-stretch overflow-hidden font-milonga text-[26px] font-normal leading-8 text-[#f2e6cf]">
             {partida.titulo}
           </h2>
 
           {/* Nombre del Master - Máximo 1 línea */}
-          <b className="self-stretch relative text-xl z-[1] mq450:text-base truncate">
+          <b className="self-stretch truncate text-base text-[#e0ad50]">
             {partida.masterName}
           </b>
 
           {/* Sistema de juego - Máximo 1 línea */}
-          <div className="self-stretch relative text-lg leading-[20px] z-[1] truncate">
+          <div className="self-stretch truncate text-sm leading-5 text-[#f2e6cf]/62">
             {partida.sistemaJuego}
           </div>
 
           {/* Fecha para sesiones; formato y precio para productos digitales */}
           {partida.tipoPartida === "Digital" ? (
-            <div className="self-stretch relative text-lg leading-[20px] z-[1] truncate">
+            <div className="self-stretch truncate text-sm leading-5 text-[#f2e6cf]/62">
               {partida.digitalFileName?.split(".").pop()?.toUpperCase() || "Archivo"}
               {partida.precio ? ` · ${Number(partida.precio).toFixed(2)} €` : ""}
             </div>
           ) : partida.fecha ? (
-            <div className="self-stretch relative text-lg leading-[20px] z-[1] truncate">
+            <div className="self-stretch truncate text-sm leading-5 text-[#f2e6cf]/62">
               {new Intl.DateTimeFormat("es-ES", {
                 dateStyle: "medium",
                 timeStyle: "short",
@@ -263,13 +254,13 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
 
           {/* Tags */}
           {partida.tags && partida.tags.length > 0 && (
-            <div className="self-stretch flex flex-row flex-wrap items-center justify-center gap-1.5 mt-2 overflow-hidden h-auto max-h-[60px]">
+            <div className="mt-2 flex max-h-[60px] h-auto flex-row flex-wrap items-center justify-start gap-1.5 overflow-hidden self-stretch">
               {partida.tags.slice(0, 4).map((tag, index) => (
                 <span
                   key={index}
                   className={`px-2 py-0.5 text-xs rounded-full border border-solid ${
                     isDarkBackground
-                      ? "border-goldenrod text-goldenrod"
+                      ? "border-[#d8a651]/32 text-[#e0ad50]"
                       : "border-black text-black"
                   } truncate max-w-[100px]`}
                   title={tag}
@@ -292,26 +283,22 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
 
         {/* Descripción (opcional) - Máximo 2 líneas */}
         {mostrarDescripcion && partida.descripcion && (
-          <div className="self-stretch flex flex-row items-start justify-start py-0 px-2.5 box-border max-w-full h-[48px]">
-            <div className="flex-1 relative leading-[24px] font-light [display:-webkit-inline-box] items-center justify-center overflow-hidden text-ellipsis [-webkit-line-clamp:2] [-webkit-box-orient:vertical] z-[1]">
+          <div className="mt-3 h-[48px] max-w-full self-stretch px-6">
+            <div className="line-clamp-2 overflow-hidden text-sm font-light leading-6 text-[#f2e6cf]/54">
               {partida.descripcion}
             </div>
           </div>
         )}
 
         {/* Botón de acción */}
-        <div className="self-stretch flex flex-row items-start justify-start py-0 px-5 box-border max-w-full mt-auto">
+        <div className="mt-auto flex max-w-full flex-row items-start justify-start px-6 pt-4 self-stretch">
           <button
             onClick={handleButtonClick}
-            className={`flex-1 cursor-pointer [border:none] py-2 px-4 rounded-xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] transition-colors duration-200 z-[1] ${
-              isDarkBackground
-                ? "bg-oldlace-100 hover:bg-goldenrod"
-                : "bg-white hover:bg-oldlace-100"
-            }`}
+            className="fe-button-secondary z-[1] flex-1 rounded-xl bg-transparent px-4 py-2"
             aria-label={`Ver detalles de ${partida.titulo}`}
             tabIndex={0}
           >
-            <b className="relative text-lg font-titulo-2 text-black1 text-center">
+            <b className="text-center text-base font-bold text-[#f2e6cf] font-titulo-2">
               {partida.tipoPartida === "Digital"
                 ? "Ver aventura"
                 : t.partidaCard.viewDetails}

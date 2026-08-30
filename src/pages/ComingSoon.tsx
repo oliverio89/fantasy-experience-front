@@ -17,17 +17,17 @@ const ComingSoon = () => {
   const feature = getFeatureName(location.state);
 
   return (
-    <main className="min-h-[calc(100vh-90px)] bg-black text-nude flex items-center justify-center px-6 py-16">
+    <main className="fe-surface-grid flex min-h-[calc(100vh-82px)] items-center justify-center px-6 py-16 text-nude">
       <section
         aria-labelledby="coming-soon-title"
-        className="w-full max-w-2xl rounded-xl border border-dark-gold/50 bg-darkslategray px-6 py-12 text-center shadow-[0_20px_70px_rgba(0,0,0,0.45)] sm:px-12"
+        className="fe-panel w-full max-w-2xl rounded-[26px] px-6 py-12 text-center sm:px-12"
       >
         <p className="m-0 text-sm font-bold uppercase tracking-[0.2em] text-dark-gold">
           Próximamente
         </p>
         <h1
           id="coming-soon-title"
-          className="mb-4 mt-4 font-titulo-2 text-4xl text-nude"
+          className="mb-4 mt-4 font-milonga text-4xl font-normal text-nude"
         >
           Estamos trabajando en ello
         </h1>
@@ -48,7 +48,7 @@ const ComingSoon = () => {
 
         <Link
           to="/"
-          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-dark-gold px-8 py-3 font-bold text-black no-underline transition-colors hover:bg-goldenrod focus:outline-none focus:ring-2 focus:ring-goldenrod focus:ring-offset-2 focus:ring-offset-black"
+          className="fe-button"
         >
           Volver al inicio
         </Link>

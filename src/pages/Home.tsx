@@ -9,22 +9,46 @@ import OurComunityOnline from "../components/OurComunityOnline";
 const HomeV: FunctionComponent = () => {
   const { t } = useTranslation();
   return (
-    <div className="w-full relative bg-white overflow-y-auto flex flex-col items-start justify-start leading-[normal] tracking-[normal]">
+    <div className="w-full overflow-y-auto bg-[#100c09] leading-[normal] tracking-[normal]">
       <Header />
-      <section className="self-stretch bg-oldlace-100 flex flex-row items-start justify-start pt-[100px] px-20 pb-[100px] box-border gap-10 max-w-full text-left text-81xl text-black font-titulo-2 mq750:gap-5 mq750:pt-[61px] mq750:px-10 mq750:pb-[65px] mq750:box-border mq1050:flex-wrap">
-        <div className="h-[625px] w-[1280px] relative bg-oldlace-100 hidden max-w-full" />
-        <img
-          className="h-[431px] flex-1 relative rounded-xl max-w-full overflow-hidden object-cover min-w-[352px] z-[1] mq750:min-w-full"
-          loading="lazy"
-          alt={t.home.heroImageAlt}
-          src="/konradkollerlctjo2d9-2cunsplash-1@2x.png"
-        />
-        <div className="flex-1 flex flex-col items-start justify-start min-w-[352px] min-h-[431px] max-w-full mq750:min-w-full mq1050:min-h-[auto]">
-          <h1 className="m-0 relative text-inherit leading-[80px] font-extrabold font-[inherit] z-[1] mq1050:text-[50px] mq1050:leading-[48px] mq450:text-11xl mq450:leading-[32px]">
-            <p className="m-0">{t.home.sectionTitle}</p>
-          </h1>
-          <div className="m-2 self-stretch relative text-lg leading-[26px] text-darkslategray z-[2]">
-            {t.home.sectionDescription}
+      <section className="fe-surface-grid border-b border-[#d8a651]/15 px-8 py-24 mq750:px-5 mq750:py-16">
+        <div className="mx-auto grid w-full max-w-[1180px] grid-cols-[0.9fr_1.1fr] items-center gap-20 mq1050:grid-cols-1 mq750:gap-10">
+          <figure className="relative m-0 min-h-[470px] mq750:min-h-[350px]">
+            <div className="absolute -left-4 -top-4 h-full w-full rounded-[24px] border border-[#d8a651]/28" />
+            <img
+              className="relative h-[470px] w-full rounded-[24px] object-cover shadow-[0_26px_70px_rgba(0,0,0,.36)] mq750:h-[350px]"
+              loading="lazy"
+              alt={t.home.heroImageAlt}
+              src="/konradkollerlctjo2d9-2cunsplash-1@2x.png"
+            />
+            <figcaption className="absolute bottom-5 right-[-18px] rounded-xl border border-[#d8a651]/25 bg-[#17100b]/95 px-5 py-3 text-xs font-extrabold uppercase tracking-[0.16em] text-[#d9a84f] shadow-xl mq750:right-3">
+              Historias compartidas
+            </figcaption>
+          </figure>
+
+          <div>
+            <p className="fe-kicker">Más que una reserva</p>
+            <h2 className="fe-section-title mb-7 mt-4">
+              Somos una comunidad alrededor de <em>la mesa</em>
+            </h2>
+            <p className="m-0 text-xl leading-8 text-[#f2e6cf]/64">
+              {t.home.sectionDescription}
+            </p>
+            <div className="fe-divider my-8" />
+            <div className="grid grid-cols-3 gap-4 mq750:grid-cols-1">
+              {[
+                ["Encuentra", "una mesa que encaje contigo"],
+                ["Conoce", "la trayectoria de cada Máster"],
+                ["Comparte", "tu opinión tras la partida"],
+              ].map(([title, copy]) => (
+                <div key={title}>
+                  <strong className="block text-lg text-[#e2b45d]">{title}</strong>
+                  <span className="mt-1 block text-sm leading-5 text-[#f2e6cf]/48">
+                    {copy}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

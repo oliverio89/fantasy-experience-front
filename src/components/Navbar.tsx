@@ -1,5 +1,5 @@
-import { FunctionComponent, memo, useCallback, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Importamos useNavigate y useLocation
+import { FunctionComponent, memo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "../i18n";
 import NotificationCenter from "./NotificationCenter";
@@ -8,285 +8,222 @@ export type FrameComponent1Type = {
   className?: string;
 };
 
+const DiceMark = () => (
+  <svg
+    aria-hidden="true"
+    className="h-10 w-10"
+    viewBox="0 0 48 48"
+    fill="none"
+  >
+    <path
+      d="M24 3.75 41.5 14v20L24 44.25 6.5 34V14L24 3.75Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <path
+      d="m6.5 14 17.5 9.7L41.5 14M24 23.7v20.55M24 3.75v19.9M15.4 9l8.6 14.7L32.6 9"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      opacity=".72"
+    />
+    <path d="M24 17.2 27 22h-6l3-4.8Z" fill="currentColor" />
+  </svg>
+);
+
 const Navbar: FunctionComponent<FrameComponent1Type> = memo(
   ({ className = "" }) => {
-    const navigate = useNavigate(); // Hook para redireccionar
-    const location = useLocation(); // Hook para obtener la ruta actual
-    const [menuOpen, setMenuOpen] = useState(false); // Estado para controlar el menú hamburguesa
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [menuOpen, setMenuOpen] = useState(false);
     const { user, userRole } = useAuth();
     const { t } = useTranslation();
 
-    // Función para alternar el estado del menú
-    const toggleMenu = () => {
-      setMenuOpen(!menuOpen);
+    const goTo = (path: string) => {
+      navigate(path);
+      setMenuOpen(false);
     };
 
-    // Funciones para navegar
-    const onHomeTextClick = useCallback(() => {
-      navigate("/"); // Redirige a la ruta principal
-      setMenuOpen(false); // Cierra el menú en pantallas pequeñas
-    }, [navigate]);
+    const navItems = [
+      { path: "/", label: t.navbar.home, aria: t.navbar.ariaHome },
+      {
+        path: "/ourmasters",
+        label: t.navbar.masters,
+        aria: t.navbar.ariaMasters,
+      },
+      { path: "/nextgames", label: t.navbar.games, aria: t.navbar.ariaGames },
+      { path: "/contacto", label: t.navbar.contact, aria: t.navbar.ariaContact },
+    ];
 
-    const onNuestrosMastersTextClick = useCallback(() => {
-      navigate("/ourmasters"); // Redirige a la ruta /masters
-      setMenuOpen(false);
-    }, [navigate]);
+    const isActive = (path: string) =>
+      path === "/"
+        ? location.pathname === path
+        : location.pathname.startsWith(path);
 
-    const onPartidasTextClick = useCallback(() => {
-      navigate("/nextgames"); // Redirige a la ruta /partidas
-      setMenuOpen(false);
-    }, [navigate]);
-
-    const onContactoTextClick = useCallback(() => {
-      navigate("/contacto"); // Redirige a la ruta /contacto
-      setMenuOpen(false);
-    }, [navigate]);
-
-    const onCrearPartidaClick = useCallback(() => {
-      navigate("/crearpartida");
-      setMenuOpen(false);
-    }, [navigate]);
-
-    const onUserDetailTextClick = useCallback(() => {
-      if (user) {
-        navigate("/user");
-      } else {
-        navigate("/login");
-      }
-      setMenuOpen(false);
-    }, [navigate, user]);
-
-    // Función para determinar si el enlace está activo
-    const getLinkClass = (path: string) =>
-      location.pathname === path ? "text-goldenrod" : "text-white";
+    const accountPath = user ? "/user" : "/login";
 
     return (
-      <section
-        className={`self-stretch h-[90px] flex flex-row items-start justify-start pt-0 px-0 box-border top-[0] z-[99] sticky max-w-full ${className}`}
+      <header
+        className={`sticky top-0 z-[99] border-b border-[#d8a651]/25 bg-[#100c09]/95 text-[#f2e6cf] shadow-[0_10px_35px_rgba(0,0,0,0.28)] backdrop-blur-xl ${className}`}
       >
-        <header className="self-stretch flex-1 bg-black overflow-auto flex flex-row items-start justify-between py-1 px-20 box-border gap-5 max-w-full z-[1] text-center text-9xl text-dark-gold font-milonga mq750:pl-10 mq750:pr-10 mq750:box-border">
-          <div className="self-stretch w-full relative bg-black hidden" />
-          <h3
-            className="m-1 self-stretch w-[150px] p-1 relative text-inherit leading-[76.6%] font-normal font-[inherit] [display:-webkit-inline-box] items-center overflow-hidden text-ellipsis [-webkit-line-clamp:3] [-webkit-box-orient:vertical] shrink-0 z-[1] cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={onHomeTextClick}
+        <div className="mx-auto flex h-[82px] w-full max-w-[1240px] items-center justify-between gap-8 px-8 mq750:h-[72px] mq750:px-4">
+          <button
+            type="button"
+            onClick={() => goTo("/")}
+            className="group flex shrink-0 items-center gap-3 bg-transparent p-0 text-left text-[#d9a84f]"
             aria-label={t.navbar.ariaHome}
           >
-            <span className="[line-break:anywhere] w-full">
-              <p className="m-1">Fantasy</p>
-              <p className="m-1">Experience</p>
+            <span className="transition-transform duration-300 group-hover:rotate-6">
+              <DiceMark />
             </span>
-          </h3>
+            <span className="flex flex-col leading-none">
+              <span className="font-milonga text-[19px] tracking-[-0.02em] text-[#f2e6cf]">
+                Fantasy
+              </span>
+              <span className="mt-1 text-[10px] font-extrabold uppercase tracking-[0.27em] text-[#d9a84f]">
+                Experience
+              </span>
+            </span>
+          </button>
 
-          <div className="flex lg:hidden flex-row items-start justify-start gap-[145px] max-w-full text-4xs text-white font-titulo-2 mq1050:w-[337px] mq1050:gap-[73px] mq450:gap-9">
-            <nav aria-label={t.navbar.ariaNav} className="m-0 flex-1 flex flex-row items-start justify-start gap-[52px] max-w-full text-center text-xl text-oldlace-100 font-titulo-2 mq750:gap-[26px] mq1050:hidden">
-              {/* Enlace Inicio */}
-              <a
-                role="link"
-                aria-label={t.navbar.ariaHome}
-                aria-current={location.pathname === "/" ? "page" : undefined}
-                className={`[text-decoration:none] h-20 relative font-medium flex items-center justify-center min-w-[52px] font-milonga cursor-pointer z-[1] ${getLinkClass(
-                  "/"
-                )}`}
-                onClick={onHomeTextClick}
+          <nav
+            aria-label={t.navbar.ariaNav}
+            className="flex items-center gap-1 rounded-full border border-[#e2bd72]/15 bg-black/20 p-1.5 mq1050:hidden"
+          >
+            {navItems.map((item) => (
+              <button
+                key={item.path}
+                type="button"
+                aria-label={item.aria}
+                aria-current={isActive(item.path) ? "page" : undefined}
+                onClick={() => goTo(item.path)}
+                className={`min-h-[40px] rounded-full bg-transparent px-5 text-[15px] font-bold transition-colors ${
+                  isActive(item.path)
+                    ? "bg-[#d9a84f]/12 text-[#e7bd69]"
+                    : "text-[#f2e6cf]/72 hover:text-[#f2e6cf]"
+                }`}
               >
-                {t.navbar.home}
-              </a>
-
-              {/* Enlace Nuestros Másters */}
-              <a
-                role="link"
-                aria-label={t.navbar.ariaMasters}
-                aria-current={location.pathname === "/ourmasters" ? "page" : undefined}
-                className={`[text-decoration:none] h-20 w-[143px] relative font-medium flex items-center font-milonga justify-center shrink-0 cursor-pointer z-[1] ${getLinkClass(
-                  "/ourmasters"
-                )}`}
-                onClick={onNuestrosMastersTextClick}
+                {item.label}
+              </button>
+            ))}
+            {user && (userRole === "master" || userRole === "admin") && (
+              <button
+                type="button"
+                aria-label={t.navbar.ariaCreateGame}
+                aria-current={isActive("/crearpartida") ? "page" : undefined}
+                onClick={() => goTo("/crearpartida")}
+                className="min-h-[40px] rounded-full bg-transparent px-5 text-[15px] font-bold text-[#d9a84f] hover:bg-[#d9a84f]/10"
               >
-                {t.navbar.masters}
-              </a>
+                {t.navbar.createGame}
+              </button>
+            )}
+          </nav>
 
-              {/* Enlace Partidas */}
-              <a
-                role="link"
-                aria-label={t.navbar.ariaGames}
-                aria-current={location.pathname === "/nextgames" ? "page" : undefined}
-                className={`[text-decoration:none] h-20 relative font-medium flex items-center font-milonga justify-center min-w-[70px] cursor-pointer z-[1] ${getLinkClass(
-                  "/nextgames"
-                )}`}
-                onClick={onPartidasTextClick}
-              >
-                {t.navbar.games}
-              </a>
-
-              {/* Enlace Contacto */}
-              <a
-                role="link"
-                aria-label={t.navbar.ariaContact}
-                aria-current={location.pathname === "/contacto" ? "page" : undefined}
-                className={`[text-decoration:none] h-20 relative font-medium flex items-center justify-center font-milonga min-w-[72px] cursor-pointer z-[1] ${getLinkClass(
-                  "/contacto"
-                )}`}
-                onClick={onContactoTextClick}
-              >
-                {t.navbar.contact}
-              </a>
-
-              {/* Crear partida — solo si hay sesión activa */}
-              {user && (userRole === "master" || userRole === "admin") && (
-                <a
-                  role="link"
-                  aria-label={t.navbar.ariaCreateGame}
-                  aria-current={location.pathname === "/crearpartida" ? "page" : undefined}
-                  className="[text-decoration:none] h-20 relative font-medium flex items-center justify-center font-milonga cursor-pointer z-[1] text-dark-gold hover:text-goldenrod transition-colors"
-                  onClick={onCrearPartidaClick}
-                >
-                  {t.navbar.createGame}
-                </a>
-              )}
-            </nav>
-
-            <div className="h-[61px] flex flex-col items-start justify-start pt-[19px] px-0 pb-0 box-border">
-              <div className="self-stretch flex-1 flex flex-row items-start justify-start gap-[24.2px]">
-                <NotificationCenter />
-                <button
-                  onClick={onUserDetailTextClick}
-                  aria-label={user ? t.navbar.ariaMyAccount : t.navbar.ariaLogin}
-                  className="cursor-pointer border-dark-gold border-[1px] border-solid py-[7px] px-[19px] bg-[transparent] self-stretch flex-1 rounded-11xl flex flex-row items-start justify-start gap-[5px] z-[1] hover:bg-dark-gold/10 transition-colors"
-                >
-                  <img
-                    className="h-6 w-6 relative overflow-hidden shrink-0"
-                    alt=""
-                    aria-hidden="true"
-                    src="/user.svg"
-                  />
-                  <div className="flex-1 flex flex-col items-start justify-start pt-px px-0 pb-0">
-                    <span className="[text-decoration:none] self-stretch relative text-lg font-bold font-titulo-2  text-dark-gold text-center whitespace-nowrap">
-                      {user ? t.navbar.myAccount : t.navbar.login}
-                    </span>
-                  </div>
-                  <div className="h-[42px] w-[140px] relative rounded-11xl border-dark-gold border-[1px] border-solid box-border hidden" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Menú hamburguesa */}
-          <div className="hidden lg:flex items-center justify-center p-2">
+          <div className="flex items-center gap-3 mq1050:hidden">
+            <NotificationCenter />
             <button
-              onClick={toggleMenu}
-              aria-label={menuOpen ? t.navbar.ariaCloseMenu : t.navbar.ariaOpenMenu}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-menu"
-              className="focus:outline-none bg-black border-2 border-dark-gold rounded-full p-2"
-              style={{ height: "50px", width: "50px" }}
+              type="button"
+              onClick={() => goTo(accountPath)}
+              aria-label={user ? t.navbar.ariaMyAccount : t.navbar.ariaLogin}
+              className="fe-button-secondary gap-2 bg-transparent px-5 text-sm"
             >
               <svg
-                className="w-8 h-8 text-dark-gold"
+                aria-hidden="true"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
+                strokeWidth="1.7"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16m-7 6h7"
-                  stroke="currentColor"
-                ></path>
+                <circle cx="12" cy="8" r="3.2" />
+                <path d="M5.5 20c.6-4 2.8-6 6.5-6s5.9 2 6.5 6" />
               </svg>
+              {user ? t.navbar.myAccount : t.navbar.login}
             </button>
           </div>
 
-          {/* Fondo semitransparente detrás del menú hamburguesa */}
-          {menuOpen && (
-            <>
-              <div
-                className="fixed inset-0 bg-black bg-opacity-50 z-40"
-                onClick={toggleMenu}
-              ></div>
-              <div id="mobile-menu" className="fixed top-0 left-0 w-auto h-full bg-black text-white z-50 overflow-y-auto lg:flex animate-slide-in-right">
-                <nav aria-label={t.navbar.ariaMobileNav} className="flex flex-col items-start justify-start text-xl font-titulo-2 text-white space-y-4 p-5">
-                  <a
-                    aria-label={t.navbar.ariaHome}
-                    aria-current={location.pathname === "/" ? "page" : undefined}
-                    className={`[text-decoration:none] h-20 font-medium flex items-center justify-start w-full ${getLinkClass(
-                      "/"
-                    )}`}
-                    onClick={onHomeTextClick}
-                  >
-                    {t.navbar.home}
-                  </a>
-                  <a
-                    aria-label={t.navbar.ariaMasters}
-                    aria-current={location.pathname === "/ourmasters" ? "page" : undefined}
-                    className={`[text-decoration:none] h-20 font-medium flex items-center justify-start w-full ${getLinkClass(
-                      "/ourmasters"
-                    )}`}
-                    onClick={onNuestrosMastersTextClick}
-                  >
-                    {t.navbar.masters}
-                  </a>
-                  <a
-                    aria-label={t.navbar.ariaGames}
-                    aria-current={location.pathname === "/nextgames" ? "page" : undefined}
-                    className={`[text-decoration:none] h-20 font-medium flex items-center justify-start w-full ${getLinkClass(
-                      "/nextgames"
-                    )}`}
-                    onClick={onPartidasTextClick}
-                  >
-                    {t.navbar.games}
-                  </a>
-                  <a
-                    aria-label={t.navbar.ariaContact}
-                    aria-current={location.pathname === "/contacto" ? "page" : undefined}
-                    className={`[text-decoration:none] h-20 font-medium flex items-center justify-start w-full ${getLinkClass(
-                      "/contacto"
-                    )}`}
-                    onClick={onContactoTextClick}
-                  >
-                    {t.navbar.contact}
-                  </a>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((current) => !current)}
+            aria-label={menuOpen ? t.navbar.ariaCloseMenu : t.navbar.ariaOpenMenu}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            className="hidden h-12 w-12 items-center justify-center rounded-full border border-[#e6c78b]/35 bg-transparent text-[#e7c57f] mq1050:inline-flex"
+          >
+            <svg
+              aria-hidden="true"
+              className="h-6 w-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+            >
+              {menuOpen ? (
+                <path d="m6 6 12 12M18 6 6 18" />
+              ) : (
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
+        </div>
 
-                  {/* Crear partida en menú móvil */}
-                  {user && (userRole === "master" || userRole === "admin") && (
-                    <a
-                      aria-label={t.navbar.ariaCreateGame}
-                      className="[text-decoration:none] h-20 font-medium flex items-center justify-start w-full text-dark-gold"
-                      onClick={onCrearPartidaClick}
-                    >
-                      {t.navbar.createGame}
-                    </a>
-                  )}
-
-                  {/* Mi cuenta dentro del menú hamburguesa */}
-                  <div className="flex flex-col items-start justify-start w-full gap-4">
-                    <NotificationCenter />
-                    <button
-                      onClick={onUserDetailTextClick}
-                      className="cursor-pointer border-dark-gold border-[1px] border-solid py-[7px] px-[19px] bg-[transparent] rounded-11xl flex flex-row items-start justify-start gap-[5px]"
-                    >
-                      <img
-                        className="h-6 w-6 relative overflow-hidden shrink-0"
-                        alt={t.navbar.myAccount}
-                        src="/user.svg"
-                      />
-                      <div className="flex-1 flex flex-col items-start justify-start pt-px px-0 pb-0">
-                        <span className="relative text-lg font-bold font-titulo-2 text-dark-gold text-center whitespace-nowrap">
-                          {user ? t.navbar.myAccount : t.navbar.login}
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-                </nav>
-              </div>
-            </>
-          )}
-        </header>
-      </section>
+        {menuOpen && (
+          <>
+            <button
+              type="button"
+              className="fixed inset-0 top-[72px] z-40 bg-black/70 backdrop-blur-sm"
+              onClick={() => setMenuOpen(false)}
+              aria-label={t.navbar.ariaCloseMenu}
+            />
+            <div
+              id="mobile-menu"
+              className="fixed inset-x-3 top-[84px] z-50 rounded-2xl border border-[#d8a651]/30 bg-[#17100b] p-4 shadow-2xl"
+            >
+              <nav aria-label={t.navbar.ariaMobileNav} className="flex flex-col gap-1">
+                {navItems.map((item) => (
+                  <button
+                    key={item.path}
+                    type="button"
+                    aria-label={item.aria}
+                    aria-current={isActive(item.path) ? "page" : undefined}
+                    onClick={() => goTo(item.path)}
+                    className={`rounded-xl bg-transparent px-4 py-3 text-left text-lg font-bold ${
+                      isActive(item.path)
+                        ? "bg-[#d9a84f]/12 text-[#e7bd69]"
+                        : "text-[#f2e6cf]/78"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                {user && (userRole === "master" || userRole === "admin") && (
+                  <button
+                    type="button"
+                    onClick={() => goTo("/crearpartida")}
+                    className="rounded-xl bg-transparent px-4 py-3 text-left text-lg font-bold text-[#d9a84f]"
+                  >
+                    {t.navbar.createGame}
+                  </button>
+                )}
+                <div className="fe-divider my-2" />
+                <div className="flex items-center justify-between gap-3">
+                  <NotificationCenter />
+                  <button
+                    type="button"
+                    onClick={() => goTo(accountPath)}
+                    className="fe-button flex-1"
+                  >
+                    {user ? t.navbar.myAccount : t.navbar.login}
+                  </button>
+                </div>
+              </nav>
+            </div>
+          </>
+        )}
+      </header>
     );
-  }
+  },
 );
+
+Navbar.displayName = "Navbar";
 
 export default Navbar;

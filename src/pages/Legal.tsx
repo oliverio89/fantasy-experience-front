@@ -165,11 +165,14 @@ const Legal = () => {
     );
 
   return (
-    <main className="min-h-screen bg-black px-6 py-16 text-left font-titulo-2">
-      <article className="max-w-4xl mx-auto flex flex-col gap-10">
+    <main className="fe-surface-grid min-h-screen px-6 py-20 text-left font-titulo-2">
+      <article className="fe-panel mx-auto flex max-w-4xl flex-col gap-10 rounded-[26px] px-10 py-12 mq750:px-6">
         <header>
-          <h1 className="text-4xl text-dark-gold font-bold">{content.title}</h1>
-          <p className="text-nude mt-3">Última actualización: 30/08/2026</p>
+          <p className="fe-kicker">Información y transparencia</p>
+          <h1 className="mb-0 mt-4 font-milonga text-5xl font-normal text-[#f2e6cf]">
+            {content.title}
+          </h1>
+          <p className="mt-3 text-nude/50">Última actualización: 30/08/2026</p>
         </header>
         {pendingLegalData && (
           <aside className="border border-red-500 rounded-lg p-4 text-red-300">

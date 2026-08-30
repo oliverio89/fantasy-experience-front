@@ -1,6 +1,5 @@
 import {
   FunctionComponent,
-  memo,
   useState,
   useCallback,
   useEffect,
@@ -23,28 +22,35 @@ import {
   ProfileService,
 } from "../services/profileService";
 import { useToast } from "../context/ToastContext";
-import { useTranslation } from "../i18n";
 
 const Root: FunctionComponent = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-
   const [filters, setFilters] = useState<MasterFilters>(() => ({
     ...DEFAULT_MASTER_FILTERS,
     busqueda: searchParams.get("q")?.trim().slice(0, 100) || "",
   }));
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Pagination (handled by MasterList mostly, but we keep state here if needed for API pagination later)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
 
   useEffect(() => {
-    fetchMasters();
-  }, []);
+    const fetchMasters = async () => {
+      setLoading(true);
+      try {
+        setProfiles(await ProfileService.getMasters());
+      } catch (error) {
+        console.error(error);
+        showToast("Error al cargar Másters", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchMasters();
+  }, [showToast]);
 
   useEffect(() => {
     const query = searchParams.get("q")?.trim().slice(0, 100) || "";
@@ -54,28 +60,19 @@ const Root: FunctionComponent = () => {
     setCurrentPage(1);
   }, [searchParams]);
 
-  const fetchMasters = async () => {
-    setLoading(true);
-    try {
-      const data = await ProfileService.getMasters();
-      setProfiles(data);
-    } catch (error) {
-      console.error(error);
-      showToast("Error al cargar masters", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const mappedMasters = useMemo(
+    () => profiles.map(mapProfileToMaster),
+    [profiles]
+  );
 
-  const mappedMasters = useMemo(() => {
-    return profiles.map(mapProfileToMaster);
-  }, [profiles]);
-
-  const handleSearch = useCallback((query: string) => {
-    setFilters((prev) => ({ ...prev, busqueda: query }));
-    setSearchParams(query ? { q: query } : {}, { replace: true });
-    setCurrentPage(1);
-  }, [setSearchParams]);
+  const handleSearch = useCallback(
+    (query: string) => {
+      setFilters((prev) => ({ ...prev, busqueda: query }));
+      setSearchParams(query ? { q: query } : {}, { replace: true });
+      setCurrentPage(1);
+    },
+    [setSearchParams]
+  );
 
   const handleClearSearch = useCallback(() => {
     setFilters((prev) => ({ ...prev, busqueda: "" }));
@@ -87,7 +84,7 @@ const Root: FunctionComponent = () => {
     setFilters((prev) => ({
       ...prev,
       sistemas: prev.sistemas.includes(system)
-        ? prev.sistemas.filter((s) => s !== system)
+        ? prev.sistemas.filter((item) => item !== system)
         : [...prev.sistemas, system],
     }));
     setCurrentPage(1);
@@ -99,76 +96,92 @@ const Root: FunctionComponent = () => {
     setCurrentPage(1);
   }, [setSearchParams]);
 
-  const handleMasterClick = useCallback(
-    (master: Master) => {
-      // Navigate to Unified Profile
-      navigate(`/user/${master.id}`);
-    },
-    [navigate]
-  );
-
   const handleFiltersChange = useCallback((newFilters: MasterFilters) => {
     setFilters(newFilters);
     setCurrentPage(1);
   }, []);
 
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
-
   return (
-    <div className="w-full relative bg-black flex flex-col items-start justify-start pt-[7.75rem] pb-[5.562rem] pl-[4.937rem] pr-[4.5rem] box-border gap-[0.875rem] leading-[normal] tracking-[normal] text-left text-[1.125rem] text-white font-titulo-2 mq750:pl-[2.438rem] mq750:pr-[2.25rem] mq750:box-border mq450:pt-[4rem] mq450:pb-[3rem] mq450:pl-[1rem] mq450:pr-[1rem] mq450:gap-[0.5rem]">
-      <div className="w-[80rem] h-[134.438rem] relative bg-black hidden max-w-full" />
-      <section className="self-stretch flex flex-row items-start justify-start pt-[0rem] pb-[0.187rem] pl-[0.062rem] pr-[0.437rem] box-border max-w-full text-left text-[6.25rem] text-dark-gold font-titulo-2 mq450:px-[0.5rem] mq450:pb-[0.5rem]">
-        <h1 className="m-0 h-[9rem] flex-1 relative text-inherit leading-[5rem] flex items-center max-w-full z-[1] font-[inherit] mq450:text-[1.875rem] mq450:leading-[2rem] mq450:h-auto mq450:py-[1rem] mq750:text-[3.125rem] mq750:leading-[3rem] mq750:h-[6rem]">
-          <span>
-            <p className="m-0 font-extrabold">{t.ourMasters.title1}</p>
-            <p className="m-0">
-              <i className="font-extrabold">{t.ourMasters.title2}</i>
-              <span className="font-extrabold font-titulo-2"> {t.ourMasters.title3}</span>
+    <main className="fe-surface-grid min-h-screen px-5 pb-24 pt-16 text-nude md:px-10 md:pt-20">
+      <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-10">
+        <header className="grid gap-8 xl:grid-cols-[1.45fr_0.55fr] xl:items-end">
+          <div>
+            <p className="fe-kicker mb-4">El gremio de narradores</p>
+            <h1 className="fe-section-title max-w-[780px]">
+              Encuentra al Máster de tu próxima historia
+            </h1>
+            <p className="mt-5 max-w-[720px] text-lg leading-8 text-[#c9bba9]">
+              Compara estilos, sistemas y experiencia con datos reales de su
+              trayectoria dentro de la comunidad.
             </p>
-          </span>
-        </h1>
-      </section>
-      <section className="self-stretch flex flex-row items-start justify-start py-[0rem] pl-[0.25rem] pr-[0.5rem] box-border min-h-[7.125rem] max-w-full text-left text-[1.125rem] text-nude font-titulo-2 mq450:px-[0.5rem] mq450:min-h-[5rem] mq450:text-[1rem]">
-        <div className="flex-1 relative leading-[1.625rem] inline-block max-w-full z-[1] mq450:leading-[1.4rem]">
-          {t.ourMasters.description}
+          </div>
+          <aside className="fe-panel p-5 text-sm leading-6 text-[#c9bba9]">
+            <p className="fe-kicker mb-2">Ranking transparente</p>
+            <p>
+              Destacamos la valoración de jugadores, las partidas completadas
+              y las aventuras publicadas. No hay posiciones compradas.
+            </p>
+          </aside>
+        </header>
+
+        <section className="fe-panel p-5 md:p-7" aria-label="Filtros de Másters">
+          <MasterSystemFilters
+            selectedSystems={filters.sistemas}
+            onSystemToggle={handleSystemToggle}
+            onClearAll={handleClearAllFilters}
+          />
+          <div className="fe-divider my-6" />
+          <MasterSearchBar
+            onSearch={handleSearch}
+            onClear={handleClearSearch}
+            initialValue={filters.busqueda}
+          />
+          <details className="group mt-6 border-t border-[#6f5436]/40 pt-5">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold uppercase tracking-[0.16em] text-[#d8b16a]">
+              Afinar búsqueda
+              <span className="text-xl transition-transform group-open:rotate-45" aria-hidden="true">
+                +
+              </span>
+            </summary>
+            <MasterAdvancedFilters
+              className="mt-6"
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+            />
+          </details>
+        </section>
+
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="fe-kicker">Perfiles públicos</p>
+            <h2 className="mt-2 font-titulo-1 text-3xl text-[#f3e7d1] md:text-4xl">
+              La mesa te está esperando
+            </h2>
+          </div>
+          {!loading && (
+            <span className="rounded-full border border-[#8d6a3e]/60 px-4 py-2 text-sm text-[#d4c4b0]">
+              {mappedMasters.length} Másters
+            </span>
+          )}
         </div>
-      </section>
 
-      <MasterSystemFilters
-        selectedSystems={filters.sistemas}
-        onSystemToggle={handleSystemToggle}
-        onClearAll={handleClearAllFilters}
-      />
-
-      <MasterSearchBar
-        onSearch={handleSearch}
-        onClear={handleClearSearch}
-        initialValue={filters.busqueda}
-      />
-
-      <MasterAdvancedFilters
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-      />
-
-      {loading ? (
-        <div className="w-full h-40 flex items-center justify-center">
-          <div className="loader"></div>
-        </div>
-      ) : (
-        <MasterList
-          masters={mappedMasters}
-          filters={filters}
-          onMasterClick={handleMasterClick}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
-      )}
-
-    </div>
+        {loading ? (
+          <div className="fe-panel flex h-44 items-center justify-center" role="status">
+            <div className="loader" />
+            <span className="sr-only">Cargando Másters</span>
+          </div>
+        ) : (
+          <MasterList
+            masters={mappedMasters}
+            filters={filters}
+            onMasterClick={(master: Master) => navigate(`/master/${master.id}`)}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        )}
+      </div>
+    </main>
   );
 };
 

@@ -133,7 +133,7 @@ function App() {
             <Route path="/en-desarrollo" element={<ComingSoon />} />
             <Route path="/proximamente" element={<ComingSoon />} />
             <Route path="/user" element={<UserDetail />} />
-            <Route path="/user/:userId" element={<UserDetail />} />
+            <Route path="/user/:masterId" element={<MasterDetail />} />
             <Route path="/ourmasters" element={<OurMasters />} />
             <Route path="/master/:masterId" element={<MasterDetail />} />
             <Route

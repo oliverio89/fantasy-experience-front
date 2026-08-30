@@ -155,7 +155,7 @@ const VideoCard: FunctionComponent<{
   );
 
   return (
-    <div className="self-stretch rounded-2xl bg-darkslategray border border-white/5 flex flex-row items-center justify-start p-8 box-border gap-10 max-w-full z-[3] font-titulo-2 mq1050:flex-col mq1050:p-6 mq450:p-4 mq450:gap-6 hover:border-dark-gold/20 transition-colors duration-300">
+    <article className="fe-panel flex w-full flex-row items-center gap-10 p-8 font-titulo-2 transition-colors duration-300 hover:border-[#d8a651]/45 mq1050:flex-col mq1050:p-6 mq450:gap-6 mq450:p-4">
       {reverse ? (
         <>
           {info}
@@ -167,7 +167,7 @@ const VideoCard: FunctionComponent<{
           {info}
         </>
       )}
-    </div>
+    </article>
   );
 };
 
@@ -184,33 +184,26 @@ const OurComunityOnline: FunctionComponent<FrameComponent3Type> = memo(
     }, []);
 
     return (
-      <section
-        className={`self-stretch bg-black flex flex-col items-start justify-start pt-24 px-20 pb-[100px] box-border gap-10 max-w-full z-[2] text-left text-61xl text-dark-gold font-titulo-2 lg:pt-[62px] lg:pb-[65px] lg:box-border mq750:gap-6 mq750:pt-10 mq750:px-10 mq750:pb-[42px] mq750:box-border mq450:pt-[26px] mq450:pb-[27px] mq450:px-4 mq450:box-border ${className}`}
-      >
-        {/* Título de sección */}
-        <div className="flex flex-col gap-2 z-[3]">
-          <h1 className="m-0 relative text-inherit leading-[90%] inline-block max-w-full font-[inherit] mq1050:text-21xl mq1050:leading-[43px] mq450:text-5xl mq450:leading-[29px]">
-            <p className="m-0 font-extrabold">{t.ourCommunity.title1}</p>
-            <p className="m-0">
-              <i className="font-extrabold">{t.ourCommunity.title2}</i>
-              <span className="font-extrabold font-titulo-2"> {t.ourCommunity.title3}</span>
+      <section className={`border-t border-[#d8a651]/15 bg-[#0b0806] px-5 py-24 md:px-10 ${className}`}>
+        <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-10">
+          <header>
+            <p className="fe-kicker mb-4">Historias que ya sucedieron</p>
+            <h2 className="fe-section-title">La comunidad en juego</h2>
+            <p className="m-0 mt-4 max-w-2xl text-base font-normal leading-7 text-[#b9aa98]">
+              {t.ourCommunity.description}
             </p>
-          </h1>
-          <p className="m-0 text-lg text-oldlace-100 font-titulo-2 font-normal max-w-xl opacity-60">
-            {t.ourCommunity.description}
-          </p>
-        </div>
+          </header>
 
         {/* Cards */}
-        <div className="self-stretch flex flex-col items-start justify-start gap-8 max-w-full mq750:gap-5">
+          <div className="flex w-full flex-col gap-8 mq750:gap-5">
           {loading ? (
             <div className="flex items-center justify-center w-full py-16">
               <div className="loader" />
             </div>
           ) : videos.length === 0 ? (
-            <div className="self-stretch rounded-2xl bg-darkslategray border border-white/5 p-12 flex flex-col items-center justify-center gap-4">
-              <div className="text-4xl">🎲</div>
-              <p className="text-oldlace-100/60 text-lg font-titulo-2 text-center m-0">
+            <div className="fe-panel flex min-h-[220px] flex-col items-center justify-center gap-4 p-12">
+              <div className="text-2xl text-[#d6a64c]" aria-hidden="true">◇</div>
+              <p className="m-0 text-center text-base text-[#a99986]">
                 {t.ourCommunity.comingSoon}
               </p>
             </div>
@@ -223,6 +216,7 @@ const OurComunityOnline: FunctionComponent<FrameComponent3Type> = memo(
               />
             ))
           )}
+          </div>
         </div>
       </section>
     );

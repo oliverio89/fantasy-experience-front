@@ -111,19 +111,22 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
 
   // Función para alternar colores de fondo
   const getBackgroundColor = (index: number) => {
-    return index % 2 === 0 ? "#f2ecdd" : "#DAB16A";
+    return index % 2 === 0 ? "#1b130d" : "#21170f";
   };
 
   return (
     <div
-      className={`w-full min-h-screen bg-black flex flex-col items-center justify-start py-10 px-5 leading-[normal] tracking-[normal] ${className}`}
+      className={`fe-surface-grid flex min-h-screen w-full flex-col items-center justify-start px-8 py-16 leading-[normal] tracking-[normal] mq750:px-5 mq750:py-10 ${className}`}
     >
-      <div className="w-full max-w-[1280px] flex flex-col items-start justify-start gap-[55px] mq725:gap-[27px]">
+      <div className="flex w-full max-w-[1180px] flex-col items-start justify-start gap-8">
         {/* Header con título y botón */}
-        <header className="self-stretch flex flex-row items-start justify-between pt-4 px-0 pb-0 gap-4 text-left text-81xl text-dark-gold font-texto mq1050:flex-wrap">
-          <h1 className="m-0 text-inherit leading-[80px] font-extrabold font-[inherit] flex items-center whitespace-nowrap mq1050:text-[60px] mq1050:leading-[64px] mq450:text-[40px] mq450:leading-[48px]">
-            {t.gamesPage.title}
-          </h1>
+        <header className="flex self-stretch items-end justify-between gap-8 mq1050:flex-wrap">
+          <div>
+            <p className="fe-kicker">El tablón de la taberna</p>
+            <h1 className="fe-section-title mt-4">
+              Partidas y <em>aventuras</em>
+            </h1>
+          </div>
           {(userRole === "master" || userRole === "admin") && (
             <Button
               button1={t.gamesPage.createButton}
@@ -143,26 +146,26 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
         </header>
 
         {/* Descripción */}
-        <div className="self-stretch text-left text-lg text-white leading-[26px] font-texto">
+        <div className="max-w-[720px] text-left text-lg leading-7 text-[#f2e6cf]/58 font-texto">
           {t.gamesPage.description}
         </div>
 
         {/* Filtros y búsqueda */}
-        <div className="self-stretch flex flex-col items-start justify-start gap-[5px] max-w-full">
-          <div className="text-left text-lg text-white leading-[26px] font-texto mb-2">
+        <div className="fe-panel flex max-w-full self-stretch flex-col items-start justify-start gap-5 rounded-[24px] p-8 mq750:p-5">
+          <div className="mb-0 text-left text-xs font-extrabold uppercase tracking-[0.16em] text-[#d9a84f]">
             {t.gamesPage.filterTypeLabel}
           </div>
 
           {/* Botones de filtro - SIN "Todos" */}
-          <div className="flex flex-row items-start justify-start gap-2.5 mb-[27px] flex-wrap">
+          <div className="mb-1 flex flex-row flex-wrap items-start justify-start gap-2.5">
             {TIPOS_PARTIDA.map((tipo) => (
               <button
                 key={tipo}
                 onClick={() => toggleFiltro(tipo)}
-                className={`h-[30px] px-4 cursor-pointer [backdrop-filter:blur(4px)] rounded-xl border-nude border-[1px] border-solid box-border overflow-hidden flex flex-row items-center justify-center py-[3px] transition-all ${
+                className={`flex min-h-[38px] items-center justify-center overflow-hidden rounded-full border px-5 py-2 transition-all ${
                   filtroTipo.includes(tipo)
-                    ? "bg-nude text-black"
-                    : "bg-transparent text-nude hover:bg-nude/20"
+                    ? "border-[#d9a84f] bg-[#d9a84f] text-[#120d09]"
+                    : "border-[#f2e6cf]/25 bg-transparent text-nude/75 hover:border-[#d9a84f]/65 hover:text-[#e1ae4f]"
                 }`}
               >
                 <span className="relative leading-[20px] text-base font-texto">
@@ -177,8 +180,8 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
           </div>
 
           {/* Filtros Avanzados: Sistema y Fecha */}
-          <div className="self-stretch flex flex-col items-start justify-start gap-[5px] max-w-full mb-[27px]">
-            <div className="text-left text-lg text-white leading-[26px] font-texto mb-2">
+          <div className="mb-1 flex max-w-full flex-col items-start justify-start gap-3 self-stretch">
+            <div className="text-left text-xs font-extrabold uppercase tracking-[0.16em] text-[#d9a84f]">
               {t.gamesPage.advancedFiltersTitle}
             </div>
             <div className="flex flex-row gap-4 flex-wrap">
@@ -186,7 +189,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               <select
                 value={filtroSistema}
                 onChange={(e) => { setFiltroSistema(e.target.value); setCurrentPage(1); }}
-                className="h-[42px] px-4 rounded-xl border-nude border-[1px] border-solid bg-transparent text-nude font-texto text-base focus:outline-none focus:border-dark-gold cursor-pointer"
+                className="h-[46px] rounded-xl border border-[#d8a651]/25 bg-[#100c09]/55 px-4 text-nude font-texto text-base focus:border-[#d9a84f] focus:outline-none"
               >
                 <option value="" className="bg-black text-nude">
                   {t.gamesPage.allSystems}
@@ -212,7 +215,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
                     setFiltroFecha(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="h-[42px] px-4 rounded-xl border-nude border-[1px] border-solid bg-transparent text-nude font-texto text-base focus:outline-none focus:border-dark-gold cursor-pointer [color-scheme:dark]"
+                  className="h-[46px] rounded-xl border border-[#d8a651]/25 bg-[#100c09]/55 px-4 text-nude font-texto text-base focus:border-[#d9a84f] focus:outline-none [color-scheme:dark]"
                   disabled={filtroTipo.length === 1 && filtroTipo[0] === "Digital"}
                 />
               </div>
@@ -220,8 +223,8 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
           </div>
 
           {/* Campo de búsqueda */}
-          <div className="self-stretch flex flex-col items-start justify-start gap-[5px] max-w-full">
-            <div className="text-left text-lg text-white leading-[26px] font-texto mb-2">
+          <div className="flex max-w-full flex-col items-start justify-start gap-3 self-stretch">
+            <div className="text-left text-xs font-extrabold uppercase tracking-[0.16em] text-[#d9a84f]">
               {t.gamesPage.searchLabel}
             </div>
             <div className="self-stretch flex flex-row items-center justify-start gap-5 max-w-full mq1050:flex-wrap">
@@ -230,11 +233,11 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
                 value={busqueda}
                 onChange={(e) => { setBusqueda(e.target.value); setCurrentPage(1); }}
                 placeholder={t.gamesPage.searchPlaceholder}
-                className="flex-1 min-w-[300px] rounded-xl border-nude border-[1px] border-solid box-border py-3 px-[13px] h-[50px] bg-transparent text-nude text-sm font-light font-texto placeholder:text-nude/60 focus:outline-none focus:border-dark-gold"
+                className="h-[50px] min-w-[300px] flex-1 rounded-xl border border-[#d8a651]/25 bg-[#100c09]/55 px-4 py-3 text-sm font-light text-nude placeholder:text-nude/35 focus:border-[#d9a84f] focus:outline-none font-texto"
               />
               <button
                 onClick={handleLimpiar}
-                className="cursor-pointer border-nude border-[1px] border-solid py-2 px-8 bg-transparent h-[42px] rounded-31xl box-border flex flex-row items-center justify-center gap-2 hover:bg-nude hover:text-black transition-all group"
+                className="fe-button-secondary group h-[46px] gap-2 bg-transparent px-6"
               >
                 <svg
                   className="w-5 h-5 relative overflow-hidden shrink-0"
@@ -264,7 +267,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
               </button>
               <button
                 onClick={handleBuscar}
-                className="cursor-pointer [border:none] py-2.5 px-10 bg-nude h-[42px] rounded-31xl flex flex-row items-center justify-center gap-1 hover:bg-dark-gold transition-all"
+                className="fe-button h-[46px] gap-2 px-8"
               >
                 <svg
                   className="w-5 h-5 relative overflow-hidden shrink-0"
@@ -320,7 +323,7 @@ const Root: FunctionComponent<RootType> = memo(({ className = "" }) => {
             </div>
           </div>
         ) : (
-          <div className="self-stretch grid grid-cols-3 gap-x-[18px] gap-y-[43px] max-w-full mq1050:grid-cols-2 mq750:grid-cols-1">
+          <div className="grid max-w-full grid-cols-3 gap-6 self-stretch mq1050:grid-cols-2 mq750:grid-cols-1">
             {proximasPartidas.map((partida, index) => (
               <PartidaCard
                 key={partida.id}

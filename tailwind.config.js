@@ -42,10 +42,18 @@ module.exports = {
       },
     },
     fontSize: {
+      xs: "12px",
+      sm: "14px",
       "13xl": "32px",
       "7xl": "26px",
       lgi: "19px",
       "5xl": "24px",
+      "4xl": "36px",
+      "3xl": "30px",
+      "2xl": "24px",
+      "6xl": "60px",
+      "8xl": "96px",
+      "9xl": "128px",
       lg: "18px",
       xl: "20px",
       base: "16px",
@@ -67,17 +75,47 @@ module.exports = {
       inherit: "inherit",
     },
     screens: {
+      sm: {
+        raw: "screen and (min-width: 640px)",
+      },
+      md: {
+        raw: "screen and (min-width: 768px)",
+      },
+      xl: {
+        raw: "screen and (min-width: 1024px)",
+      },
+      "2xl": {
+        raw: "screen and (min-width: 1440px)",
+      },
       lg: {
         max: "1200px",
       },
       mq1050: {
         raw: "screen and (max-width: 1050px)",
       },
+      mq1025: {
+        raw: "screen and (max-width: 1025px)",
+      },
+      mq975: {
+        raw: "screen and (max-width: 975px)",
+      },
+      mq900: {
+        raw: "screen and (max-width: 900px)",
+      },
       mq750: {
         raw: "screen and (max-width: 750px)",
       },
+      mq725: {
+        raw: "screen and (max-width: 725px)",
+      },
+      mq700: {
+        raw: "screen and (max-width: 700px)",
+      },
       mq450: {
         raw: "screen and (max-width: 450px)",
+      },
+      mq1225: {
+        raw: "screen and (max-width: 1225px)",
       },
     },
   },

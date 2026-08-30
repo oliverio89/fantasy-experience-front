@@ -1,9 +1,5 @@
-// Componente para filtros de sistemas de juego
-// Archivo: src/components/MasterSystemFilters.tsx
-
-import { FunctionComponent, memo, useCallback } from "react";
+import { FunctionComponent, memo } from "react";
 import { SistemaJuego, SISTEMAS_POPULARES } from "../types/masters";
-import { useTranslation } from "../i18n";
 
 export type MasterSystemFiltersType = {
   className?: string;
@@ -12,91 +8,56 @@ export type MasterSystemFiltersType = {
   onClearAll: () => void;
 };
 
+const shortName = (system: SistemaJuego) => {
+  const names: Partial<Record<SistemaJuego, string>> = {
+    "Dungeons & Dragons 5e": "D&D 5e",
+    "Call of Cthulhu": "Cthulhu",
+    "Vampiro: La Mascarada": "Vampiro",
+    "Hombre Lobo: El Apocalipsis": "Hombre Lobo",
+    "FATE Core": "FATE",
+  };
+  return names[system] || system;
+};
+
 const MasterSystemFilters: FunctionComponent<MasterSystemFiltersType> = memo(
-  ({ className = "", selectedSystems, onSystemToggle, onClearAll }) => {
-    const { t } = useTranslation();
-    const handleSystemClick = useCallback(
-      (system: SistemaJuego) => {
-        onSystemToggle(system);
-      },
-      [onSystemToggle]
-    );
-
-    const handleClearAll = useCallback(() => {
-      onClearAll();
-    }, [onClearAll]);
-
-    const currentSystems: SistemaJuego[] = SISTEMAS_POPULARES;
-
-    return (
-      <div
-        className={`w-[45.313rem] flex flex-row items-start justify-start pt-[0rem] px-[0.062rem] pb-[2.5rem] box-border max-w-full mq450:w-full mq450:px-[0.5rem] mq450:pb-[1.5rem] ${className}`}
-      >
-        <div className="flex-1 flex flex-col items-start justify-start gap-[0.312rem] max-w-full">
-          <div className="w-[12.125rem] relative leading-[1.625rem] flex items-center z-[1] text-white font-titulo-2 mq450:w-full mq450:text-[1rem]">
-            {t.masterSystemFilters.label}
-          </div>
-          <div className="self-stretch flex flex-row items-start justify-start gap-[0.812rem] text-center text-[1rem] text-nude mq750:flex-wrap mq450:gap-[0.5rem] mq450:flex-wrap">
-            {currentSystems.map((system) => {
-              const isSelected = selectedSystems.includes(system);
-              const systemDisplayName =
-                system === "Dungeons & Dragons 5e"
-                  ? "D&D 5e"
-                  : system === "Call of Cthulhu"
-                  ? "Cthulhu"
-                  : system === "Vampiro: La Mascarada"
-                  ? "Vampiro: La Mascarada"
-                  : system === "Hombre Lobo: El Apocalipsis"
-                  ? "Hombre Lobo"
-                  : system === "FATE Core"
-                  ? "FATE"
-                  : system; // Z-Corp se mantiene igual
-
-              return (
-                <button
-                  key={system}
-                  onClick={() => handleSystemClick(system)}
-                  className={`h-[1.875rem] [backdrop-filter:blur(4px)] rounded-xl border-[1px] border-solid box-border overflow-hidden flex flex-row items-start justify-start py-[0.187rem] px-[0.5rem] z-[1] transition-all duration-200 hover:scale-105 mq450:h-[2rem] mq450:px-[0.75rem] mq450:text-[0.8rem] ${
-                    isSelected
-                      ? "bg-light-gold border-light-gold text-black font-semibold"
-                      : "bg-transparent border-nude text-nude hover:bg-nude hover:text-black hover:border-light-gold"
-                  }`}
-                  aria-label={`Filtrar por ${system}`}
-                >
-                  <div className="relative leading-[1.25rem] flex items-center justify-center shrink-0 text-[0.75rem] mq450:text-[0.8rem]">
-                    {systemDisplayName}
-                  </div>
-                </button>
-              );
-            })}
-
-            {/* Botón para limpiar todos los filtros */}
-            {selectedSystems.length > 0 && (
-              <button
-                onClick={handleClearAll}
-                className="h-[1.875rem] [backdrop-filter:blur(4px)] rounded-xl border-[1px] border-solid box-border overflow-hidden flex flex-row items-start justify-start py-[0.187rem] px-[0.5rem] z-[1] transition-all duration-200 hover:scale-105 bg-transparent border-red-400 text-red-400 hover:bg-red-400 hover:text-white hover:border-red-500 mq450:h-[2rem] mq450:px-[0.75rem] mq450:text-[0.8rem]"
-                aria-label="Limpiar todos los filtros"
-              >
-                <div className="relative leading-[1.25rem] flex items-center justify-center shrink-0 text-[0.75rem] mq450:text-[0.8rem]">
-                  {t.masterSystemFilters.clearButton}
-                </div>
-              </button>
-            )}
-          </div>
-
-          {/* Indicador de filtros activos */}
-          {selectedSystems.length > 0 && (
-            <div className="self-stretch flex flex-row items-center justify-start gap-[0.5rem] text-sm text-light-gold mq450:text-xs mq450:gap-[0.25rem]">
-              <span>{t.masterSystemFilters.activeFilters}</span>
-              <span className="bg-dark-gold px-2 py-1 rounded text-xs mq450:px-1 mq450:py-0.5">
-                {selectedSystems.length} {selectedSystems.length > 1 ? t.masterSystemFilters.systems : t.masterSystemFilters.system}
-              </span>
-            </div>
-          )}
-        </div>
+  ({ className = "", selectedSystems, onSystemToggle, onClearAll }) => (
+    <div className={className}>
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#d8b16a]">
+          Sistema de juego
+        </p>
+        {selectedSystems.length > 0 && (
+          <button
+            type="button"
+            onClick={onClearAll}
+            className="text-xs text-[#b8a894] underline decoration-[#8d6a3e] underline-offset-4 hover:text-white"
+          >
+            Restablecer filtros
+          </button>
+        )}
       </div>
-    );
-  }
+      <div className="flex flex-wrap gap-2">
+        {SISTEMAS_POPULARES.map((system) => {
+          const selected = selectedSystems.includes(system);
+          return (
+            <button
+              key={system}
+              type="button"
+              onClick={() => onSystemToggle(system)}
+              aria-pressed={selected}
+              className={`rounded-full border px-4 py-2 text-sm transition-colors ${
+                selected
+                  ? "border-[#e0b255] bg-[#d6a64c] text-[#171008]"
+                  : "border-[#6f5436]/70 bg-[#120d09]/50 text-[#cdbda9] hover:border-[#c49345] hover:text-white"
+              }`}
+            >
+              {shortName(system)}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  )
 );
 
 MasterSystemFilters.displayName = "MasterSystemFilters";

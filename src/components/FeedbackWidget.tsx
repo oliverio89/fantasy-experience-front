@@ -57,38 +57,38 @@ const FeedbackWidget: FunctionComponent = () => {
       {/* Botón flotante */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed right-0 top-1/2 -translate-y-1/2 bg-dark-gold hover:bg-light-gold transition-all duration-300 text-black font-bold py-4 px-3 rounded-l-lg shadow-lg z-[100] ${
-          isOpen ? "right-[420px]" : "right-0"
-        }`}
-        style={{
-          writingMode: "vertical-rl",
-          textOrientation: "mixed",
-        }}
+        aria-expanded={isOpen}
+        className="fe-button-secondary fixed bottom-6 right-6 z-[100] gap-2 bg-[#17100b]/95 px-5 py-2 text-sm shadow-2xl mq450:bottom-4 mq450:right-4"
       >
-        <span className="text-sm tracking-wider">{t.feedback.buttonLabel}</span>
+        <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+          <path d="M5 5.5h14v10H9l-4 3v-13Z" />
+          <path d="M8 9h8M8 12h5" />
+        </svg>
+        <span>{t.feedback.buttonLabel}</span>
       </button>
 
       {/* Panel del formulario */}
       <div
-        className={`fixed right-0 top-0 h-full w-[420px] bg-black shadow-2xl transform transition-transform duration-300 ease-in-out z-[99] ${
+        className={`fixed right-0 top-0 z-[99] h-full w-[min(420px,100vw)] transform border-l border-[#d8a651]/25 bg-[#100c09] shadow-2xl transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="h-full flex flex-col">
           {/* Header */}
-          <div className="bg-dark-gold p-6">
+          <div className="border-b border-[#d8a651]/22 bg-[#1b130d] p-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold font-milonga text-black">
+              <h2 className="m-0 font-milonga text-2xl font-normal text-[#e1ae4f]">
                 {t.feedback.title}
               </h2>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-black hover:text-white transition-colors text-3xl font-bold leading-none"
+                aria-label="Cerrar feedback"
+                className="bg-transparent p-1 text-3xl font-bold leading-none text-[#f2e6cf]/60 transition-colors hover:text-white"
               >
                 ×
               </button>
             </div>
-            <p className="text-sm text-black mt-2 font-titulo-2">
+            <p className="mb-0 mt-2 text-sm text-[#f2e6cf]/55 font-titulo-2">
               {t.feedback.subtitle}
             </p>
           </div>
@@ -119,7 +119,7 @@ const FeedbackWidget: FunctionComponent = () => {
                     type="text"
                     id="name"
                     {...register("name", { maxLength: 80 })}
-                    className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors font-titulo-2"
+                    className="w-full rounded-xl border border-[#d8a651]/24 bg-[#1b130d] px-4 py-3 text-nude placeholder:text-nude/35 focus:border-[#d8a651] focus:outline-none font-titulo-2"
                     placeholder={t.feedback.namePlaceholder}
                     maxLength={80}
                   />
@@ -141,7 +141,7 @@ const FeedbackWidget: FunctionComponent = () => {
                       maxLength: 254,
                       pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                     })}
-                    className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors font-titulo-2"
+                    className="w-full rounded-xl border border-[#d8a651]/24 bg-[#1b130d] px-4 py-3 text-nude placeholder:text-nude/35 focus:border-[#d8a651] focus:outline-none font-titulo-2"
                     placeholder="tu@email.com"
                     maxLength={254}
                   />
@@ -163,7 +163,7 @@ const FeedbackWidget: FunctionComponent = () => {
                       maxLength: 3000,
                     })}
                     rows={6}
-                    className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors resize-none font-titulo-2"
+                    className="w-full resize-none rounded-xl border border-[#d8a651]/24 bg-[#1b130d] px-4 py-3 text-nude placeholder:text-nude/35 focus:border-[#d8a651] focus:outline-none font-titulo-2"
                     placeholder={t.feedback.messagePlaceholder}
                     minLength={10}
                     maxLength={3000}
@@ -171,7 +171,7 @@ const FeedbackWidget: FunctionComponent = () => {
                 </div>
 
                 {/* Nota informativa */}
-                <div className="bg-darkslategray border border-dark-gold rounded-lg p-4">
+                <div className="rounded-xl border border-[#d8a651]/18 bg-[#1b130d] p-4">
                   <p className="text-xs text-nude font-titulo-2">
                     {t.feedback.privacyNote}
                     {" "}
@@ -190,7 +190,7 @@ const FeedbackWidget: FunctionComponent = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-dark-gold hover:bg-light-gold disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-bold py-4 px-6 rounded-xl transition-colors duration-200 font-titulo-2 text-lg"
+                  className="fe-button w-full rounded-xl text-lg disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? t.feedback.submitting : t.feedback.submit}
                 </button>
@@ -199,7 +199,7 @@ const FeedbackWidget: FunctionComponent = () => {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-darkslategray p-4 bg-darkslategray">
+          <div className="border-t border-[#d8a651]/15 bg-[#17100b] p-4">
             <p className="text-xs text-center text-nude font-titulo-2">
               {t.feedback.footerNote}
             </p>

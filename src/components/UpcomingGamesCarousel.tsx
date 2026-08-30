@@ -1,88 +1,75 @@
 import { FunctionComponent, memo, useRef } from "react";
-import PartidaCard from "./PartidaCard";
 import { useNavigate } from "react-router-dom";
+import PartidaCard from "./PartidaCard";
 import { usePartidasDestacadas } from "../hooks/usePartidas";
-
 
 export type UpcomingGamesCarouselType = {
   className?: string;
 };
 
-const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
-  memo(({ className = "" }) => {
+const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> = memo(
+  ({ className = "" }) => {
     const navigate = useNavigate();
-    const cardContainerRef = useRef<HTMLDivElement>(null);
-    const isDraggingRef = useRef(false);
-    const initialScrollLeftRef = useRef(0);
-    const startXRef = useRef(0);
+    const trackRef = useRef<HTMLDivElement>(null);
     const { partidas, loading } = usePartidasDestacadas(6);
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-      if (!cardContainerRef.current) return;
-      isDraggingRef.current = true;
-      startXRef.current = e.clientX;
-      initialScrollLeftRef.current = cardContainerRef.current.scrollLeft;
-    };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-      if (!isDraggingRef.current || !cardContainerRef.current) return;
-      cardContainerRef.current.scrollLeft = initialScrollLeftRef.current - (e.clientX - startXRef.current);
-    };
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
-    };
+    const digitalAdventures = partidas.filter((partida) => partida.tipoPartida === "Digital");
+    const move = (direction: number) =>
+      trackRef.current?.scrollBy({ left: direction * 370, behavior: "smooth" });
 
     return (
-      <section
-        className={`flex flex-col items-center justify-start py-8 pl-5 pr-5 box-border max-w-full text-center text-45xl text-black font-titulo-2 ${className}`}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseUp}
-        onMouseUp={handleMouseUp}
-      >
-        <div className="w-full flex flex-row items-start justify-center pt-0 pb-14 px-[79px] box-border max-w-full mq1050:px-[39px] mq1050:box-border">
-          <h1 className="m-0 h-[140px] flex-1 relative text-inherit font-extrabold font-[inherit] inline-block max-w-full z-[2] mq1050:text-32xl mq450:text-19xl text-center">
-            <p className="m-0">Aventuras</p>
-            <p className="m-0">digitales recientes</p>
-          </h1>
-        </div>
-
-        <div
-          className="w-auto overflow-x-auto flex flex-row items-stretch justify-start pt-0 px-12 pb-[40px] box-border gap-[20.4px] max-w-full z-[1] mq750:pb-10 mq750:box-border scrollbar-hide select-none cursor-pointer"
-          ref={cardContainerRef}
-          onMouseDown={handleMouseDown}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center w-full py-12">
-              <div className="loader" />
+      <section className={`fe-surface-grid px-5 py-24 md:px-10 ${className}`}>
+        <div className="mx-auto w-full max-w-[1180px]">
+          <header className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <p className="fe-kicker mb-4">Llévate la aventura</p>
+              <h2 className="fe-section-title">Aventuras digitales</h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-[#b9aa98]">
+                Material listo para dirigir: compra el archivo una vez y recíbelo
+                de forma segura en tu biblioteca.
+              </p>
             </div>
-          ) : partidas.length === 0 ? (
-            <div className="text-black text-xl py-12 px-6 font-titulo-2">
-              Todavía no hay aventuras digitales disponibles.
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => move(-1)} className="fe-icon-button" aria-label="Ver aventuras anteriores">←</button>
+              <button type="button" onClick={() => move(1)} className="fe-icon-button" aria-label="Ver más aventuras">→</button>
+            </div>
+          </header>
+
+          {loading ? (
+            <div className="fe-panel flex h-56 items-center justify-center" role="status">
+              <div className="loader" />
+              <span className="sr-only">Cargando aventuras digitales</span>
+            </div>
+          ) : digitalAdventures.length === 0 ? (
+            <div className="fe-panel flex min-h-[220px] flex-col items-center justify-center px-6 text-center">
+              <span className="mb-3 text-2xl text-[#d6a64c]" aria-hidden="true">◇</span>
+              <h3 className="m-0 font-titulo-1 text-2xl text-[#f3e7d1]">Nuevos tomos en preparación</h3>
+              <p className="mb-0 mt-3 text-sm text-[#a99986]">Las próximas aventuras descargables aparecerán aquí.</p>
             </div>
           ) : (
-            partidas.map((partida) => (
-              <PartidaCard
-                key={partida.id}
-                partida={partida}
-                mostrarDescripcion={true}
-              />
-            ))
+            <div ref={trackRef} className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-5 scrollbar-hide">
+              {digitalAdventures.map((partida) => (
+                <PartidaCard
+                  key={partida.id}
+                  partida={partida}
+                  mostrarDescripcion
+                  className="w-[340px] snap-start"
+                  backgroundColor="#21170f"
+                />
+              ))}
+            </div>
           )}
-        </div>
 
-        <div className="w-[507px] flex flex-row items-start justify-end py-0 px-20 box-border max-w-full mq750:pl-10 mq750:pr-10 mq750:box-border">
-          <button
-            className="cursor-pointer [border:none] py-[15.5px] pl-[93px] pr-[92px] bg-dark-gold flex-1 shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden flex flex-row items-start justify-center box-border max-w-full z-[2] hover:bg-darkgoldenrod mq450:pl-5 mq450:pr-5 mq450:box-border"
-            onClick={() => navigate("/nextgames?tipo=Digital")}
-          >
-            <b className="flex-1 relative text-5xl font-titulo-2 text-black text-center">
-              Ver aventuras
-            </b>
-          </button>
+          <div className="mt-8 flex justify-center">
+            <button type="button" className="fe-button-secondary" onClick={() => navigate("/nextgames?tipo=Digital")}>
+              Ver catálogo digital <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
       </section>
     );
-  });
+  }
+);
+
+UpcomingGamesCarousel.displayName = "UpcomingGamesCarousel";
 
 export default UpcomingGamesCarousel;

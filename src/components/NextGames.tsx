@@ -1,8 +1,7 @@
-import { FunctionComponent, memo, useRef, useEffect } from "react";
-import PartidaCard from "./PartidaCard";
+import { FunctionComponent, memo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import PartidaCard from "./PartidaCard";
 import { useProximasPartidas } from "../hooks/usePartidas";
-import { useTranslation } from "../i18n";
 
 export type UpcomingCarouselType = {
   className?: string;
@@ -11,108 +10,61 @@ export type UpcomingCarouselType = {
 const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
   ({ className = "" }) => {
     const navigate = useNavigate();
-    const { t } = useTranslation();
-    const cardContainerRef = useRef<HTMLDivElement>(null);
-    const isScrollingRef = useRef(false);
+    const trackRef = useRef<HTMLDivElement>(null);
     const { partidas, loading } = useProximasPartidas(6);
-
-    // Duplicar para efecto de bucle infinito (solo si hay datos)
-    const extendedGameCards = partidas.length > 0
-      ? [...partidas, ...partidas]
-      : [];
-
-    // Efecto de desplazamiento infinito
-    useEffect(() => {
-      const handleScroll = () => {
-        if (!cardContainerRef.current) return;
-        const { scrollLeft, scrollWidth, clientWidth } =
-          cardContainerRef.current;
-
-        // Volver al inicio o al final para crear el efecto de bucle
-        if (scrollLeft <= 0) {
-          cardContainerRef.current.scrollLeft = scrollWidth / 2 - clientWidth;
-        } else if (scrollLeft + clientWidth >= scrollWidth) {
-          cardContainerRef.current.scrollLeft = scrollWidth / 2 - clientWidth;
-        }
-      };
-
-      const container = cardContainerRef.current;
-      if (container) {
-        container.addEventListener("scroll", handleScroll);
-      }
-
-      return () => {
-        if (container) container.removeEventListener("scroll", handleScroll);
-      };
-    }, []);
-
-    // Manejo de arrastre para desplazamiento manual continuo
-    const handleMouseDown = (e: React.MouseEvent) => {
-      isScrollingRef.current = true;
-      cardContainerRef.current?.addEventListener("mousemove", handleMouseMove);
-    };
-
-    const handleMouseUp = () => {
-      isScrollingRef.current = false;
-      cardContainerRef.current?.removeEventListener(
-        "mousemove",
-        handleMouseMove
-      );
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isScrollingRef.current || !cardContainerRef.current) return;
-      cardContainerRef.current.scrollLeft += -e.movementX;
-    };
+    const move = (direction: number) =>
+      trackRef.current?.scrollBy({ left: direction * 370, behavior: "smooth" });
 
     return (
-      <section
-        className="self-stretch bg-oldlace-100 flex flex-col items-end justify-start py-[100px] px-0 box-border gap-10 max-w-full z-[1] text-right text-61xl text-black font-titulo-2 lg:pt-[65px] lg:pb-[65px] lg:box-border mq750:gap-5 mq1050:pt-[42px] mq1050:pb-[42px] mq1050:box-border mq450:pt-[27px] mq450:pb-[27px] mq450:box-border select-none"
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      >
-        <div className="self-stretch h-[1829px] relative bg-oldlace-100 hidden" />
-        <div className="w-[796px] flex flex-row items-start justify-end py-0 pl-[78px] pr-[79px] box-border max-w-full mq1050:pl-[39px] mq1050:pr-[39px] mq1050:box-border">
-          <h1 className="m-0 flex-1 relative text-inherit font-extrabold font-[inherit] inline-block max-w-full z-[2] mq1050:text-21xl mq450:text-5xl">
-            {t.nextGamesCarousel.title}
-          </h1>
-        </div>
+      <section className={`border-y border-[#d8a651]/15 bg-[#0d0907] px-5 py-24 md:px-10 ${className}`}>
+        <div className="mx-auto w-full max-w-[1180px]">
+          <header className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <p className="fe-kicker mb-4">Reserva tu sitio</p>
+              <h2 className="fe-section-title">Próximas partidas</h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-[#b9aa98]">
+                Sesiones en mesa y online con plazas abiertas. Elige el sistema,
+                conoce al Máster y entra en la historia.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => move(-1)} className="fe-icon-button" aria-label="Ver partidas anteriores">
+                ←
+              </button>
+              <button type="button" onClick={() => move(1)} className="fe-icon-button" aria-label="Ver más partidas">
+                →
+              </button>
+            </div>
+          </header>
 
-        <div
-          className={`flex flex-col items-end justify-start px-20 pb-[60px] box-border max-w-full text-center text-base text-black font-titulo-2 mq750:pb-[39px] mq750:box-border ${className}`}
-        >
-          <div
-            ref={cardContainerRef}
-            onMouseDown={handleMouseDown}
-            className="w-auto overflow-x-auto flex flex-row items-stretch justify-start pt-0 px-12 pb-[40px] box-border gap-[20.4px] max-w-full z-[1] mq750:pb-10 mq750:box-border scrollbar-hide cursor-pointer"
-          >
-            {loading ? (
-              <div className="flex items-center justify-center w-full py-12">
-                <div className="loader" />
-              </div>
-            ) : extendedGameCards.length === 0 ? (
-              <div className="text-darkslategray text-xl py-12 px-6 font-titulo-2">
-                {t.nextGamesCarousel.empty}
-              </div>
-            ) : (
-              extendedGameCards.map((partida, index) => (
+          {loading ? (
+            <div className="fe-panel flex h-56 items-center justify-center" role="status">
+              <div className="loader" />
+              <span className="sr-only">Cargando partidas</span>
+            </div>
+          ) : partidas.length === 0 ? (
+            <div className="fe-panel flex min-h-[220px] flex-col items-center justify-center px-6 text-center">
+              <span className="mb-3 text-2xl text-[#d6a64c]" aria-hidden="true">◇</span>
+              <h3 className="m-0 font-titulo-1 text-2xl text-[#f3e7d1]">La agenda se está preparando</h3>
+              <p className="mb-0 mt-3 text-sm text-[#a99986]">Todavía no hay próximas sesiones publicadas.</p>
+            </div>
+          ) : (
+            <div ref={trackRef} className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-5 scrollbar-hide">
+              {partidas.map((partida) => (
                 <PartidaCard
-                  key={`${partida.id}-${index}`}
+                  key={partida.id}
                   partida={partida}
                   mostrarDescripcion={false}
+                  className="w-[340px] snap-start"
+                  backgroundColor="#1b130d"
                 />
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
 
-          <div className="w-[507px] flex flex-row items-start justify-end py-0 px-20 box-border max-w-full mq750:pl-10 mq750:pr-10 mq750:box-border">
-            <button
-              className="cursor-pointer [border:none] py-[15.5px] pl-[93px] pr-[92px] bg-dark-gold flex-1 shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden flex flex-row items-start justify-center box-border max-w-full z-[2] hover:bg-darkgoldenrod mq450:pl-5 mq450:pr-5 mq450:box-border"
-              onClick={() => navigate("/nextgames")}
-            >
-              <b className="flex-1 relative text-5xl font-titulo-2 text-black text-center">
-                {t.nextGamesCarousel.viewMore}
-              </b>
+          <div className="mt-8 flex justify-center">
+            <button type="button" className="fe-button" onClick={() => navigate("/nextgames")}>
+              Explorar todas las partidas <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>
@@ -120,5 +72,7 @@ const NextGames: FunctionComponent<UpcomingCarouselType> = memo(
     );
   }
 );
+
+NextGames.displayName = "NextGames";
 
 export default NextGames;
