@@ -2,6 +2,8 @@ import { FunctionComponent, useState } from "react";
 import { useForm } from "react-hook-form";
 import useWeb3Forms from "@web3forms/react";
 import { useTranslation } from "../i18n";
+import { publicConfig } from "../lib/publicConfig";
+import { useToast } from "../context/ToastContext";
 
 interface FeedbackFormData {
   name?: string;
@@ -11,6 +13,7 @@ interface FeedbackFormData {
 
 const FeedbackWidget: FunctionComponent = () => {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -22,7 +25,7 @@ const FeedbackWidget: FunctionComponent = () => {
   } = useForm<FeedbackFormData>();
 
   const { submit } = useWeb3Forms({
-    access_key: "defc80b9-eb2b-446c-9e4c-bd4731c6f2d4",
+    access_key: publicConfig.web3FormsAccessKey,
     settings: {
       from_name: "Fantasy Experience - Widget de Feedback",
       subject: "Nuevo Feedback - Fantasy Experience",
@@ -37,11 +40,15 @@ const FeedbackWidget: FunctionComponent = () => {
     },
     onError: (error) => {
       console.error("Error al enviar feedback:", error);
-      alert(t.feedback.errorMsg);
+      showToast(t.feedback.errorMsg, "error");
     },
   });
 
   const onSubmit = async (data: FeedbackFormData) => {
+    if (!publicConfig.web3FormsAccessKey) {
+      showToast(t.feedback.configError, "error");
+      return;
+    }
     await submit(data);
   };
 
@@ -111,9 +118,10 @@ const FeedbackWidget: FunctionComponent = () => {
                   <input
                     type="text"
                     id="name"
-                    {...register("name")}
+                    {...register("name", { maxLength: 80 })}
                     className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors font-titulo-2"
                     placeholder={t.feedback.namePlaceholder}
+                    maxLength={80}
                   />
                 </div>
 
@@ -128,9 +136,14 @@ const FeedbackWidget: FunctionComponent = () => {
                   <input
                     type="email"
                     id="email"
-                    {...register("email", { required: true })}
+                    {...register("email", {
+                      required: true,
+                      maxLength: 254,
+                      pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    })}
                     className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors font-titulo-2"
                     placeholder="tu@email.com"
+                    maxLength={254}
                   />
                 </div>
 
@@ -144,10 +157,16 @@ const FeedbackWidget: FunctionComponent = () => {
                   </label>
                   <textarea
                     id="message"
-                    {...register("message", { required: true })}
+                    {...register("message", {
+                      required: true,
+                      minLength: 10,
+                      maxLength: 3000,
+                    })}
                     rows={6}
                     className="w-full px-4 py-3 rounded-xl bg-darkslategray border border-nude text-nude placeholder-gray-400 focus:outline-none focus:border-dark-gold transition-colors resize-none font-titulo-2"
                     placeholder={t.feedback.messagePlaceholder}
+                    minLength={10}
+                    maxLength={3000}
                   />
                 </div>
 
@@ -155,6 +174,15 @@ const FeedbackWidget: FunctionComponent = () => {
                 <div className="bg-darkslategray border border-dark-gold rounded-lg p-4">
                   <p className="text-xs text-nude font-titulo-2">
                     {t.feedback.privacyNote}
+                    {" "}
+                    <a
+                      href="/privacidad"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-dark-gold underline"
+                    >
+                      Política de privacidad
+                    </a>
                   </p>
                 </div>
 

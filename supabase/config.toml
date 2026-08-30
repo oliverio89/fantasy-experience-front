@@ -1,0 +1,18 @@
+project_id = "fantasy-experience"
+
+[functions.create-checkout-session]
+verify_jwt = true
+
+[functions.payment-status]
+verify_jwt = true
+
+[functions.download-digital-product]
+verify_jwt = true
+
+[functions.cancel-game]
+verify_jwt = true
+
+# Stripe no envía un JWT de Supabase. Esta función verifica en su lugar la
+# firma stripe-signature sobre el cuerpo crudo de cada evento.
+[functions.stripe-webhook]
+verify_jwt = false

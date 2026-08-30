@@ -54,7 +54,7 @@ export const es = {
   home: {
     sectionTitle: "Somos Fantasy Experience",
     sectionDescription:
-      "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.",
+      "Una comunidad para encontrar partidas de rol y Másters con estilos, sistemas y horarios distintos. Explora las próximas sesiones, reserva una plaza y comparte tu experiencia cuando termine la aventura.",
     heroImageAlt: "Jugadores reunidos en torno a una mesa de rol",
   },
 
@@ -74,7 +74,8 @@ export const es = {
     roleQuestion: "¿Cómo quieres empezar a participar?",
     asPlayer: "Como Jugador",
     asMaster: "Como Master",
-    roleNote: "* Tu cuenta te permitirá unirte a partidas y crearlas igualmente.",
+    roleNote:
+      "* Los jugadores reservan plazas; los perfiles de Master también pueden publicar partidas.",
     emailLabel: "Correo electrónico",
     emailPlaceholder: "Ingresa tu email",
     cityLabel: "Ciudad",
@@ -87,13 +88,21 @@ export const es = {
     submitting: "Creando...",
     hasAccount: "Si tienes cuenta,",
     loginLink: "Ingresa aquí.",
+    acceptPrefix: "He leído y acepto los",
+    termsLink: "términos de uso",
+    andThe: "y la",
+    privacyLink: "política de privacidad",
     errors: {
       incompleteTitle: "Campos Incompletos",
       incompleteMsg: "Por favor, completa todos los campos obligatorios para continuar.",
+      invalidNameTitle: "Nombre no válido",
+      invalidNameMsg: "El nombre debe tener entre 2 y 80 caracteres.",
+      invalidCityTitle: "Ciudad no válida",
+      invalidCityMsg: "La ciudad no puede superar 100 caracteres.",
       passwordMismatchTitle: "Error de Contraseña",
       passwordMismatchMsg: "Las contraseñas no coinciden. Por favor, asegúrate de escribirlas correctamente.",
       passwordWeakTitle: "Contraseña Insegura",
-      passwordWeakMsg: "La contraseña debe tener al menos 6 caracteres.",
+      passwordWeakMsg: "La contraseña debe tener al menos 8 caracteres.",
       userExistsTitle: "Usuario Existente",
       userExistsMsg: "Este correo electrónico ya está registrado en nuestra plataforma. Por favor, inicia sesión.",
       invalidEmailTitle: "Email Inválido",
@@ -102,6 +111,9 @@ export const es = {
       passwordIssueMsg: "La contraseña no cumple con los requisitos de seguridad.",
       genericTitle: "Error de Registro",
       genericMsg: "Ha ocurrido un problema al crear tu cuenta. Por favor, inténtalo de nuevo.",
+      termsTitle: "Aceptación necesaria",
+      termsMsg:
+        "Debes aceptar los términos de uso y la política de privacidad para crear una cuenta.",
     },
   },
 
@@ -131,17 +143,51 @@ export const es = {
     resendSending: "Enviando...",
     resendSent: "¡Correo reenviado! Revisa tu bandeja de entrada.",
     resendError: "No se pudo reenviar el correo. Inténtalo de nuevo.",
+    forgotPassword: "¿Has olvidado tu contraseña?",
+    resetEmailTitle: "Indica tu correo",
+    resetEmailMsg: "Escribe tu correo electrónico para recuperar la contraseña.",
+    resetSentTitle: "Revisa tu correo",
+    resetSentMsg:
+      "Si existe una cuenta con ese correo, recibirás un enlace para cambiar la contraseña.",
+    resetErrorTitle: "No se pudo enviar el enlace",
+    resetErrorMsg: "Inténtalo de nuevo dentro de unos minutos.",
+  },
+
+  resetPassword: {
+    title: "Cambia tu contraseña",
+    description: "Introduce una contraseña nueva de al menos 8 caracteres.",
+    passwordLabel: "Nueva contraseña",
+    confirmLabel: "Repite la contraseña",
+    submit: "Guardar contraseña",
+    submitting: "Guardando...",
+    invalidTitle: "Revisa la contraseña",
+    invalidLength: "La contraseña debe tener al menos 8 caracteres.",
+    mismatch: "Las dos contraseñas no coinciden.",
+    errorTitle: "No se pudo cambiar la contraseña",
+    errorMessage:
+      "El enlace puede haber caducado. Solicita uno nuevo desde la pantalla de acceso.",
+    successTitle: "Contraseña actualizada",
+    successMessage: "Ya puedes entrar con tu nueva contraseña.",
+    invalidLinkTitle: "Enlace de recuperación no válido",
+    invalidLinkDescription:
+      "Solicita un nuevo enlace desde la pantalla de acceso para cambiar tu contraseña.",
   },
 
   emailConfirmation: {
+    pendingTitle: "Revisa tu correo",
+    pendingDescription:
+      "Te hemos enviado un enlace de confirmación. Ábrelo para activar tu cuenta; revisa también la carpeta de spam.",
     title: "¡Correo Confirmado!",
     description:
       "Gracias por verificar tu correo electrónico. Tu cuenta ya está activa y lista para usar.",
     loginButton: "Iniciar Sesión",
+    errorTitle: "No se pudo confirmar el correo",
+    errorDescription:
+      "El enlace puede haber caducado o ya haberse utilizado. Intenta iniciar sesión o solicita un nuevo correo de confirmación.",
   },
 
   contact: {
-    sideNote: "Si quieres ser Master, escríbenos a contacto@fantasyexperience.com",
+    sideNote: "Si necesitas ayuda, escríbenos a contacto@fantasyexperience.com",
     title1: "Ponte en contacto",
     title2: "con nosotros",
     successTitle: "¡Mensaje enviado!",
@@ -160,6 +206,7 @@ export const es = {
     submit: "Enviar",
     submitting: "Enviando...",
     errorGeneric: "Error al enviar el mensaje. Por favor, inténtalo de nuevo.",
+    configError: "El formulario de contacto aún no está configurado.",
   },
 
   ourMasters: {
@@ -193,6 +240,12 @@ export const es = {
     backToMasters: "Volver a Masters",
     editProfile: "Editar Mi Perfil",
     signOut: "Cerrar Sesión",
+    deleteAccount: "Eliminar cuenta",
+    deletingAccount: "Eliminando...",
+    confirmDeleteAccount:
+      "¿Seguro que quieres eliminar tu cuenta? Se retirarán tus datos personales, archivos, reservas activas y contenido sin historial. Las partidas con participantes se conservarán anonimizadas para no borrar el historial de terceros. Esta acción no se puede deshacer.",
+    accountDeleted: "Tu cuenta se ha eliminado.",
+    accountDeleteError: "No se pudo eliminar la cuenta.",
     about: "Sobre el Máster",
     preferredSystems: "Sistemas preferidos",
     noSystems: "Sin sistemas definidos",
@@ -212,6 +265,7 @@ export const es = {
     avatarSection: "Avatar",
     basicInfo: "Información Básica",
     publicName: "Nombre Público",
+    cityLabel: "Ciudad",
     firstName: "Nombre",
     lastName: "Apellidos",
     bioLabel: "Biografía",
@@ -237,17 +291,23 @@ export const es = {
     notFound: "Perfil no encontrado",
     tagsViewLabel: "Tags:",
     saveChanges: "Guardar Cambios",
+    reservationHistory: "Historial de reservas",
+    managedGameHistory: "Historial de partidas dirigidas",
+    invalidPublicName:
+      "El nombre público debe tener entre 2 y 80 caracteres.",
+    bioTooLong: "La biografía no puede superar 2000 caracteres.",
+    cityTooLong: "La ciudad no puede superar 100 caracteres.",
   },
 
   gamesPage: {
-    title: "Próximas partidas",
-    createButton: "Crear nueva partida",
+    title: "Partidas y aventuras",
+    createButton: "Publicar partida o aventura",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    filterTypeLabel: "Elije el tipo de partida :",
+      "Encuentra sesiones en mesa u online y aventuras digitales listas para descargar. Filtra por título, Máster, sistema, modalidad o fecha.",
+    filterTypeLabel: "Elige la modalidad:",
     filterOnline: "Online",
-    filterPresencial: "Presencial",
-    filterDigital: "Digital",
+    filterPresencial: "En mesa",
+    filterDigital: "Aventura digital",
     advancedFiltersTitle: "Filtros adicionales:",
     allSystems: "Todos los sistemas",
     systemDnD: "D&D 5e",
@@ -256,11 +316,11 @@ export const es = {
     systemVampiro: "Vampiro",
     systemOther: "Otro",
     dateFromLabel: "Desde:",
-    searchLabel: "Busca una partida por título de la partida o nombre del Máster:",
-    searchPlaceholder: "Escribe el título de la partida o el nombre del Máster",
-    loading: "Cargando partidas...",
-    errorLoading: "Error al cargar partidas",
-    noResults: "No se encontraron partidas",
+    searchLabel: "Busca por título o nombre del Máster:",
+    searchPlaceholder: "Escribe el título o el nombre del Máster",
+    loading: "Cargando catálogo...",
+    errorLoading: "Error al cargar el catálogo",
+    noResults: "No se encontraron partidas ni aventuras",
   },
 
   newGame: {
@@ -270,6 +330,9 @@ export const es = {
     createAccount: "Crear cuenta",
     loginButton: "Iniciar sesión",
     browseGames: "Ver partidas disponibles sin cuenta",
+    masterOnlyTitle: "Solo los perfiles de Máster pueden publicar partidas",
+    masterOnlyDescription:
+      "Tu cuenta está configurada como jugador. Puedes explorar y reservar partidas, pero la publicación está reservada a perfiles de Máster.",
     titleCreate: "Nueva Partida",
     titleEdit: "Editar Partida",
     subtitleCreate: "Rellena los campos para crear una nueva partida",
@@ -292,8 +355,8 @@ export const es = {
     ageLabel: "Edad Mínima",
     sessionsLabel: "Sesiones",
     priceLabel: "Precio (€)",
-    dateLabel: "Fecha de inicio *",
-    cityLabel: "Ciudad (Si es presencial)",
+    dateLabel: "Fecha y hora de inicio *",
+    cityLabel: "Ciudad (si hay parte presencial)",
     cityRequired: "La ciudad es obligatoria para partidas presenciales",
     scheduleLabel: "Horario",
     scheduleMoment: "Momento",
@@ -391,6 +454,7 @@ export const es = {
   },
 
   masterAdvancedFilters: {
+    gameType: "Modalidad de partida",
     experience: "Experiencia",
     price: "Precio por Sesión",
     availability: "Disponibilidad",
@@ -417,6 +481,7 @@ export const es = {
     successTitle: "¡Gracias!",
     successMsg: "Tu feedback ha sido enviado correctamente. Lo revisaremos pronto.",
     errorMsg: "Error al enviar feedback. Por favor, inténtalo de nuevo.",
+    configError: "El formulario de feedback aún no está configurado.",
   },
 
   detailsGame: {
@@ -452,6 +517,9 @@ export const es = {
     yes: "Si",
     no: "No",
     joinButton: "Apuntarse",
+    payButton: "Reservar y pagar",
+    paidReservationButton: "Reserva pagada",
+    cancelPaidReservation: "Solicitar cancelación o reembolso",
     leaveButton: "Desapuntarse",
     fullButton: "Completa",
     processingButton: "Procesando...",
@@ -460,12 +528,34 @@ export const es = {
     confirmDelete: "¿Estás seguro de que deseas eliminar esta partida? Esta acción no se puede deshacer.",
     deleteSuccess: "Partida eliminada correctamente.",
     deleteError: "Hubo un error al intentar eliminar la partida.",
+    cannotDeleteWithPlayers:
+      "No puedes eliminar una partida con reservas. Cancélala para conservar el historial.",
+    cancelGameButton: "Cancelar partida",
+    completeButton: "Marcar completada",
+    reactivateButton: "Reactivar partida",
+    confirmCancel: "¿Quieres cancelar esta partida? Las sesiones de pago pendientes se cerrarán y las reservas cobradas se devolverán.",
+    statusUpdated: "Estado de la partida actualizado",
     leftGame: "Has salido de la partida",
     joinedGame: "¡Te has apuntado a la partida!",
+    paymentCancelled: "Pago cancelado. La plaza no se ha reservado y puedes intentarlo de nuevo.",
     gameFull: "La partida está completa",
     loadError: "No se pudo cargar la información de la partida.",
     invalidId: "ID de partida no válido",
     actionError: "Error al realizar la acción",
+    statusLabel: "Estado",
+    statusActive: "Abierta",
+    statusFull: "Completa",
+    statusCancelled: "Cancelada",
+    statusCompleted: "Completada",
+    reviewTitle: "Valora a tu Master",
+    editReviewTitle: "Edita tu reseña",
+    ratingLabel: "Valoración",
+    reviewCommentLabel: "Comentario",
+    reviewSubmit: "Publicar reseña",
+    reviewSaving: "Guardando...",
+    reviewSaved: "Reseña guardada correctamente",
+    reviewLoadError: "No se pudo cargar tu reseña.",
+    reviewSaveError: "No se pudo guardar la reseña.",
   },
 } as const;
 

@@ -42,8 +42,8 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
       >
         <div className="w-full flex flex-row items-start justify-center pt-0 pb-14 px-[79px] box-border max-w-full mq1050:px-[39px] mq1050:box-border">
           <h1 className="m-0 h-[140px] flex-1 relative text-inherit font-extrabold font-[inherit] inline-block max-w-full z-[2] mq1050:text-32xl mq450:text-19xl text-center">
-            <p className="m-0">Partidas</p>
-            <p className="m-0">digitales destacadas</p>
+            <p className="m-0">Aventuras</p>
+            <p className="m-0">digitales recientes</p>
           </h1>
         </div>
 
@@ -58,7 +58,7 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
             </div>
           ) : partidas.length === 0 ? (
             <div className="text-black text-xl py-12 px-6 font-titulo-2">
-              No hay partidas destacadas disponibles aún.
+              Todavía no hay aventuras digitales disponibles.
             </div>
           ) : (
             partidas.map((partida) => (
@@ -74,10 +74,10 @@ const UpcomingGamesCarousel: FunctionComponent<UpcomingGamesCarouselType> =
         <div className="w-[507px] flex flex-row items-start justify-end py-0 px-20 box-border max-w-full mq750:pl-10 mq750:pr-10 mq750:box-border">
           <button
             className="cursor-pointer [border:none] py-[15.5px] pl-[93px] pr-[92px] bg-dark-gold flex-1 shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-31xl overflow-hidden flex flex-row items-start justify-center box-border max-w-full z-[2] hover:bg-darkgoldenrod mq450:pl-5 mq450:pr-5 mq450:box-border"
-            onClick={() => navigate("/nextgames")}
+            onClick={() => navigate("/nextgames?tipo=Digital")}
           >
             <b className="flex-1 relative text-5xl font-titulo-2 text-black text-center">
-              Ver más partidas
+              Ver aventuras
             </b>
           </button>
         </div>

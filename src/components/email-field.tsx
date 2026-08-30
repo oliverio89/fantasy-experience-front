@@ -8,6 +8,9 @@ export type EmailFieldType = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
   name?: string;
+  minLength?: number;
+  maxLength?: number;
+  autoComplete?: string;
 
   /** Style props */
   propPadding?: CSSProperties["padding"];
@@ -22,6 +25,9 @@ const EmailField: FunctionComponent<EmailFieldType> = memo(
     onChange,
     type = "text",
     name,
+    minLength,
+    maxLength,
+    autoComplete,
     propPadding,
   }) => {
     const emailFieldStyle: CSSProperties = useMemo(() => {
@@ -48,6 +54,9 @@ const EmailField: FunctionComponent<EmailFieldType> = memo(
               name={name}
               value={value}
               onChange={onChange}
+              minLength={minLength}
+              maxLength={maxLength}
+              autoComplete={autoComplete}
             />
           </div>
         </div>

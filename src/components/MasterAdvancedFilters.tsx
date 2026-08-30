@@ -10,6 +10,8 @@ import {
   EXPERIENCIA_MASTER,
   RANGOS_PRECIO,
   DISPONIBILIDAD_MASTER,
+  TipoPartida,
+  TIPOS_PARTIDA,
 } from "../types/masters";
 import { useTranslation } from "../i18n";
 
@@ -36,15 +38,24 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
       [filters, onFiltersChange]
     );
 
-    const handlePrecioToggle = useCallback(
-      (precio: RangoPrecio) => {
-        const newPrecios = filters.tiposPartida.includes(precio as any)
-          ? filters.tiposPartida.filter((p) => (p as unknown) !== precio)
-          : [...filters.tiposPartida, precio as any];
-
+    const handleTipoToggle = useCallback(
+      (tipo: TipoPartida) => {
         onFiltersChange({
           ...filters,
-          tiposPartida: newPrecios,
+          tiposPartida: filters.tiposPartida.includes(tipo)
+            ? filters.tiposPartida.filter((current) => current !== tipo)
+            : [...filters.tiposPartida, tipo],
+        });
+      },
+      [filters, onFiltersChange]
+    );
+
+    const handlePrecioToggle = useCallback(
+      (precio: RangoPrecio) => {
+        onFiltersChange({
+          ...filters,
+          precioMin: filters.precioMin === precio ? null : precio,
+          precioMax: null,
         });
       },
       [filters, onFiltersChange]
@@ -81,6 +92,9 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
         ...filters,
         experiencia: [],
         disponibilidad: [],
+        tiposPartida: [],
+        precioMin: null,
+        precioMax: null,
         ratingMin: 0,
       });
     }, [filters, onFiltersChange]);
@@ -89,6 +103,32 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
       <div
         className={`w-full flex flex-col items-start justify-start gap-6 ${className}`}
       >
+        {/* Filtro de modalidad */}
+        <div className="w-full flex flex-col items-start justify-start gap-3">
+          <h3 className="text-lg text-white font-titulo-2">
+            {t.masterAdvancedFilters.gameType}
+          </h3>
+          <div className="flex flex-row items-start justify-start gap-2 flex-wrap">
+            {TIPOS_PARTIDA.map((tipo) => {
+              const isSelected = filters.tiposPartida.includes(tipo);
+              return (
+                <button
+                  key={tipo}
+                  type="button"
+                  onClick={() => handleTipoToggle(tipo)}
+                  className={`px-4 py-2 rounded-lg border text-sm transition-all duration-200 ${
+                    isSelected
+                      ? "bg-light-gold border-light-gold text-black font-semibold"
+                      : "bg-transparent border-nude text-nude"
+                  }`}
+                >
+                  {tipo}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Filtros de Experiencia */}
         <div className="w-full flex flex-col items-start justify-start gap-3">
           <h3 className="text-lg text-white font-titulo-2">{t.masterAdvancedFilters.experience}</h3>
@@ -119,7 +159,7 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
           </h3>
           <div className="flex flex-row items-start justify-start gap-2 flex-wrap">
             {RANGOS_PRECIO.map((precio) => {
-              const isSelected = filters.tiposPartida.includes(precio as any);
+              const isSelected = filters.precioMin === precio;
               return (
                 <button
                   key={precio}
@@ -180,8 +220,10 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
         </div>
 
         {/* Botón Limpiar */}
-        {(filters.experiencia.length > 0 ||
+        {(filters.tiposPartida.length > 0 ||
+          filters.experiencia.length > 0 ||
           filters.disponibilidad.length > 0 ||
+          filters.precioMin !== null ||
           filters.ratingMin > 0) && (
           <div className="w-full flex flex-row items-center justify-start gap-2">
             <button
@@ -191,8 +233,10 @@ const MasterAdvancedFilters: FunctionComponent<MasterAdvancedFiltersType> =
               {t.masterAdvancedFilters.clearButton}
             </button>
             <span className="text-light-gold text-sm">
-              {filters.experiencia.length +
+              {filters.tiposPartida.length +
+                filters.experiencia.length +
                 filters.disponibilidad.length +
+                (filters.precioMin !== null ? 1 : 0) +
                 (filters.ratingMin > 0 ? 1 : 0)}{" "}
               {t.masterAdvancedFilters.activeFilters}
             </span>

@@ -1,8 +1,13 @@
 # Fantasy Experience — Documentación de Base de Datos
 
+> **Aviso:** este documento es una referencia explicativa heredada. La fuente
+> de verdad ejecutable está en `supabase/migrations/`. No copies fragmentos de
+> aquí sobre producción sin compararlos con las migraciones actuales.
+
 > Base de datos: **Supabase (PostgreSQL)**
 > Este documento recoge la estructura completa necesaria para que la aplicación funcione.
-> Los SQL de cada sección se pueden copiar directamente en el **SQL Editor de Supabase**.
+> Los fragmentos de este documento son históricos y no deben copiarse al SQL Editor.
+> Aplica siempre las migraciones versionadas de `supabase/migrations/`.
 
 ---
 
@@ -200,7 +205,7 @@ CREATE TABLE public.game_participants (
 
 ### `master_reviews`
 
-Reseñas de jugadores sobre Masters. **Tabla futura** — los tipos ya están definidos en el frontend (`src/types/masters.ts`).
+Reseñas verificadas de jugadores sobre Masters. La implementación vigente y sus políticas están en las migraciones.
 
 ```sql
 CREATE TABLE public.master_reviews (
@@ -489,16 +494,33 @@ CREATE INDEX idx_games_title_search ON public.games USING GIN(to_tsvector('spani
 
 ## Orden de ejecución en Supabase
 
-Copiar y ejecutar en este orden en el **SQL Editor**:
+Usa Supabase CLI para aplicar, en orden, los archivos de `supabase/migrations/`.
+En bases existentes, valida primero el hardening en staging y no reapliques el
+esquema inicial sobre tablas ya creadas.
 
-1. Crear tabla `profiles`
-2. Crear tabla `games`
-3. Crear tabla `game_participants`
-4. Crear tabla `master_reviews`
-5. Crear triggers (`handle_new_user`, `set_updated_at`, `update_master_rating`)
-6. Activar RLS y crear políticas (profiles, games, participants, reviews)
-7. Crear buckets y políticas de storage
-8. Crear índices
+---
+
+## Pagos y plazas retenidas
+
+La migración `20260830200000_stripe_payments_security.sql` añade:
+
+- `payment_orders`, registro privado de pedidos con importe inmutable en céntimos y estados `creating`, `pending`, `paid`, `expired`, `failed`, `refund_pending` y `refunded`;
+- `stripe_webhook_events`, registro técnico para procesar cada evento una sola vez;
+- `games.pending_players`, que suma las sesiones Checkout vigentes al aforo sin presentarlas como participantes confirmados;
+- RPC internos ejecutables únicamente con `service_role` para preparar pedidos, confirmar eventos y coordinar devoluciones.
+
+No se concede `SELECT` ni escrituras sobre las tablas financieras a `anon` o
+`authenticated`. El estado propio se consulta mediante `payment-status`, que
+valida el JWT y filtra por `player_id` en servidor.
+
+Secretos de las Edge Functions (no pertenecen al frontend):
+
+```env
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+SITE_URL=https://fantasyexperience.es
+ALLOWED_ORIGINS=https://fantasyexperience.es
+```
 
 ---
 
@@ -559,7 +581,7 @@ En GitHub Actions → Settings → Secrets and variables → Actions:
 | `game_type` | `tipoPartida` | `string` |
 | `start_date` | `fecha` | `string` |
 | `max_players` | `jugadores` | `string` |
-| `game_participants.count` | `jugadoresActuales` | `number` |
+| `current_players` | `jugadoresActuales` | `number` |
 | `price` | `precio` | `string` |
 | `city` | `ciudad` | `string` |
 | `schedule` | `horario` | `string` |
@@ -568,7 +590,7 @@ En GitHub Actions → Settings → Secrets and variables → Actions:
 | `min_age` | `edadMinima` | `number` |
 | `temporalidad` | `temporalidad` | `string` |
 | `recommendations` | `recomendaciones` | `string` |
-| `master_contact` | `contactoMaster` | `string` |
+| `master_contact` | `contactoMaster` | `string` protegido; sólo reserva/Máster/admin |
 | `tools_needed` | `herramientas` | `string[]` |
 | `use_x_card` | `usoTarjetaX` | `boolean` |
 | `camera_mandatory` | `obligatorioCamara` | `boolean` |

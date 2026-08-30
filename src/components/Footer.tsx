@@ -44,7 +44,8 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
                   onClick={() =>
                     window.open(
                       "https://www.instagram.com/rolfantasyexp/",
-                      "_blank"
+                      "_blank",
+                      "noopener,noreferrer"
                     )
                   } // Abre Instagram en una nueva pestaña
                 />
@@ -55,7 +56,11 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
                     alt={t.footer.twitter}
                     src="/twitter.svg"
                     onClick={() =>
-                      window.open("https://x.com/RolFantasyExp", "_blank")
+                      window.open(
+                        "https://x.com/RolFantasyExp",
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
                     } // Abre Twitter en una nueva pestaña
                   />
                 </div>
@@ -77,6 +82,12 @@ const Footer: FunctionComponent<SocialContainerType> = memo(
             <p className="m-0 cursor-pointer" onClick={onContactoClick}>
               {t.footer.contact}
             </p>
+            <div className="mt-4 flex flex-col gap-1 text-sm">
+              <button onClick={() => navigate("/legal")}>Aviso legal</button>
+              <button onClick={() => navigate("/privacidad")}>Privacidad</button>
+              <button onClick={() => navigate("/cookies")}>Cookies</button>
+              <button onClick={() => navigate("/terminos")}>Términos</button>
+            </div>
           </div>
         </div>
 

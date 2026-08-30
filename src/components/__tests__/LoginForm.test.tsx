@@ -7,11 +7,14 @@ import LoginForm from '../login-form';
 // with const/let are not yet initialized when the factory runs.
 // vi.hoisted() runs *before* the hoist, making mockSignIn available inside the factory.
 const mockSignIn = vi.hoisted(() => vi.fn());
+const mockResetPassword = vi.hoisted(() => vi.fn());
 
 vi.mock('../../lib/supabase', () => ({
   supabase: {
     auth: {
       signInWithPassword: mockSignIn,
+      resetPasswordForEmail: mockResetPassword,
+      resend: vi.fn(),
     },
   },
 }));
@@ -188,5 +191,25 @@ describe('LoginForm', () => {
     await waitFor(() => {
       expect(screen.queryByText('Entrando...')).not.toBeInTheDocument();
     });
+  });
+
+  it('sends a password recovery link to the entered email', async () => {
+    mockResetPassword.mockResolvedValueOnce({ error: null });
+    renderLoginForm();
+
+    fireEvent.change(screen.getByPlaceholderText('Ingresa tu email'), {
+      target: { name: 'email', value: 'user@example.com' },
+    });
+    fireEvent.click(screen.getByText('¿Has olvidado tu contraseña?'));
+
+    await waitFor(() => {
+      expect(mockResetPassword).toHaveBeenCalledWith(
+        'user@example.com',
+        expect.objectContaining({
+          redirectTo: expect.stringContaining('/reset-password'),
+        })
+      );
+    });
+    expect(screen.getByText('Revisa tu correo')).toBeInTheDocument();
   });
 });

@@ -6,12 +6,16 @@ import PartidasService from "../services/partidasService";
 interface ImageUploadProps {
   currentImage?: string;
   onImageUploaded: (url: string) => void;
+  uploadFile?: (file: File) => Promise<string>;
+  maxSizeMb?: number;
   className?: string;
 }
 
 export const ImageUpload = ({
   currentImage,
   onImageUploaded,
+  uploadFile = PartidasService.subirImagen,
+  maxSizeMb = 5,
   className = "",
 }: ImageUploadProps) => {
   const [loading, setLoading] = useState(false);
@@ -22,24 +26,24 @@ export const ImageUpload = ({
       const file = acceptedFiles[0];
       if (!file) return;
 
-      if (file.size > 5 * 1024 * 1024) {
-        showToast("La imagen no puede superar los 5MB", "error");
+      if (file.size > maxSizeMb * 1024 * 1024) {
+        showToast(`La imagen no puede superar los ${maxSizeMb}MB`, "error");
         return;
       }
 
       setLoading(true);
       try {
-        const publicUrl = await PartidasService.subirImagen(file);
+        const publicUrl = await uploadFile(file);
         onImageUploaded(publicUrl);
         showToast("Imagen subida correctamente", "success");
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error uploading image:", error);
         showToast("Error al subir la imagen", "error");
       } finally {
         setLoading(false);
       }
     },
-    [onImageUploaded, showToast]
+    [maxSizeMb, onImageUploaded, showToast, uploadFile]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -124,7 +128,7 @@ export const ImageUpload = ({
               : "Arrastra una imagen o haz clic para seleccionar"}
           </p>
           <p className="text-xs mt-2 opacity-50 font-radio-option">
-            (Máx. 5MB - JPG, PNG, WEBP)
+            (Máx. {maxSizeMb}MB - JPG, PNG, WEBP)
           </p>
         </div>
       )}

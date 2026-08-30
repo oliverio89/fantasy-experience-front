@@ -26,6 +26,10 @@ const UnifiedMasterCard: FunctionComponent<UnifiedMasterCardType> = memo(
         masterCard={master.avatar}
         MasterName={master.displayName}
         rate={master.rating}
+        totalReviews={master.totalReviews}
+        completedSessions={master.completedSessions}
+        publishedSessions={master.publishedSessions}
+        isFeatured={master.isFeatured}
         Sistema={master.sistemas.join(", ")}
         Preferencia={master.tiposPartida.join(", ")}
       />

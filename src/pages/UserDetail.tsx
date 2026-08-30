@@ -12,7 +12,14 @@ import { Profile, ProfileService } from "../services/profileService";
 import { ImageUpload } from "../components/ImageUpload";
 import { useToast } from "../context/ToastContext";
 import PartidaCard, { Partida } from "../components/PartidaCard";
+import PartidasService from "../services/partidasService";
 import { useTranslation } from "../i18n";
+import {
+  DISPONIBILIDAD_MASTER,
+  EXPERIENCIA_MASTER,
+  RANGOS_PRECIO,
+} from "../types/masters";
+import { FALLBACK_AVATAR_URL } from "../constants";
 
 // Helper for Array inputs (Systems, Tags, etc.)
 const ArrayInput: FunctionComponent<{
@@ -24,10 +31,15 @@ const ArrayInput: FunctionComponent<{
   const [inputValue, setInputValue] = useState("");
 
   const handleAdd = () => {
-    if (inputValue.trim()) {
-      onChange([...values, inputValue.trim()]);
+    const nextValue = inputValue.trim();
+    if (!nextValue || values.length >= 20) return;
+    if (values.some((value) => value.toLocaleLowerCase() === nextValue.toLocaleLowerCase())) {
       setInputValue("");
+      return;
     }
+
+    onChange([...values, nextValue]);
+    setInputValue("");
   };
 
   const handleRemove = (index: number) => {
@@ -59,12 +71,19 @@ const ArrayInput: FunctionComponent<{
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder={placeholder || "Añadir item..."}
+          maxLength={80}
           className="flex-1 bg-black/50 border border-dark-gold text-nude px-4 py-2 rounded-lg"
-          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleAdd();
+            }
+          }}
         />
         <button
           onClick={handleAdd}
           type="button"
+          disabled={!inputValue.trim() || values.length >= 20}
           className="bg-dark-gold text-black px-4 py-2 rounded-lg hover:brightness-110"
         >
           +
@@ -75,7 +94,7 @@ const ArrayInput: FunctionComponent<{
 };
 
 const UserDetail: FunctionComponent = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -85,9 +104,13 @@ const UserDetail: FunctionComponent = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   // Games state
-  const [myGames, setMyGames] = useState<any[]>([]);
+  const [myGames, setMyGames] = useState<Partida[]>([]);
+  const [joinedGames, setJoinedGames] = useState<Partida[]>([]);
+  const [pastJoinedGames, setPastJoinedGames] = useState<Partida[]>([]);
+  const [pastManagedGames, setPastManagedGames] = useState<Partida[]>([]);
 
   // Form State
   const [formData, setFormData] = useState<Partial<Profile>>({});
@@ -97,18 +120,23 @@ const UserDetail: FunctionComponent = () => {
   const isMyProfile = user && targetUserId === user.id;
 
   useEffect(() => {
+    if (authLoading) return;
     if (targetUserId) {
       loadData(targetUserId);
     } else {
       // If no ID and no logged in user, redirect to login
       navigate("/login");
     }
-  }, [targetUserId, navigate]);
+  }, [targetUserId, user?.id, authLoading, navigate]);
 
   const loadData = async (id: string) => {
     setLoading(true);
     try {
-      await Promise.all([loadProfile(id), loadGames(id)]);
+      await Promise.all([
+        loadProfile(id),
+        loadGames(id),
+        user?.id === id ? loadJoinedGames(id) : Promise.resolve(),
+      ]);
     } finally {
       setLoading(false);
     }
@@ -130,21 +158,76 @@ const UserDetail: FunctionComponent = () => {
   };
 
   const loadGames = async (id: string) => {
-    // 1. Games Created
-    const { data: created } = await supabase
-      .from("games")
-      .select("*")
-      .eq("master_id", id);
+    try {
+      const response = await PartidasService.obtenerPartidas({
+        masterId: id,
+        limit: 100,
+        status: "all",
+      });
+      setMyGames(
+        response.partidas.filter(
+          (game) => game.status === "active" || game.status === "full"
+        )
+      );
+      setPastManagedGames(
+        user?.id === id
+          ? response.partidas.filter(
+              (game) =>
+                game.status === "cancelled" || game.status === "completed"
+            )
+          : []
+      );
+    } catch (error) {
+      console.error(error);
+      setMyGames([]);
+      setPastManagedGames([]);
+      showToast(t.userDetail.errorLoading, "error");
+    }
+  };
 
-    if (created) setMyGames(created);
+  const loadJoinedGames = async (id: string) => {
+    try {
+      const [activeGames, history] = await Promise.all([
+        PartidasService.obtenerPartidasComoJugador(id),
+        PartidasService.obtenerPartidasComoJugador(id, { history: true }),
+      ]);
+      setJoinedGames(activeGames);
+      setPastJoinedGames(history);
+    } catch (error) {
+      console.error(error);
+      setJoinedGames([]);
+      setPastJoinedGames([]);
+    }
   };
 
   const handleSave = async () => {
     if (!targetUserId) return;
+    const publicName = formData.fullName?.trim() || "";
+    if (publicName.length < 2 || publicName.length > 80) {
+      showToast(t.userDetail.invalidPublicName, "error");
+      return;
+    }
+    if ((formData.bio?.length || 0) > 2000) {
+      showToast(t.userDetail.bioTooLong, "error");
+      return;
+    }
+    if ((formData.city?.trim().length || 0) > 100) {
+      showToast(t.userDetail.cityTooLong, "error");
+      return;
+    }
+    if ((formData.timezone?.trim().length || 0) > 64) {
+      showToast("La zona horaria no puede superar 64 caracteres", "error");
+      return;
+    }
     setIsSaving(true);
     try {
-      await ProfileService.updateProfile(targetUserId, formData);
-      setProfile((prev) => ({ ...prev!, ...formData } as Profile));
+      const normalizedData = {
+        ...formData,
+        fullName: publicName,
+        city: formData.city?.trim() || "",
+      };
+      await ProfileService.updateProfile(targetUserId, normalizedData);
+      setProfile((prev) => ({ ...prev!, ...normalizedData } as Profile));
       setIsEditing(false);
       showToast(t.userDetail.successUpdate, "success");
     } catch (error) {
@@ -164,6 +247,24 @@ const UserDetail: FunctionComponent = () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
       navigate("/login");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm(t.userDetail.confirmDeleteAccount)) return;
+
+    setIsDeletingAccount(true);
+    try {
+      if (user) await ProfileService.deleteUserStorage(user.id);
+      const { error } = await supabase.rpc("delete_my_account");
+      if (error) throw error;
+      await supabase.auth.signOut({ scope: "local" });
+      navigate("/");
+      showToast(t.userDetail.accountDeleted, "success");
+    } catch (error) {
+      console.error(error);
+      showToast(t.userDetail.accountDeleteError, "error");
+      setIsDeletingAccount(false);
     }
   };
 
@@ -229,7 +330,7 @@ const UserDetail: FunctionComponent = () => {
       ...(profile.estilos || []),
     ]);
     // Also add systems from myGames if separate (though ProfileService attempts to aggregate)
-    const gameSystems = myGames.map((g) => g.game_system).filter(Boolean);
+    const gameSystems = myGames.map((game) => game.sistemaJuego).filter(Boolean);
     gameSystems.forEach((s) => aggregated.add(s));
 
     return Array.from(aggregated);
@@ -240,7 +341,7 @@ const UserDetail: FunctionComponent = () => {
     if (!profile) return [];
     const types = new Set(profile.tiposPartida || []);
     myGames.forEach((g) => {
-      if (g.game_type) types.add(g.game_type);
+      if (g.tipoPartida) types.add(g.tipoPartida);
     });
     return Array.from(types);
   };
@@ -301,6 +402,15 @@ const UserDetail: FunctionComponent = () => {
               >
                 {t.userDetail.signOut}
               </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount}
+                className="border border-red-700 text-red-400 px-6 py-3 rounded-xl hover:bg-red-900/20 transition-colors disabled:opacity-50"
+              >
+                {isDeletingAccount
+                  ? t.userDetail.deletingAccount
+                  : t.userDetail.deleteAccount}
+              </button>
             </div>
           )}
         </div>
@@ -316,7 +426,7 @@ const UserDetail: FunctionComponent = () => {
                   className="w-[347px] h-[347px] rounded-full object-cover border-[3px] border-solid border-dark-gold shadow-[0px_0px_15px_rgba(212,175,55,0.3)]"
                   loading="lazy"
                   alt={`Avatar de ${profile.fullName}`}
-                  src={profile.avatarUrl || "/default-avatar.png"}
+                  src={profile.avatarUrl || FALLBACK_AVATAR_URL}
                 />
               </div>
 
@@ -371,11 +481,9 @@ const UserDetail: FunctionComponent = () => {
                 </div>
               </div>
 
-              {/* Partidas jugadas (visual placeholder blocks as per design - stacked layout) */}
-              <div className="self-stretch flex flex-col items-start justify-start gap-4">
-                {myGames.length > 2 ? (
-                  // If we have many games, show the extras here simply
-                  myGames.slice(2).map((game, i) => (
+              {myGames.length > 2 && (
+                <div className="self-stretch flex flex-col items-start justify-start gap-4">
+                  {myGames.slice(2).map((game) => (
                     <div
                       key={`extra-game-${game.id}`}
                       className="self-stretch rounded-xl bg-oldlace-100 flex items-center justify-center py-6 px-6 cursor-pointer hover:bg-white transition-colors border border-transparent hover:border-dark-gold shadow-md"
@@ -385,23 +493,9 @@ const UserDetail: FunctionComponent = () => {
                         {game.titulo}
                       </span>
                     </div>
-                  ))
-                ) : (
-                  <>
-                    {/* Hardcoded placeholders to match Screenshot design balance if not enough games */}
-                    <div className="self-stretch rounded-xl bg-oldlace-100 flex items-center justify-center py-8 px-6 opacity-90 shadow-md">
-                      <span className="text-black font-bold text-lg font-titulo-2">
-                        Partida 2
-                      </span>
-                    </div>
-                    <div className="self-stretch rounded-xl bg-oldlace-100 flex items-center justify-center py-8 px-6 opacity-90 shadow-md">
-                      <span className="text-black font-bold text-lg font-titulo-2">
-                        Partida 3
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* COLUMNA DERECHA */}
@@ -411,6 +505,11 @@ const UserDetail: FunctionComponent = () => {
                 <h1 className="m-0 self-stretch relative text-inherit font-bold font-titulo-2 z-[1] mq450:text-5xl mq900:text-13xl text-dark-gold text-center w-full">
                   {profile.fullName}
                 </h1>
+                {profile.city && (
+                  <p className="m-0 text-lg text-nude font-titulo-2">
+                    {profile.city}
+                  </p>
+                )}
                 <div className="self-stretch relative text-xl font-medium text-nude flex items-center justify-center shrink-0 z-[1] font-titulo-2">
                   {t.userDetail.rating}
                 </div>
@@ -472,34 +571,7 @@ const UserDetail: FunctionComponent = () => {
                       {myGames.slice(0, 2).map((game) => (
                         <PartidaCard
                           key={game.id}
-                          partida={
-                            {
-                              id: game.id,
-                              titulo: game.titulo,
-                              masterName: profile.fullName,
-                              // Mapping DB columns to Partida type
-                              sistemaJuego: game.game_system,
-                              fecha: game.fecha, // Assuming fecha_inicio is mapped to fecha in PartidasService but here we are using raw DB? Wait.
-                              // loadGames uses select("*"). So raw DB.
-                              // PartidasService uses "start_date" for fecha. "game_system" for sistemaJuego.
-                              // Wait, myGames is RAW from DB.
-                              // So I should use: game.game_system, etc.
-                              // But PartidaCard expects "fecha" which is string.
-                              // Raw DB has "start_date".
-                              // I need to map it correctly.
-
-                              // Let's check logic:
-                              // myGames is set via: const { data: created } = await supabase.from("games").select("*").eq("master_id", id);
-                              // So it's Snake Case.
-
-                              // Correct mapping:
-                              // sistemaJuego: game.game_system
-                              // fecha: game.start_date
-                              // descripcion: game.description
-                              // imagenUrl: game.image_url
-                              // tipoPartida: game.game_type
-                            } as any
-                          }
+                          partida={game}
                           mostrarDescripcion={true}
                           onClick={() => navigate(`/detailsgame/${game.id}`)}
                           className="min-w-[280px] max-w-[300px]"
@@ -515,6 +587,61 @@ const UserDetail: FunctionComponent = () => {
               </div>
             </section>
           </div>
+
+          {isMyProfile && joinedGames.length > 0 && (
+            <section className="mt-12 rounded-xl bg-darkslategray border border-nude/10 p-8">
+              <h2 className="m-0 mb-6 text-3xl text-dark-gold font-titulo-2 text-center">
+                Mis reservas activas
+              </h2>
+              <div className="flex flex-row flex-wrap justify-center gap-6">
+                {joinedGames.map((game) => (
+                  <PartidaCard
+                    key={`joined-${game.id}`}
+                    partida={game}
+                    mostrarDescripcion={true}
+                    onClick={() => navigate(`/detailsgame/${game.id}`)}
+                    className="min-w-[280px] max-w-[320px]"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+          {isMyProfile && pastJoinedGames.length > 0 && (
+            <section className="mt-12 rounded-xl bg-darkslategray border border-nude/10 p-8">
+              <h2 className="m-0 mb-6 text-3xl text-dark-gold font-titulo-2 text-center">
+                {t.userDetail.reservationHistory}
+              </h2>
+              <div className="flex flex-row flex-wrap justify-center gap-6">
+                {pastJoinedGames.map((game) => (
+                  <PartidaCard
+                    key={`past-${game.id}`}
+                    partida={game}
+                    mostrarDescripcion={true}
+                    onClick={() => navigate(`/detailsgame/${game.id}`)}
+                    className="min-w-[280px] max-w-[320px]"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+          {isMyProfile && pastManagedGames.length > 0 && (
+            <section className="mt-12 rounded-xl bg-darkslategray border border-nude/10 p-8">
+              <h2 className="m-0 mb-6 text-3xl text-dark-gold font-titulo-2 text-center">
+                {t.userDetail.managedGameHistory}
+              </h2>
+              <div className="flex flex-row flex-wrap justify-center gap-6">
+                {pastManagedGames.map((game) => (
+                  <PartidaCard
+                    key={`managed-${game.id}`}
+                    partida={game}
+                    mostrarDescripcion={true}
+                    onClick={() => navigate(`/detailsgame/${game.id}`)}
+                    className="min-w-[280px] max-w-[320px]"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
     );
@@ -538,15 +665,22 @@ const UserDetail: FunctionComponent = () => {
                   src={
                     formData.avatarUrl ||
                     profile?.avatarUrl ||
-                    "/default-avatar.png"
+                    FALLBACK_AVATAR_URL
                   }
                   className="w-40 h-40 rounded-full object-cover border-4 border-dark-gold mb-4"
                 />
                 <ImageUpload
                   currentImage={formData.avatarUrl || undefined}
-                  onImageUploaded={(url: string) =>
-                    setFormData({ ...formData, avatarUrl: url })
+                  maxSizeMb={2}
+                  uploadFile={(file) =>
+                    ProfileService.uploadAvatar(targetUserId as string, file)
                   }
+                  onImageUploaded={(url: string) => {
+                    setFormData((current) => ({ ...current, avatarUrl: url }));
+                    setProfile((current) =>
+                      current ? { ...current, avatarUrl: url } : current
+                    );
+                  }}
                 />
               </div>
             </div>
@@ -560,25 +694,23 @@ const UserDetail: FunctionComponent = () => {
                 <input
                   className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white"
                   value={formData.fullName || ""}
+                  maxLength={80}
                   onChange={(e) =>
                     setFormData({ ...formData, fullName: e.target.value })
                   }
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm text-gray-400">{t.userDetail.firstName}</label>
+                <label className="text-sm text-gray-400">
+                  {t.userDetail.cityLabel}
+                </label>
                 <input
-                  className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white opacity-50 cursor-not-allowed"
-                  value={profile?.firstName || ""}
-                  disabled
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm text-gray-400">{t.userDetail.lastName}</label>
-                <input
-                  className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white opacity-50 cursor-not-allowed"
-                  value={profile?.lastName || ""}
-                  disabled
+                  className="bg-black/50 border border-dark-gold px-4 py-2 rounded-lg text-white"
+                  value={formData.city || ""}
+                  onChange={(event) =>
+                    setFormData({ ...formData, city: event.target.value })
+                  }
+                  maxLength={100}
                 />
               </div>
             </div>
@@ -593,6 +725,7 @@ const UserDetail: FunctionComponent = () => {
               <textarea
                 className="w-full h-40 bg-black/50 border border-dark-gold rounded-lg p-4 text-white resize-none"
                 value={formData.bio || ""}
+                maxLength={2000}
                 onChange={(e) =>
                   setFormData({ ...formData, bio: e.target.value })
                 }
@@ -606,6 +739,83 @@ const UserDetail: FunctionComponent = () => {
                   {t.userDetail.masterDetails}
                 </h3>
               </div>
+
+              {profile.role === "master" && (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-light-gold font-bold">Experiencia</label>
+                    <select
+                      className="bg-black/50 border border-dark-gold text-nude px-4 py-2 rounded-lg"
+                      value={formData.experiencia || ""}
+                      onChange={(event) =>
+                        setFormData({
+                          ...formData,
+                          experiencia: (event.target.value ||
+                            null) as Profile["experiencia"],
+                        })
+                      }
+                    >
+                      <option value="">Sin especificar</option>
+                      {EXPERIENCIA_MASTER.map((value) => (
+                        <option key={value} value={value}>{value}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-light-gold font-bold">Disponibilidad</label>
+                    <select
+                      className="bg-black/50 border border-dark-gold text-nude px-4 py-2 rounded-lg"
+                      value={formData.disponibilidad || ""}
+                      onChange={(event) =>
+                        setFormData({
+                          ...formData,
+                          disponibilidad: (event.target.value ||
+                            null) as Profile["disponibilidad"],
+                        })
+                      }
+                    >
+                      <option value="">Sin especificar</option>
+                      {DISPONIBILIDAD_MASTER.map((value) => (
+                        <option key={value} value={value}>{value}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-light-gold font-bold">Precio por sesión</label>
+                    <select
+                      className="bg-black/50 border border-dark-gold text-nude px-4 py-2 rounded-lg"
+                      value={formData.precioPorSesion || ""}
+                      onChange={(event) =>
+                        setFormData({
+                          ...formData,
+                          precioPorSesion: (event.target.value ||
+                            null) as Profile["precioPorSesion"],
+                        })
+                      }
+                    >
+                      <option value="">Sin especificar</option>
+                      {RANGOS_PRECIO.map((value) => (
+                        <option key={value} value={value}>{value}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-light-gold font-bold">Zona horaria</label>
+                    <input
+                      className="bg-black/50 border border-dark-gold text-nude px-4 py-2 rounded-lg"
+                      value={formData.timezone ?? ""}
+                      placeholder="Europe/Madrid"
+                      maxLength={64}
+                      onChange={(event) =>
+                        setFormData({ ...formData, timezone: event.target.value })
+                      }
+                    />
+                  </div>
+                </>
+              )}
 
               <ArrayInput
                 label={t.userDetail.systemsLabel}

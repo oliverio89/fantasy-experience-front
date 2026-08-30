@@ -113,6 +113,14 @@ export interface Master {
   numeroJugadores: NumeroJugadores[];
   rating: number; // 0-5
   totalReviews: number;
+  publishedSessions: number;
+  completedSessions: number;
+  cancelledSessions: number;
+  playersServed: number;
+  digitalProducts: number;
+  digitalSales: number;
+  rankingScore: number;
+  isFeatured: boolean;
   timezone: string;
   createdAt: Date;
   lastActive: Date;
@@ -158,7 +166,7 @@ export interface MasterFilters {
   numeroJugadores: NumeroJugadores[];
 
   // Ordenamiento
-  ordenarPor: "rating" | "nombre" | "experiencia" | "precio" | "fechaRegistro";
+  ordenarPor: "ranking" | "rating" | "nombre" | "experiencia" | "precio" | "fechaRegistro";
   ordenDireccion: "asc" | "desc";
 
   // Paginación
@@ -180,7 +188,7 @@ export const DEFAULT_MASTER_FILTERS: MasterFilters = {
   ratingMin: 0,
   duracion: [],
   numeroJugadores: [],
-  ordenarPor: "rating",
+  ordenarPor: "ranking",
   ordenDireccion: "desc",
   pagina: 1,
   resultadosPorPagina: 12,
@@ -223,10 +231,9 @@ export const SISTEMAS_POPULARES: SistemaJuego[] = [
 
 // Constantes para tipos de partida
 export const TIPOS_PARTIDA: TipoPartida[] = [
-  "Digital",
   "Presencial",
   "Online",
-  "Híbrida",
+  "Digital",
 ];
 
 // Constantes para experiencia

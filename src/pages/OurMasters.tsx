@@ -6,7 +6,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import MasterSearchBar from "../components/MasterSearchBar";
 import MasterList from "../components/master-list";
 import MasterSystemFilters from "../components/MasterSystemFilters";
@@ -16,11 +16,12 @@ import {
   DEFAULT_MASTER_FILTERS,
   SistemaJuego,
   Master,
-  ExperienciaMaster,
-  DisponibilidadMaster,
-  RangoPrecio,
 } from "../types/masters";
-import { Profile, ProfileService } from "../services/profileService";
+import {
+  mapProfileToMaster,
+  Profile,
+  ProfileService,
+} from "../services/profileService";
 import { useToast } from "../context/ToastContext";
 import { useTranslation } from "../i18n";
 
@@ -28,8 +29,12 @@ const Root: FunctionComponent = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [filters, setFilters] = useState<MasterFilters>(DEFAULT_MASTER_FILTERS);
+  const [filters, setFilters] = useState<MasterFilters>(() => ({
+    ...DEFAULT_MASTER_FILTERS,
+    busqueda: searchParams.get("q")?.trim().slice(0, 100) || "",
+  }));
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +45,14 @@ const Root: FunctionComponent = () => {
   useEffect(() => {
     fetchMasters();
   }, []);
+
+  useEffect(() => {
+    const query = searchParams.get("q")?.trim().slice(0, 100) || "";
+    setFilters((current) =>
+      current.busqueda === query ? current : { ...current, busqueda: query }
+    );
+    setCurrentPage(1);
+  }, [searchParams]);
 
   const fetchMasters = async () => {
     setLoading(true);
@@ -54,46 +67,21 @@ const Root: FunctionComponent = () => {
     }
   };
 
-  // Convert Profile -> Master for the View Component
-  const mapProfileToMaster = useCallback((profile: Profile): Master => {
-    return {
-      id: profile.id,
-      username: profile.fullName.toLowerCase().replace(/\s+/g, ""),
-      displayName: profile.fullName,
-      email: "hidden", // Not needed for card
-      avatar: profile.avatarUrl || "/default-avatar.png",
-      bio: profile.bio || "Sin biografía.",
-      // Aggregated Data from ProfileService
-      experiencia: (profile.experiencia as ExperienciaMaster) || "Intermedio",
-      sistemas: (profile.sistemas as SistemaJuego[]) || [],
-      tiposPartida: (profile.tiposPartida as any[]) || [],
-      disponibilidad: (profile.disponibilidad as DisponibilidadMaster) || "Disponible",
-      estilos: (profile.estilos as any[]) || [],
-      idiomas: (profile.idiomas as any[]) || [],
-      precioPorSesion: (profile.precioPorSesion as RangoPrecio) || "Gratis",
-      duracionSesion: (profile.duracionSesion as any[]) || [],
-      numeroJugadores: (profile.numeroJugadores as any[]) || [],
-      rating: profile.rating || 0,
-      totalReviews: profile.totalReviews || 0,
-      timezone: profile.timezone || "Europe/Madrid",
-      createdAt: new Date(profile.updatedAt || Date.now()),
-      lastActive: new Date(),
-    };
-  }, []);
-
   const mappedMasters = useMemo(() => {
     return profiles.map(mapProfileToMaster);
-  }, [profiles, mapProfileToMaster]);
+  }, [profiles]);
 
   const handleSearch = useCallback((query: string) => {
     setFilters((prev) => ({ ...prev, busqueda: query }));
+    setSearchParams(query ? { q: query } : {}, { replace: true });
     setCurrentPage(1);
-  }, []);
+  }, [setSearchParams]);
 
   const handleClearSearch = useCallback(() => {
     setFilters((prev) => ({ ...prev, busqueda: "" }));
+    setSearchParams({}, { replace: true });
     setCurrentPage(1);
-  }, []);
+  }, [setSearchParams]);
 
   const handleSystemToggle = useCallback((system: SistemaJuego) => {
     setFilters((prev) => ({
@@ -107,8 +95,9 @@ const Root: FunctionComponent = () => {
 
   const handleClearAllFilters = useCallback(() => {
     setFilters(DEFAULT_MASTER_FILTERS);
+    setSearchParams({}, { replace: true });
     setCurrentPage(1);
-  }, []);
+  }, [setSearchParams]);
 
   const handleMasterClick = useCallback(
     (master: Master) => {
@@ -179,32 +168,6 @@ const Root: FunctionComponent = () => {
         />
       )}
 
-      <footer className="self-stretch flex flex-row items-start justify-end text-center text-[1.125rem] text-nude font-titulo-2 mq450:justify-center mq450:text-[1rem]">
-        <div className="w-[13.188rem] flex flex-row items-start justify-start mq450:w-full mq450:max-w-[20rem]">
-          <div className="h-[2.5rem] flex-1 relative mq450:h-[2rem]">
-            <b className="absolute top-[0rem] left-[0rem] [text-decoration:underline] flex items-center justify-center w-full h-full z-[1] mq450:text-[0.9rem]">
-              Atrás
-            </b>
-            <img
-              className="absolute top-[0.75rem] left-[1.438rem] w-[1rem] h-[1rem] z-[1] mq450:top-[0.5rem] mq450:left-[1rem] mq450:w-[0.8rem] mq450:h-[0.8rem]"
-              loading="lazy"
-              alt=""
-              src="/group-12.svg"
-            />
-          </div>
-          <div className="h-[2.5rem] flex-1 relative ml-[-2.813rem] mq450:h-[2rem] mq450:ml-[-2rem]">
-            <b className="absolute top-[0rem] left-[0rem] [text-decoration:underline] flex items-center justify-center w-full h-full z-[1] mq450:text-[0.9rem]">
-              Siguiente
-            </b>
-            <img
-              className="absolute top-[0.75rem] left-[6.5rem] w-[1rem] h-[1rem] object-contain z-[1] mq450:top-[0.5rem] mq450:left-[5rem] mq450:w-[0.8rem] mq450:h-[0.8rem]"
-              loading="lazy"
-              alt=""
-              src="/group-42@2x.png"
-            />
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

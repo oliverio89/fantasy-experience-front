@@ -2,12 +2,18 @@ import { FunctionComponent, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "../i18n";
 
-// Tipo de partida que vendrá de la API en el futuro
-export type TipoPartida = "digital" | "presencial" | "online";
+export type TipoPartida = "Digital" | "Presencial" | "Online" | "Híbrida";
+export type EstadoPartida = "active" | "full" | "cancelled" | "completed";
+
+export interface ParticipantePartida {
+  id: string;
+  nombre: string;
+}
 
 // Interface que representa los datos de una partida (preparado para API)
 export interface Partida {
   id: string | number;
+  masterId?: string;
   titulo: string;
   masterName: string;
   sistemaJuego: string;
@@ -19,6 +25,24 @@ export interface Partida {
   tags?: string[];
   jugadores?: string; // Total plazas
   jugadoresActuales?: number;
+  participantes?: ParticipantePartida[];
+  idioma?: string;
+  edadMinima?: number;
+  temporalidad?: string;
+  recomendaciones?: string;
+  ciudad?: string;
+  contactoMaster?: string;
+  precio?: string;
+  horario?: string;
+  herramientas?: string[];
+  usoTarjetaX?: boolean;
+  obligatorioCamara?: boolean;
+  obligatorioMicrofono?: boolean;
+  status?: EstadoPartida;
+  digitalFileName?: string;
+  digitalFileSizeBytes?: number;
+  digitalMimeType?: string;
+  digitalVersion?: number;
 }
 
 export type PartidaCardProps = {
@@ -27,6 +51,13 @@ export type PartidaCardProps = {
   mostrarDescripcion?: boolean;
   onClick?: () => void;
   backgroundColor?: string;
+};
+
+const statusLabels: Record<EstadoPartida, string> = {
+  active: "Abierta",
+  full: "Completa",
+  cancelled: "Cancelada",
+  completed: "Completada",
 };
 
 // Componente interno para el rating con estrellas
@@ -68,7 +99,7 @@ const BadgeTipoPartida: FunctionComponent<{ tipo: TipoPartida }> = memo(
         case "presencial":
           return {
             icon: "/star-1.svg",
-            texto: "Presencial",
+            texto: "En mesa",
             color: "text-black",
           };
         case "online":
@@ -77,10 +108,17 @@ const BadgeTipoPartida: FunctionComponent<{ tipo: TipoPartida }> = memo(
             texto: "Online",
             color: "text-black",
           };
+        case "híbrida":
+        case "hibrida":
+          return {
+            icon: "/star-1.svg",
+            texto: "Híbrida",
+            color: "text-black",
+          };
         default:
           return {
             icon: "/star-1.svg",
-            texto: "Digital",
+            texto: "Partida",
             color: "text-black",
           };
       }
@@ -147,7 +185,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
       <div
         className={`w-[360px] min-h-[536px] cursor-pointer shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl shrink-0 flex flex-col items-start justify-start pt-0 px-0 pb-[15px] box-border max-w-full text-center text-base ${textColor} font-titulo-2 hover:scale-[1.02] transition-transform duration-200 ${className}`}
         style={{ backgroundColor }}
-        onDoubleClick={handleCardClick}
+        onClick={handleCardClick}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
@@ -155,7 +193,7 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
             handleCardClick();
           }
         }}
-        aria-label={`Doble click para ver detalles de ${partida.titulo} por ${partida.masterName}`}
+        aria-label={`Ver detalles de ${partida.titulo} por ${partida.masterName}`}
       >
         {/* Header con imagen y badge */}
         <div
@@ -169,10 +207,22 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
 
         {/* Contenido de la tarjeta */}
         <div className="self-stretch flex-1 flex flex-col items-center justify-start pt-6 px-4 pb-0 gap-3 relative">
-          {/* Vacantes - Badge top right of content */}
+          {/* Disponibilidad: plazas para sesiones, descarga para productos */}
           <div className="absolute top-[-10px] right-[10px] bg-dark-gold text-black font-bold px-3 py-1 rounded-full text-xs shadow-md z-[5]">
-            {vacantes > 0 ? `${vacantes} ${t.partidaCard.spotsLeft}` : t.partidaCard.full}
+            {partida.tipoPartida === "Digital"
+              ? partida.digitalFileName
+                ? "Descarga digital"
+                : "Próximamente"
+              : vacantes > 0
+              ? `${vacantes} ${t.partidaCard.spotsLeft}`
+              : t.partidaCard.full}
           </div>
+
+          {partida.status && (
+            <span className="text-sm font-bold text-dark-gold">
+              {statusLabels[partida.status]}
+            </span>
+          )}
 
           {/* Título - Máximo 2 líneas */}
           <h2 className="m-0 self-stretch relative text-13xl font-bold font-[inherit] text-goldenrod z-[1] mq1050:text-7xl mq450:text-lgi overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] h-[80px]">
@@ -189,17 +239,27 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
             {partida.sistemaJuego}
           </div>
 
-          {/* Fecha (opcional) - Máximo 1 línea */}
-          {partida.fecha && (
+          {/* Fecha para sesiones; formato y precio para productos digitales */}
+          {partida.tipoPartida === "Digital" ? (
             <div className="self-stretch relative text-lg leading-[20px] z-[1] truncate">
-              {partida.fecha}
+              {partida.digitalFileName?.split(".").pop()?.toUpperCase() || "Archivo"}
+              {partida.precio ? ` · ${Number(partida.precio).toFixed(2)} €` : ""}
+            </div>
+          ) : partida.fecha ? (
+            <div className="self-stretch relative text-lg leading-[20px] z-[1] truncate">
+              {new Intl.DateTimeFormat("es-ES", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              }).format(new Date(partida.fecha))}
+            </div>
+          ) : null}
+
+          {/* La valoración corresponde a sesiones dirigidas, no al PDF vendido. */}
+          {partida.tipoPartida !== "Digital" && (
+            <div className="mt-2 text-center w-full">
+              <RatingStars rating={partida.rating} />
             </div>
           )}
-
-          {/* Rating de estrellas */}
-          <div className="mt-2 text-center w-full">
-            <RatingStars rating={partida.rating} />
-          </div>
 
           {/* Tags */}
           {partida.tags && partida.tags.length > 0 && (
@@ -252,7 +312,9 @@ const PartidaCard: FunctionComponent<PartidaCardProps> = memo(
             tabIndex={0}
           >
             <b className="relative text-lg font-titulo-2 text-black1 text-center">
-              {t.partidaCard.viewDetails}
+              {partida.tipoPartida === "Digital"
+                ? "Ver aventura"
+                : t.partidaCard.viewDetails}
             </b>
           </button>
         </div>

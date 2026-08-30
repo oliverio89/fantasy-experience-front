@@ -5,6 +5,7 @@ import EmailField from "./email-field";
 import Button from "./button";
 import { supabase } from "../lib/supabase";
 import Modal from "../components/ui/Modal";
+import { getErrorMessage } from "../lib/errors";
 
 export type LoginFormType = {
   className?: string;
@@ -29,10 +30,22 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
       title: string;
       message: string;
       isUnconfirmed: boolean;
-    }>({ show: false, title: "", message: "", isUnconfirmed: false });
+      type: "error" | "success";
+    }>({
+      show: false,
+      title: "",
+      message: "",
+      isUnconfirmed: false,
+      type: "error",
+    });
 
-    const showModal = (title: string, message: string, isUnconfirmed = false) => {
-      setErrorModal({ show: true, title, message, isUnconfirmed });
+    const showModal = (
+      title: string,
+      message: string,
+      isUnconfirmed = false,
+      type: "error" | "success" = "error"
+    ) => {
+      setErrorModal({ show: true, title, message, isUnconfirmed, type });
     };
 
     const closeModal = () => {
@@ -46,8 +59,35 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: unconfirmedEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/email-confirmation`,
+        },
       });
       setResendStatus(error ? "error" : "sent");
+    };
+
+    const handlePasswordReset = async () => {
+      const email = formData.email.trim();
+      if (!email) {
+        showModal(t.login.resetEmailTitle, t.login.resetEmailMsg);
+        return;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        showModal(t.login.resetErrorTitle, t.login.resetErrorMsg);
+        return;
+      }
+
+      showModal(
+        t.login.resetSentTitle,
+        t.login.resetSentMsg,
+        false,
+        "success"
+      );
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +95,7 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
     };
 
     const onLoginClick = async () => {
+      if (loading) return;
       if (!formData.email || !formData.password) {
         showModal(t.login.errors.incompleteTitle, t.login.errors.incompleteMsg);
         return;
@@ -64,7 +105,7 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
 
       try {
         const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
+          email: formData.email.trim(),
           password: formData.password,
         });
 
@@ -74,13 +115,13 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
 
         navigate("/");
         // We could show a success toast here if we wanted, or just redirect
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Login Error:", error);
-        const errorMessage = error.message || "";
+        const errorMessage = getErrorMessage(error);
 
         // Handle specific Supabase errors
         if (errorMessage.includes("Email not confirmed")) {
-          setUnconfirmedEmail(formData.email);
+          setUnconfirmedEmail(formData.email.trim());
           setResendStatus("idle");
           showModal(t.login.errors.unconfirmedTitle, t.login.errors.unconfirmedMsg, true);
         } else if (errorMessage.includes("Invalid login credentials")) {
@@ -100,7 +141,7 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
           isOpen={errorModal.show}
           onClose={closeModal}
           title={errorModal.title}
-          type="error"
+          type={errorModal.type}
           actions={
             errorModal.isUnconfirmed ? (
               <div className="flex flex-col items-center gap-2 w-full">
@@ -138,8 +179,11 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
             correoElectrnico={t.login.emailLabel}
             ingresaTuEmailPlaceholder={t.login.emailPlaceholder}
             name="email"
+            type="email"
             value={formData.email}
             onChange={handleChange}
+            maxLength={254}
+            autoComplete="email"
           />
           <EmailField
             correoElectrnico={t.login.passwordLabel}
@@ -148,8 +192,18 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
             type="password"
             value={formData.password}
             onChange={handleChange}
+            minLength={8}
+            maxLength={128}
+            autoComplete="current-password"
             propPadding="0rem 1.25rem 0.875rem"
           />
+          <button
+            type="button"
+            className="font-titulo-2 text-black underline cursor-pointer hover:opacity-70"
+            onClick={handlePasswordReset}
+          >
+            {t.login.forgotPassword}
+          </button>
           <div className="flex flex-row items-center justify-center pb-[2.625rem] box-border max-w-full w-full">
             <Button
               button1={loading ? t.login.submitting : t.login.submit}
@@ -159,7 +213,8 @@ const LoginForm: FunctionComponent<LoginFormType> = memo(
               button1Height1="1.375rem"
               button1Width1="3.875rem"
               button1FontSize="1.125rem"
-              onClick={onLoginClick}
+              type="submit"
+              disabled={loading}
             />
           </div>
           <div className="self-stretch relative text-[1.25rem] text-black text-center z-[1] mq450:text-[1rem]">

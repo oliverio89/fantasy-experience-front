@@ -2,6 +2,7 @@ import { FunctionComponent, memo, useCallback, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom"; // Importamos useNavigate y useLocation
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "../i18n";
+import NotificationCenter from "./NotificationCenter";
 
 export type FrameComponent1Type = {
   className?: string;
@@ -12,7 +13,7 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
     const navigate = useNavigate(); // Hook para redireccionar
     const location = useLocation(); // Hook para obtener la ruta actual
     const [menuOpen, setMenuOpen] = useState(false); // Estado para controlar el menú hamburguesa
-    const { user } = useAuth();
+    const { user, userRole } = useAuth();
     const { t } = useTranslation();
 
     // Función para alternar el estado del menú
@@ -131,7 +132,7 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
               </a>
 
               {/* Crear partida — solo si hay sesión activa */}
-              {user && (
+              {user && (userRole === "master" || userRole === "admin") && (
                 <a
                   role="link"
                   aria-label={t.navbar.ariaCreateGame}
@@ -146,6 +147,7 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
 
             <div className="h-[61px] flex flex-col items-start justify-start pt-[19px] px-0 pb-0 box-border">
               <div className="self-stretch flex-1 flex flex-row items-start justify-start gap-[24.2px]">
+                <NotificationCenter />
                 <button
                   onClick={onUserDetailTextClick}
                   aria-label={user ? t.navbar.ariaMyAccount : t.navbar.ariaLogin}
@@ -248,16 +250,19 @@ const Navbar: FunctionComponent<FrameComponent1Type> = memo(
                   </a>
 
                   {/* Crear partida en menú móvil */}
-                  <a
-                    aria-label={t.navbar.ariaCreateGame}
-                    className="[text-decoration:none] h-20 font-medium flex items-center justify-start w-full text-dark-gold"
-                    onClick={onCrearPartidaClick}
-                  >
-                    {t.navbar.createGame}
-                  </a>
+                  {user && (userRole === "master" || userRole === "admin") && (
+                    <a
+                      aria-label={t.navbar.ariaCreateGame}
+                      className="[text-decoration:none] h-20 font-medium flex items-center justify-start w-full text-dark-gold"
+                      onClick={onCrearPartidaClick}
+                    >
+                      {t.navbar.createGame}
+                    </a>
+                  )}
 
                   {/* Mi cuenta dentro del menú hamburguesa */}
                   <div className="flex flex-col items-start justify-start w-full gap-4">
+                    <NotificationCenter />
                     <button
                       onClick={onUserDetailTextClick}
                       className="cursor-pointer border-dark-gold border-[1px] border-solid py-[7px] px-[19px] bg-[transparent] rounded-11xl flex flex-row items-start justify-start gap-[5px]"

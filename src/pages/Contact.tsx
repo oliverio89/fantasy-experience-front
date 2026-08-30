@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useWeb3Forms from "@web3forms/react";
 import { useTranslation } from "../i18n";
+import { publicConfig } from "../lib/publicConfig";
+import { useToast } from "../context/ToastContext";
 
 interface ContactFormData {
   name: string;
@@ -13,6 +15,7 @@ interface ContactFormData {
 const ContactoV: FunctionComponent = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const {
@@ -23,7 +26,7 @@ const ContactoV: FunctionComponent = () => {
   } = useForm<ContactFormData>();
 
   const { submit } = useWeb3Forms({
-    access_key: "defc80b9-eb2b-446c-9e4c-bd4731c6f2d4",
+    access_key: publicConfig.web3FormsAccessKey,
     settings: {
       from_name: "Fantasy Experience - Formulario de Contacto",
       subject: "Nuevo Mensaje de Contacto - Fantasy Experience",
@@ -34,11 +37,15 @@ const ContactoV: FunctionComponent = () => {
     },
     onError: (error) => {
       console.error("Error al enviar el mensaje:", error);
-      alert(t.contact.errorGeneric);
+      showToast(t.contact.errorGeneric, "error");
     },
   });
 
   const onSubmit = async (data: ContactFormData) => {
+    if (!publicConfig.web3FormsAccessKey) {
+      showToast(t.contact.configError, "error");
+      return;
+    }
     await submit(data);
   };
 
@@ -99,10 +106,14 @@ const ContactoV: FunctionComponent = () => {
                 <div className="self-stretch flex flex-row items-start justify-start py-[0rem] pl-[0.875rem] pr-[0.5rem] relative">
                   <div className="h-full w-full absolute !m-[0] top-[0rem] right-[0rem] bottom-[0rem] left-[0rem] [filter:blur(1px)] rounded-xl bg-whitesmoke border-light-gold border-[1px] border-solid box-border mix-blend-normal z-[1]" />
                   <input
-                    {...register("name", { required: t.contact.nameRequired })}
+                    {...register("name", {
+                      required: t.contact.nameRequired,
+                      maxLength: 80,
+                    })}
                     className="w-full [border:none] [outline:none] font-light font-titulo-2 text-[1rem] bg-[transparent] h-[2.5rem] flex-1 relative text-black text-left flex items-center min-w-[12rem] p-0 z-[2]"
                     placeholder={t.contact.namePlaceholder}
                     type="text"
+                    maxLength={80}
                   />
                 </div>
                 {errors.name && (
@@ -125,10 +136,12 @@ const ContactoV: FunctionComponent = () => {
                         value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                         message: t.contact.emailInvalid,
                       },
+                      maxLength: 254,
                     })}
                     className="w-full [border:none] [outline:none] font-light font-titulo-2 text-[1rem] bg-[transparent] h-[2.5rem] flex-1 relative text-black text-left flex items-center min-w-[12rem] p-0 z-[2]"
                     placeholder={t.contact.emailPlaceholder}
                     type="email"
+                    maxLength={254}
                   />
                 </div>
                 {errors.email && (
@@ -144,11 +157,17 @@ const ContactoV: FunctionComponent = () => {
                   {t.contact.messageLabel}
                 </div>
                 <textarea
-                  {...register("message", { required: t.contact.messageRequired })}
+                  {...register("message", {
+                    required: t.contact.messageRequired,
+                    minLength: 10,
+                    maxLength: 3000,
+                  })}
                   className="border-black border-[1px] border-solid bg-whitesmoke h-[8.75rem] w-auto [outline:none] self-stretch rounded-xl box-border flex flex-row items-start justify-start py-[0rem] px-[0.875rem] font-titulo-2 font-light text-[1rem] text-black z-[1]"
                   placeholder={t.contact.messagePlaceholder}
                   rows={7}
                   cols={17}
+                  minLength={10}
+                  maxLength={3000}
                 />
                 {errors.message && (
                   <span className="text-red-500 text-sm font-titulo-2">{errors.message.message}</span>
@@ -157,6 +176,18 @@ const ContactoV: FunctionComponent = () => {
             </div>
 
             {/* Botón enviar */}
+            <p className="self-stretch text-center text-sm text-black font-titulo-2 px-6">
+              Usaremos tus datos para responder a tu consulta.{" "}
+              <a
+                href="/privacidad"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-bold"
+              >
+                Consulta la política de privacidad
+              </a>
+              .
+            </p>
             <div className="flex flex-row items-center justify-center py-[0rem] box-border max-w-full w-full">
               <button
                 type="submit"

@@ -1,4 +1,10 @@
-import { FunctionComponent, memo, useState, useCallback } from "react";
+import {
+  FunctionComponent,
+  memo,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import { useTranslation } from "../i18n";
 
 export type MasterSearchBarType = {
@@ -20,6 +26,10 @@ const MasterSearchBar: FunctionComponent<MasterSearchBarType> = memo(
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState(initialValue);
     const resolvedPlaceholder = placeholder || t.masterSearch.placeholder;
+
+    useEffect(() => {
+      setSearchQuery(initialValue);
+    }, [initialValue]);
 
     const handleSearch = useCallback(() => {
       if (onSearch) {
@@ -64,7 +74,7 @@ const MasterSearchBar: FunctionComponent<MasterSearchBarType> = memo(
                 type="text"
                 value={searchQuery}
                 onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 placeholder={resolvedPlaceholder}
                 className="h-[3.125rem] w-[32.938rem] relative font-light bg-transparent border-none outline-none text-white placeholder-nude shrink-0 max-w-full z-[2] mq450:h-[2.5rem] mq450:w-full mq450:text-[0.9rem]"
                 aria-label="Buscar Master"

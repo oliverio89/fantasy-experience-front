@@ -8,6 +8,9 @@ export type InputFieldsContainerType = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
   name?: string;
+  minLength?: number;
+  maxLength?: number;
+  autoComplete?: string;
 
   /** Style props */
   propPadding?: CSSProperties["padding"];
@@ -25,6 +28,9 @@ const InputFieldsContainer: FunctionComponent<InputFieldsContainerType> = memo(
     onChange,
     type = "text",
     name,
+    minLength,
+    maxLength,
+    autoComplete,
     propPadding,
     propGap,
     propPadding1,
@@ -78,6 +84,9 @@ const InputFieldsContainer: FunctionComponent<InputFieldsContainerType> = memo(
               name={name}
               value={value}
               onChange={onChange}
+              minLength={minLength}
+              maxLength={maxLength}
+              autoComplete={autoComplete}
               style={ingresaTuEmailStyle}
             />
           </div>

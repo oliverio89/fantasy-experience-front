@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 // Obtener las variables de entorno
 const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL;
@@ -20,5 +21,4 @@ if (!supabaseAnonKey) {
 // Nota: No loguear información sensible en producción
 
 // Crear y exportar el cliente de Supabase
-// Crear y exportar el cliente de Supabase
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);

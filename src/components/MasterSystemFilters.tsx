@@ -26,15 +26,7 @@ const MasterSystemFilters: FunctionComponent<MasterSystemFiltersType> = memo(
       onClearAll();
     }, [onClearAll]);
 
-    // Sistemas que están en la página actual (los que están hardcodeados)
-    const currentSystems: SistemaJuego[] = [
-      "Dungeons & Dragons 5e",
-      "Call of Cthulhu",
-      "Vampiro: La Mascarada",
-      "Hombre Lobo: El Apocalipsis",
-      "FATE Core",
-      "Z-Corp", // Este parece ser un sistema personalizado
-    ];
+    const currentSystems: SistemaJuego[] = SISTEMAS_POPULARES;
 
     return (
       <div

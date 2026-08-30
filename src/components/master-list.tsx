@@ -1,7 +1,16 @@
 import { FunctionComponent, memo, useMemo } from "react";
 import UnifiedMasterCard from "./UnifiedMasterCard";
 import MasterPagination from "./MasterPagination";
-import { Master, MasterFilters, SistemaJuego } from "../types/masters";
+import { Master, MasterFilters, RangoPrecio } from "../types/masters";
+
+const priceRank: Record<RangoPrecio, number> = {
+  Gratis: 0,
+  "1-5€": 1,
+  "6-10€": 2,
+  "11-20€": 3,
+  "21-30€": 4,
+  "30€+": 5,
+};
 
 export type MasterListType = {
   className?: string;
@@ -26,12 +35,9 @@ const MasterList: FunctionComponent<MasterListType> = memo(
   }) => {
     // Función para filtrar masters
     const filteredMasters = useMemo(() => {
-      let result = masters || [];
+      let result = [...(masters || [])];
 
       if (!filters) return result;
-
-      // Debug: mostrar filtros activos
-      console.log("Filtros activos:", filters);
 
       // Filtro por búsqueda de texto
       if (filters.busqueda) {
@@ -49,18 +55,11 @@ const MasterList: FunctionComponent<MasterListType> = memo(
 
       // Filtro por sistemas de juego
       if (filters.sistemas.length > 0) {
-        console.log("Filtrando por sistemas:", filters.sistemas);
-        result = result.filter((master) => {
-          const hasSystem = filters.sistemas.some((sistema) =>
+        result = result.filter((master) =>
+          filters.sistemas.some((sistema) =>
             master.sistemas.includes(sistema)
-          );
-          console.log(
-            `Master ${master.displayName}: sistemas ${master.sistemas.join(
-              ", "
-            )}, tiene sistema: ${hasSystem}`
-          );
-          return hasSystem;
-        });
+          )
+        );
       }
 
       // Filtro por tipos de partida
@@ -91,11 +90,22 @@ const MasterList: FunctionComponent<MasterListType> = memo(
         result = result.filter((master) => master.rating >= filters.ratingMin);
       }
 
+      if (filters.precioMin) {
+        result = result.filter(
+          (master) => master.precioPorSesion === filters.precioMin
+        );
+      }
+
       // Ordenamiento
       result.sort((a, b) => {
         let comparison = 0;
 
         switch (filters.ordenarPor) {
+          case "ranking":
+            comparison =
+              Number(a.isFeatured) - Number(b.isFeatured) ||
+              a.rankingScore - b.rankingScore;
+            break;
           case "rating":
             comparison = a.rating - b.rating;
             break;
@@ -106,12 +116,8 @@ const MasterList: FunctionComponent<MasterListType> = memo(
             comparison = a.experiencia.localeCompare(b.experiencia);
             break;
           case "precio":
-            // Convertir precios a números para comparar
-            const precioA =
-              parseFloat(a.precioPorSesion.replace(/[^\d]/g, "")) || 0;
-            const precioB =
-              parseFloat(b.precioPorSesion.replace(/[^\d]/g, "")) || 0;
-            comparison = precioA - precioB;
+            comparison =
+              priceRank[a.precioPorSesion] - priceRank[b.precioPorSesion];
             break;
           case "fechaRegistro":
             comparison = a.createdAt.getTime() - b.createdAt.getTime();
@@ -139,10 +145,6 @@ const MasterList: FunctionComponent<MasterListType> = memo(
     const handleMasterClick = (master: Master) => {
       if (onMasterClick) {
         onMasterClick(master);
-      } else {
-        // Navegación por defecto al perfil del master
-        console.log("Navegando al perfil de:", master.displayName);
-        // TODO: Implementar navegación real cuando tengamos la página de perfil
       }
     };
 

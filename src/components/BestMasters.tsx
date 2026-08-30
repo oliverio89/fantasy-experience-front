@@ -2,41 +2,12 @@ import { FunctionComponent, memo, useCallback, useRef, useState, useEffect } fro
 import { useTranslation } from "../i18n";
 import UnifiedMasterCard from "./UnifiedMasterCard";
 import { useNavigate } from "react-router-dom";
-import {
-  Master,
-  ExperienciaMaster,
-  DisponibilidadMaster,
-  RangoPrecio,
-  SistemaJuego,
-} from "../types/masters";
-import { ProfileService, Profile } from "../services/profileService";
+import { Master } from "../types/masters";
+import { mapProfileToMaster, ProfileService } from "../services/profileService";
 
 export type FrameComponent2Type = {
   className?: string;
 };
-
-const mapProfileToMaster = (profile: Profile): Master => ({
-  id: profile.id,
-  username: profile.fullName?.toLowerCase().replace(/\s+/g, "") || profile.id,
-  displayName: profile.fullName || "Master",
-  email: "hidden",
-  avatar: profile.avatarUrl || "/default-avatar.png",
-  bio: profile.bio || "Sin biografía.",
-  experiencia: (profile.experiencia as ExperienciaMaster) || "Intermedio",
-  sistemas: (profile.sistemas as SistemaJuego[]) || [],
-  tiposPartida: (profile.tiposPartida as any[]) || [],
-  disponibilidad: (profile.disponibilidad as DisponibilidadMaster) || "Disponible",
-  estilos: (profile.estilos as any[]) || [],
-  idiomas: (profile.idiomas as any[]) || [],
-  precioPorSesion: (profile.precioPorSesion as RangoPrecio) || "Gratis",
-  duracionSesion: (profile.duracionSesion as any[]) || [],
-  numeroJugadores: (profile.numeroJugadores as any[]) || [],
-  rating: profile.rating || 0,
-  totalReviews: profile.totalReviews || 0,
-  timezone: profile.timezone || "Europe/Madrid",
-  createdAt: new Date(profile.updatedAt || Date.now()),
-  lastActive: new Date(),
-});
 
 const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
   ({ className = "" }) => {
@@ -51,16 +22,22 @@ const BestMasters: FunctionComponent<FrameComponent2Type> = memo(
         .then((profiles) => {
           const masters = profiles
             .map(mapProfileToMaster)
-            .sort((a, b) => b.rating - a.rating)
+            .sort(
+              (a, b) =>
+                Number(b.isFeatured) - Number(a.isFeatured) ||
+                b.rankingScore - a.rankingScore ||
+                b.completedSessions - a.completedSessions
+            )
             .slice(0, 6);
           setBestMasters(masters);
         })
+        .catch(() => setBestMasters([]))
         .finally(() => setLoading(false));
     }, []);
 
     const onSlide1ContainerClick = useCallback(
       (master: Master) => {
-        navigate(`/master/${master.id}`);
+        navigate(`/user/${master.id}`);
       },
       [navigate]
     );

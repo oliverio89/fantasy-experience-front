@@ -1,25 +1,45 @@
 import { FunctionComponent, useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import PartidasService from "../services/partidasService";
 import { Partida } from "../components/PartidaCard";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { useTranslation } from "../i18n";
+import ReviewForm from "../components/ReviewForm";
+import { FALLBACK_GAME_IMAGE_URL } from "../constants";
+import { getErrorMessage } from "../lib/errors";
+import PaymentService from "../services/paymentService";
 
 const DetailsGame: FunctionComponent = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { partidaId } = useParams<{ partidaId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Usamos 'any' para permitir campos extra que puedan venir del backend aunque no estén en la interfaz base
-  const [partida, setPartida] = useState<any | null>(null);
+  const [partida, setPartida] = useState<Partida | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { showToast } = useToast();
 
   const [isJoined, setIsJoined] = useState(false);
+  const [hasDigitalAccess, setHasDigitalAccess] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
+  const isPaidGame = Number(partida?.precio || 0) > 0;
+  const isDigital = partida?.tipoPartida === "Digital";
+
+  useEffect(() => {
+    if (searchParams.get("payment") !== "cancelled") return;
+    showToast(t.detailsGame.paymentCancelled, "info");
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("payment");
+    setSearchParams(nextParams, { replace: true });
+  }, [searchParams, setSearchParams, showToast, t]);
 
   useEffect(() => {
     const fetchPartidaAndStatus = async () => {
@@ -29,10 +49,18 @@ const DetailsGame: FunctionComponent = () => {
           setPartida(data);
 
           if (user) {
-            const joined = await PartidasService.verificarInscripcion(
-              partidaId
-            );
-            setIsJoined(joined);
+            if (data.tipoPartida === "Digital") {
+              setHasDigitalAccess(
+                await PartidasService.tieneAccesoDigital(partidaId)
+              );
+              setIsJoined(false);
+            } else {
+              const joined = await PartidasService.verificarInscripcion(
+                partidaId
+              );
+              setIsJoined(joined);
+              setHasDigitalAccess(false);
+            }
           }
         } catch (err) {
           console.error("Error cargando partida:", err);
@@ -57,22 +85,72 @@ const DetailsGame: FunctionComponent = () => {
     navigate(`/editarpartida/${partidaId}`);
   }, [navigate, partidaId]);
 
+  const handleDigitalDownload = useCallback(async () => {
+    if (!partidaId) return;
+    setJoinLoading(true);
+    try {
+      const download = await PaymentService.obtenerDescargaDigital(partidaId);
+      window.location.assign(download.url);
+    } catch (downloadError) {
+      showToast(
+        getErrorMessage(downloadError, "No se pudo preparar la descarga"),
+        "error"
+      );
+    } finally {
+      setJoinLoading(false);
+    }
+  }, [partidaId, showToast]);
+
   const handleEliminar = useCallback(async () => {
+    if (Number(partida?.jugadoresActuales) > 0) {
+      showToast(t.detailsGame.cannotDeleteWithPlayers, "error");
+      return;
+    }
     if (
       confirm(t.detailsGame.confirmDelete)
     ) {
       try {
         if (partidaId) {
           await PartidasService.eliminarPartida(partidaId);
-          alert(t.detailsGame.deleteSuccess);
+          showToast(t.detailsGame.deleteSuccess, "success");
           navigate("/nextgames");
         }
       } catch (err) {
         console.error("Error al eliminar:", err);
-        alert(t.detailsGame.deleteError);
+        showToast(t.detailsGame.deleteError, "error");
       }
     }
-  }, [partidaId, navigate]);
+  }, [partida, partidaId, navigate, showToast, t]);
+
+  const handleStatusChange = useCallback(
+    async (status: "active" | "cancelled" | "completed") => {
+      if (!partidaId) return;
+      if (
+        status === "cancelled" &&
+        !confirm(
+          partida?.tipoPartida === "Digital"
+            ? "¿Quieres retirar esta aventura de la venta? Quienes ya la compraron conservarán su descarga."
+            : t.detailsGame.confirmCancel
+        )
+      ) {
+        return;
+      }
+
+      try {
+        await PartidasService.cambiarEstado(partidaId, status);
+        const updatedPartida = await PartidasService.obtenerPartidaPorId(
+          partidaId
+        );
+        setPartida(updatedPartida);
+        showToast(t.detailsGame.statusUpdated, "success");
+      } catch (statusError) {
+        const message =
+          getErrorMessage(statusError, t.detailsGame.actionError);
+        showToast(message, "error");
+      }
+    },
+    [partida, partidaId, showToast, t]
+  );
 
   const handleToggleJoin = useCallback(async () => {
     if (!user) {
@@ -80,20 +158,34 @@ const DetailsGame: FunctionComponent = () => {
       return;
     }
 
-    if (!partidaId) return;
+    if (!partidaId || !partida) return;
 
     setJoinLoading(true);
     try {
+      if (partida.tipoPartida === "Digital") {
+        if (hasDigitalAccess) {
+          const download = await PaymentService.obtenerDescargaDigital(partidaId);
+          window.location.assign(download.url);
+        } else {
+          const checkoutUrl = await PaymentService.iniciarPago(partidaId);
+          window.location.assign(checkoutUrl);
+        }
+        return;
+      }
+
       if (isJoined) {
         // Salir
         await PartidasService.salirPartida(partidaId);
         setIsJoined(false);
         showToast(t.detailsGame.leftGame, "info");
       } else {
-        // Unirse
-        // Check if full
         if (Number(partida.jugadoresActuales) >= Number(partida.jugadores)) {
           throw new Error(t.detailsGame.gameFull);
+        }
+        if (isPaidGame) {
+          const checkoutUrl = await PaymentService.iniciarPago(partidaId);
+          window.location.assign(checkoutUrl);
+          return;
         }
         await PartidasService.unirsePartida(partidaId);
         setIsJoined(true);
@@ -105,13 +197,26 @@ const DetailsGame: FunctionComponent = () => {
         partidaId
       );
       setPartida(updatedPartida);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al cambiar estado unirse:", error);
-      showToast(error.message || t.detailsGame.actionError, "error");
+      showToast(
+        getErrorMessage(error, t.detailsGame.actionError),
+        "error"
+      );
     } finally {
       setJoinLoading(false);
     }
-  }, [user, navigate, partidaId, isJoined, showToast]);
+  }, [
+    user,
+    navigate,
+    partidaId,
+    partida,
+    hasDigitalAccess,
+    isJoined,
+    isPaidGame,
+    showToast,
+    t,
+  ]);
 
   if (loading) {
     return (
@@ -139,6 +244,13 @@ const DetailsGame: FunctionComponent = () => {
     );
   }
 
+  const canComplete =
+    partida.tipoPartida !== "Digital" &&
+    (partida.status === "active" || partida.status === "full") &&
+    Boolean(partida.fecha) &&
+    new Date(partida.fecha as string).getTime() <= Date.now();
+  const canManage = user?.id === partida.masterId || userRole === "admin";
+
   return (
     <div className="w-full relative bg-white overflow-hidden flex flex-col items-start justify-start leading-[normal] tracking-[normal]">
       <main className="self-stretch bg-black flex flex-col items-end justify-start pt-[0rem] px-[4.875rem] pb-[7.562rem] box-border max-w-full text-center text-[1.125rem] text-black1 font-radio-option lg:pb-[4.938rem] lg:box-border mq1050:pb-[3.188rem] mq1050:box-border mq450:pb-[2.063rem] mq450:box-border mq750:pl-[2.438rem] mq750:pr-[2.438rem] mq750:box-border">
@@ -151,6 +263,20 @@ const DetailsGame: FunctionComponent = () => {
             <h1 className="m-0 self-stretch relative text-inherit font-extrabold font-[inherit] z-[2] mq1050:text-[1.813rem] mq1050:leading-[1.75rem] mq450:text-[1.375rem] mq450:leading-[1.313rem]">
               {partida.titulo}
             </h1>
+            <p className="text-base text-dark-gold font-bold z-[2]">
+              {t.detailsGame.statusLabel}:{" "}
+              {isDigital
+                ? partida.status === "cancelled"
+                  ? "No disponible"
+                  : "Disponible"
+                : partida.status === "completed"
+                ? t.detailsGame.statusCompleted
+                : partida.status === "cancelled"
+                ? t.detailsGame.statusCancelled
+                : partida.status === "full"
+                ? t.detailsGame.statusFull
+                : t.detailsGame.statusActive}
+            </p>
             <div className="self-stretch h-[2.688rem] relative text-[1.125rem] leading-[1.625rem] whitespace-pre-wrap flex items-center shrink-0 z-[2] mt-[-0.625rem]">
               {t.detailsGame.organizedBy}{" "}
               {partida.masterName || t.detailsGame.unknownMaster}
@@ -186,11 +312,11 @@ const DetailsGame: FunctionComponent = () => {
                           className="self-stretch flex-1 relative rounded-xl max-w-full overflow-hidden max-h-[300px] object-cover z-[2]"
                           loading="lazy"
                           alt={partida.titulo}
-                          src={partida.imagenUrl || "/placeholder.jpg"}
-                          onError={(e: any) =>
-                            (e.target.src =
-                              "https://via.placeholder.com/300x200?text=No+Image")
-                          }
+                          src={partida.imagenUrl || FALLBACK_GAME_IMAGE_URL}
+                          onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = FALLBACK_GAME_IMAGE_URL;
+                          }}
                         />
                       </div>
 
@@ -275,33 +401,57 @@ const DetailsGame: FunctionComponent = () => {
                         </div>
                       </div>
 
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          {t.detailsGame.numPlayers}
+                      {partida.tipoPartida === "Digital" ? (
+                        <div className="self-stretch rounded-xl border border-dark-gold/50 bg-black/20 p-4 text-left text-sm text-nude">
+                          <strong className="block mb-2 text-base text-light-gold">Archivo incluido</strong>
+                          <span className="block break-all">{partida.digitalFileName || "Archivo digital"}</span>
+                          <span className="block mt-1 text-nude/60">
+                            {partida.digitalFileSizeBytes
+                              ? `${(partida.digitalFileSizeBytes / 1024 / 1024).toFixed(1)} MB`
+                              : "Tamaño no disponible"}
+                            {partida.digitalVersion ? ` · versión ${partida.digitalVersion}` : ""}
+                          </span>
                         </div>
-                        <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <div className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]">
-                            {partida.jugadores}
+                      ) : (
+                        <>
+                          <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
+                            <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
+                              {t.detailsGame.numPlayers}
+                            </div>
+                            <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
+                              <div className="w-[15.338rem] font-light font-radio-option text-[0.875rem] h-[2.5rem] relative text-nude text-left flex items-center z-[3]">
+                                {partida.jugadores}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-
-                      <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
-                        <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
-                          {t.detailsGame.temporality}
-                        </div>
-                        <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
-                          <div className="h-[2.5rem] w-[19.25rem] relative rounded-xl border-nude border-[1px] border-solid box-border hidden mix-blend-normal" />
-                          <div className="w-[15.338rem] [border:none] [outline:none] font-light font-radio-option text-[0.875rem] bg-[transparent] h-[2.5rem] relative text-nude text-left flex items-center p-0 z-[3]">
-                            {partida.temporalidad}
+                          <div className="self-stretch flex flex-col items-start justify-start gap-[0.375rem]">
+                            <div className="w-[16.363rem] relative text-[1.125rem] font-medium font-radio-option text-nude text-left flex items-center z-[2]">
+                              {t.detailsGame.temporality}
+                            </div>
+                            <div className="self-stretch rounded-xl border-nude border-[1px] border-solid flex flex-row items-start justify-start py-[0rem] px-[0.687rem] z-[2]">
+                              <div className="w-[15.338rem] font-light font-radio-option text-[0.875rem] h-[2.5rem] relative text-nude text-left flex items-center z-[3]">
+                                {partida.temporalidad}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
 
+                {partida.tipoPartida === "Digital" && (
+                  <div className="w-full max-w-[54.5rem] rounded-xl border border-dark-gold/40 bg-black/20 p-6 text-left text-nude">
+                    <h2 className="m-0 text-2xl text-light-gold">Aventura digital</h2>
+                    <p className="mb-0 mt-3 text-base leading-6">
+                      Compra única con entrega privada en PDF, ZIP o RAR. El pago se procesa
+                      con Stripe y el archivo se entrega mediante un enlace temporal asociado
+                      a tu cuenta; no reserva plaza ni incluye una sesión dirigida por el máster.
+                    </p>
+                  </div>
+                )}
+
+                {partida.tipoPartida !== "Digital" && <>
                 {/* SECCIÓN 2: Información de la sesión */}
                 <div className="self-stretch flex flex-col items-start justify-start gap-[4.125rem] max-w-full mq1050:gap-[2.063rem] mq450:gap-[1rem]">
                   <div className="self-stretch flex flex-row items-start justify-start gap-[2.437rem] mq1050:flex-wrap mq450:gap-[1.188rem]">
@@ -585,40 +735,79 @@ const DetailsGame: FunctionComponent = () => {
                     )}
                   </div>
                 </div>
+                </>}
               </div>
             </div>
 
             {/* Botones de acción principales */}
             <div className="flex flex-row items-start justify-start gap-[2.5rem] max-w-full mq450:gap-[1.25rem] mq750:flex-wrap mb-8">
-              {user?.id !== partida.masterId && (
+              {user?.id !== partida.masterId &&
+                ((isDigital && hasDigitalAccess) ||
+                  partida.status === "active" ||
+                  partida.status === "full") && (
                 <button
                   onClick={handleToggleJoin}
-                  disabled={joinLoading}
-                  className={`cursor-pointer [border:none] py-[0.625rem] px-[3.5rem] h-[2.625rem] rounded-31xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] overflow-hidden flex flex-row items-start justify-start box-border z-[2] transition-colors ${
-                    isJoined
+                  disabled={
+                    joinLoading ||
+                    (!isDigital && isJoined && isPaidGame) ||
+                    (!isJoined &&
+                      !isDigital &&
+                      (partida.status !== "active" ||
+                        Number(partida.jugadoresActuales) >=
+                          Number(partida.jugadores)))
+                  }
+                  className={`cursor-pointer [border:none] py-[0.625rem] px-[3.5rem] min-h-[2.625rem] rounded-31xl shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] overflow-hidden flex flex-row items-center justify-center box-border z-[2] transition-colors ${
+                    !isDigital && isJoined
                       ? "bg-red-900/20 border-red-500 border-[1px] border-solid hover:bg-red-900/40"
                       : "bg-dark-gold hover:bg-darkgoldenrod"
                   } ${joinLoading ? "opacity-70 cursor-wait" : ""}`}
                 >
                   <b
                     className={`flex-1 relative text-[1.125rem] inline-block font-radio-option text-center min-w-[5.125rem] ${
-                      isJoined ? "text-red-500" : "text-black"
+                      !isDigital && isJoined ? "text-red-500" : "text-black"
                     }`}
                   >
                     {joinLoading
                       ? t.detailsGame.processingButton
+                      : isDigital
+                      ? hasDigitalAccess
+                        ? "Descargar aventura"
+                        : `Comprar y descargar · ${Number(partida.precio).toFixed(2)} €`
                       : isJoined
-                      ? t.detailsGame.leaveButton
+                      ? isPaidGame
+                        ? t.detailsGame.paidReservationButton
+                        : t.detailsGame.leaveButton
                       : Number(partida.jugadoresActuales) >=
                         Number(partida.jugadores)
                       ? t.detailsGame.fullButton
+                      : isPaidGame
+                      ? `${t.detailsGame.payButton} ${Number(partida.precio).toFixed(2)} €`
                       : t.detailsGame.joinButton}
                   </b>
                 </button>
               )}
 
-              {user?.id === partida.masterId && (
+              {!isDigital && isJoined && isPaidGame && (
+                <Link
+                  to="/contacto"
+                  className="h-[2.625rem] flex items-center text-nude underline"
+                >
+                  {t.detailsGame.cancelPaidReservation}
+                </Link>
+              )}
+
+              {canManage && (
                 <>
+                  {partida.tipoPartida === "Digital" && (
+                    <button
+                      type="button"
+                      onClick={() => void handleDigitalDownload()}
+                      disabled={joinLoading}
+                      className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2rem] min-h-[2.625rem] rounded-31xl bg-dark-gold text-black disabled:opacity-60"
+                    >
+                      <b className="text-[1rem] font-radio-option">Descargar archivo</b>
+                    </button>
+                  )}
                   <button
                     onClick={handleEditar}
                     className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-nude/10 h-[2.625rem] rounded-31xl box-border overflow-hidden flex flex-row items-start justify-start z-[2] hover:bg-nude/20 hover:border-darkgoldenrod-100"
@@ -635,6 +824,54 @@ const DetailsGame: FunctionComponent = () => {
                       {t.detailsGame.deleteButton}
                     </b>
                   </button>
+                  {canComplete && (
+                    <button
+                      onClick={() => handleStatusChange("completed")}
+                      className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-nude/10 h-[2.625rem] rounded-31xl box-border"
+                    >
+                      <b className="text-[1.125rem] font-radio-option text-white">
+                        {t.detailsGame.completeButton}
+                      </b>
+                    </button>
+                  )}
+                  {partida.tipoPartida === "Digital" ? (
+                    <button
+                      onClick={() =>
+                        handleStatusChange(
+                          partida.status === "cancelled" ? "active" : "cancelled"
+                        )
+                      }
+                      className={`cursor-pointer border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-nude/10 min-h-[2.625rem] rounded-31xl box-border ${
+                        partida.status === "cancelled"
+                          ? "border-dark-gold text-white"
+                          : "border-red-500 text-red-500"
+                      }`}
+                    >
+                      <b className="text-[1rem] font-radio-option">
+                        {partida.status === "cancelled"
+                          ? "Volver a poner a la venta"
+                          : "Retirar de la venta"}
+                      </b>
+                    </button>
+                  ) : partida.status === "cancelled" ? (
+                    <button
+                      onClick={() => handleStatusChange("active")}
+                      className="cursor-pointer border-dark-gold border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-nude/10 h-[2.625rem] rounded-31xl box-border"
+                    >
+                      <b className="text-[1.125rem] font-radio-option text-white">
+                        {t.detailsGame.reactivateButton}
+                      </b>
+                    </button>
+                  ) : partida.status !== "completed" ? (
+                    <button
+                      onClick={() => handleStatusChange("cancelled")}
+                      className="cursor-pointer border-red-500 border-[1px] border-solid py-[0.5rem] px-[2.75rem] bg-red-900/20 h-[2.625rem] rounded-31xl box-border"
+                    >
+                      <b className="text-[1.125rem] font-radio-option text-red-500">
+                        {t.detailsGame.cancelGameButton}
+                      </b>
+                    </button>
+                  ) : null}
                 </>
               )}
               <button
@@ -646,6 +883,17 @@ const DetailsGame: FunctionComponent = () => {
                 </b>
               </button>
             </div>
+            {user?.id !== partida.masterId &&
+              partida.status === "completed" &&
+              partida.tipoPartida !== "Digital" &&
+              isJoined &&
+              partida.masterId &&
+              partidaId && (
+                <ReviewForm
+                  partidaId={partidaId}
+                  masterId={partida.masterId}
+                />
+              )}
           </div>
         </section>
       </main>

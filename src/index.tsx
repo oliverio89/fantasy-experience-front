@@ -4,14 +4,16 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import "./global.css";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const container = document.getElementById("root");
-console.log(container + "aqui estoy");
 const root = createRoot(container!);
 
 root.render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
+  <ErrorBoundary>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </ErrorBoundary>
 );
 reportWebVitals();

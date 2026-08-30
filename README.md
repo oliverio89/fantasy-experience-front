@@ -1,70 +1,143 @@
-# Fanstasy Experience (Castellano)
+# Fantasy Experience
 
-> Nueva documentación unificada: ver `DOCUMENTACION_UNIFICADA.md` para un índice único, guía rápida, especificaciones de backend, migración y cambios.
+Marketplace web que conecta jugadores de rol con Másters. Los Másters publican partidas, los jugadores buscan y reservan plazas, y las sesiones completadas pueden recibir reseñas verificadas.
 
-**Iniciación del proyecto:**
+## Estado del MVP
 
-1. Asegurate de tener Node JS instalada en tú computador.
-2. Abre el proyecto en un editor de código como Visual Estudio Code.
-3. Escribe en la terminal, `npm install` para instalar las dependencias bases del proyecto.
-4. **Configura las variables de entorno:**
-   - Copia `.env.example` a `.env`: `cp .env.example .env`
-   - Edita `.env` con tus credenciales de Supabase (ver `SECURITY.md` para más detalles)
-5. Escribe en la terminal, `npm start` para ver el proyecto en tu navegador.
+Incluido actualmente:
 
-**Objetivos del proyecto:**
+- registro con roles `player` y `master`, confirmación de correo y recuperación de contraseña;
+- catálogo de Másters y partidas con búsqueda, filtros, orden y paginación;
+- creación y edición de partidas por Másters;
+- reservas atómicas con límites de aforo y de reservas activas;
+- cobros con Stripe Checkout, reserva temporal de plaza, webhook idempotente y devoluciones al cancelar una partida;
+- ciclo `active` → `full` / `cancelled` / `completed`;
+- panel de reservas del jugador y partidas del Máster;
+- reseñas sólo para participantes de partidas completadas;
+- notificaciones internas de reservas y cambios de estado;
+- edición y eliminación autoservicio de cuenta con anonimización del historial compartido;
+- RLS, permisos por columna y funciones seguras en PostgreSQL;
+- páginas de privacidad, cookies, términos y aviso legal configurables.
 
-El principal objetivo de la aplicación es conectar Masters de rol que ofrezcan sus servicios de partidas a los usuarios de la aplicación par que puedan contratar sus servicios.
+Los cobros de esta versión entran en la cuenta Stripe de la plataforma. El reparto automático a Másters todavía no está incluido: para ello hay que definir fiscalidad, comisión y onboarding antes de incorporar Stripe Connect.
 
-**Stack:**
+## Stack
 
-Los lenguajes de programación o librerias que utilizaré en el proyecto son:
+- React 18, TypeScript, Vite y Tailwind CSS.
+- Supabase Auth, PostgreSQL, Storage y Row Level Security.
+- Vitest, Testing Library, ESLint, auditoría npm y Dependabot.
+- Web3Forms para contacto y feedback.
 
-- **React JS con Vite** para el fronteng ayudandome de diversas librerias como react router dom para ahcer más sencillo el desarrollo.
+## Arranque local
 
-- **PHP con Laravel** para un desarrollo robusto del backend.
+Requisitos: Node.js 20.19 o superior y npm.
 
-- **MySQL** para la BBDD.
+```bash
+npm ci
+cp .env.example .env
+npm start
+```
 
-**Estado actual del proyecto**
+En Windows, copia `.env.example` a `.env` con el Explorador o PowerShell antes de arrancar.
 
-Al inicio del proyecto tomé la decisión de incursionar en el mundo de las inteligencias artificiales para acelerar el proyecto y aprender de estas nuevas herramientas, y tras mucha investigación y pruebas, me decanté por Locofy.io, una IA que basandose en un desarrollo realizado en Figma lo trnascribe a código, el resultado no era lo esperado, ya que aún les queda mucho por mejorar, pero si que me sirvió para sentar las bases iniciales del proyecto agilizando su inicio, y desde ahí poder ir desarrollando la aplicación.
+Variables necesarias:
 
-Ene stos momentos me dedico a página a página ir revisando el código y afinando el diseño.
+- `VITE_PUBLIC_SUPABASE_URL`
+- `VITE_ANON_KEY` — usa exclusivamente la clave pública/anon, nunca `service_role`.
+- `VITE_WEB3FORMS_ACCESS_KEY`
+- `VITE_LEGAL_OWNER`, `VITE_LEGAL_TAX_ID`, `VITE_LEGAL_ADDRESS`, `VITE_LEGAL_EMAIL`
+- `VITE_SHOW_CONSTRUCTION_BANNER` (`true` o `false`)
 
-Aún no está planificado ni el backend ni la BBDD.
+## Base de datos
 
-Todo el que quiera ser participe del proyecto puede escribirme a victor.mrngarcia@gmail.com y ver las posibilidades de acción.
+Las migraciones versionadas son la fuente de verdad:
 
-# Fanstasy Experience (English)
+1. `supabase/migrations/20260830180000_initial_schema.sql`
+2. `supabase/migrations/20260830190000_mvp_core_hardening.sql`
+3. `supabase/migrations/20260830200000_stripe_payments_security.sql`
+4. `supabase/migrations/20260830210000_master_ranking_digital_products.sql`
 
-**Project Initiation:**
+En un proyecto nuevo, enlaza Supabase CLI y ejecuta:
 
-1. Make sure you have Node.js installed on your computer.
-2. Open the project in a code editor like Visual Studio Code.
-3. Type `npm install` in the terminal.
-4. Type `npm start` in the terminal to view the project in your browser.
+```bash
+supabase link --project-ref TU_PROJECT_REF
+supabase db push
+```
 
-**Project Objectives:**
+### Activar Stripe
 
-The main objective of the application is to connect role-playing game Masters offering their services with users of the application, allowing them to hire their services.
+1. Copia `supabase/.env.example` a `supabase/.env.local` y completa las claves de prueba.
+2. Sube los secretos y despliega las funciones:
 
-**Stack:**
+```bash
+supabase secrets set --env-file supabase/.env.local
+supabase functions deploy create-checkout-session
+supabase functions deploy payment-status
+supabase functions deploy download-digital-product
+supabase functions deploy cancel-game
+supabase functions deploy stripe-webhook --no-verify-jwt
+```
 
-The programming languages or libraries I will use in the project are:
+3. En Stripe Workbench crea un destino de eventos HTTPS hacia
+   `https://TU_PROJECT_REF.supabase.co/functions/v1/stripe-webhook` para
+   `checkout.session.completed`, `checkout.session.expired` y
+   `charge.refunded`.
+4. Copia su secreto `whsec_...` a `STRIPE_WEBHOOK_SECRET` y vuelve a ejecutar
+   `supabase secrets set --env-file supabase/.env.local`.
 
-- **React.js with Vite** for the frontend, utilizing various libraries like React Router DOM to simplify development.
+Usa primero el modo test de Stripe. La plaza sólo se confirma desde el webhook;
+la URL `/payment/success` consulta el resultado, pero nunca concede acceso por
+sí misma.
 
-- **PHP with Laravel** for robust backend development.
+Las funciones todavía no publicadas deben enlazar a `/en-desarrollo` (también
+disponible como `/proximamente`). La página informa de que la funcionalidad no
+está disponible, aclara que no puede generar reservas ni cobros y ofrece una
+vuelta directa al inicio.
 
-- **MySQL** for the database.
+En una base que ya se creó manualmente con `DATABASE.md`, no ejecutes la migración inicial sin comparar primero el esquema; aplica el hardening en staging y valida los datos existentes. `DATABASE.md` queda como referencia explicativa, pero las migraciones mandan.
 
-**Current Status of the Project**
+Tras desplegar el frontend, añade en Supabase Auth las URLs permitidas de producción:
 
-At the beginning of the project, I decided to explore the world of artificial intelligence to speed up development and learn from these new tools. After extensive research and testing, I chose Locofy.io, an AI that translates Figma designs into code. The result was not as expected, as there is still much room for improvement, but it did help lay the initial foundations of the project, accelerating its start and allowing me to move forward with the application development.
+- `https://tu-dominio/reset-password`
+- `https://tu-dominio/email-confirmation`
 
-Currently, I am working on refining the code and polishing the design page by page.
+El hosting debe resolver las rutas de la SPA contra `index.html`. En Nginx, el
+bloque que sirve el frontend necesita `try_files $uri $uri/ /index.html;` para
+que enlaces directos como `/detailsgame/:id` y `/user/:id` no devuelvan 404.
 
-The backend and database are not yet planned.
+## Calidad
 
-Anyone interested in participating in the project can write to me at victor.mrngarcia@gmail.com to discuss potential collaboration opportunities.
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run test:coverage
+npm audit --audit-level=high
+npm run build
+```
+
+La CI ejecuta typecheck, lint, tests y build antes del despliegue.
+
+## Seguridad y operación
+
+- El cliente nunca puede asignarse `admin` ni modificar rating, estado o contador de plazas.
+- Las reservas pasan por `join_game` / `leave_game` con bloqueo de fila.
+- Las partidas con precio no pueden usar `join_game`: el importe se calcula en PostgreSQL, Checkout se crea en una Edge Function y el webhook firmado confirma la plaza.
+- Las sesiones de pago caducan, cuentan temporalmente para el aforo y se limitan por usuario; los eventos y reembolsos usan claves de idempotencia.
+- El contacto de una partida sólo se obtiene para el Máster, un participante o administración.
+- Los perfiles de jugadores, los participantes y el historial cerrado no forman parte del catálogo público.
+- La publicación y las reservas se serializan por usuario para respetar los límites incluso con peticiones concurrentes.
+- La eliminación de cuenta limpia los archivos propios, retira datos personales y conserva anonimizado únicamente el historial que afecta a terceros.
+- Una partida con reservas se cancela; no puede borrarse perdiendo historial.
+- No publiques `.env`, credenciales de Supabase, claves privadas ni `service_role`.
+- Incluye `deploy/nginx-security-headers.conf.example` en el bloque HTTPS de Nginx y revisa la CSP al cambiar el JSON-LD o proveedores externos.
+
+Consulta [SECURITY.md](./SECURITY.md) para el checklist de despliegue y reporte de vulnerabilidades.
+
+## Pendiente antes del lanzamiento comercial
+
+- completar y revisar profesionalmente los datos/textos legales;
+- definir comisión, impuestos, disputas, política de cancelación individual y Stripe Connect antes de pagar automáticamente a Másters;
+- configurar correos transaccionales para cancelaciones y recordatorios;
+- validar las migraciones en staging con datos representativos;
+- revisar conjuntamente el contenido y acabado visual, que se ha dejado fuera de este bloque de trabajo.

@@ -2,8 +2,8 @@ import { FunctionComponent, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import InputFieldsContainer from "../components/input-fields-container";
 import Button from "../components/button";
-import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
+import { getErrorMessage } from "../lib/errors";
 import { CustomRadio } from "../components/ui/CustomRadio";
 import Modal from "../components/ui/Modal";
 import { useTranslation } from "../i18n";
@@ -19,6 +19,7 @@ const Registerv: FunctionComponent = () => {
     password: "",
     confirmPassword: "",
     role: "player", // default
+    acceptTerms: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,7 @@ const Registerv: FunctionComponent = () => {
   };
 
   const onRegisterClick = async () => {
+    if (loading) return;
     // 1. Validation Logic
     if (
       !formData.name.trim() ||
@@ -58,40 +60,50 @@ const Registerv: FunctionComponent = () => {
       return;
     }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 8) {
       showError(t.register.errors.passwordWeakTitle, t.register.errors.passwordWeakMsg);
+      return;
+    }
+
+    if (formData.name.trim().length < 2 || formData.name.trim().length > 80) {
+      showError(t.register.errors.invalidNameTitle, t.register.errors.invalidNameMsg);
+      return;
+    }
+
+    if (formData.city.trim().length > 100) {
+      showError(t.register.errors.invalidCityTitle, t.register.errors.invalidCityMsg);
+      return;
+    }
+
+    if (!formData.acceptTerms) {
+      showError(t.register.errors.termsTitle, t.register.errors.termsMsg);
       return;
     }
 
     setLoading(true);
 
     try {
-      console.log("Attempting Supabase SignUp with:", {
-        email: formData.email,
-      });
-
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
+      const { error } = await supabase.auth.signUp({
+        email: formData.email.trim(),
         password: formData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/email-confirmation`,
           data: {
-            full_name: formData.name,
+            full_name: formData.name.trim(),
             role: formData.role,
-            city: formData.city,
+            city: formData.city.trim() || null,
+            legal_accepted: true,
+            legal_version: "2026-08-30",
           },
         },
       });
 
       if (error) throw error;
 
-      console.log("Supabase SignUp Success:", data);
-
-      // Navigate to login on success
-      navigate("/login");
-    } catch (error: any) {
+      navigate("/email-confirmation?pending=1");
+    } catch (error: unknown) {
       console.error("Registration Error:", error);
-      const errorMessage = error.message || "";
+      const errorMessage = getErrorMessage(error);
 
       // 2. Map Supabase Errors to User-Friendly Messages
       if (
@@ -173,6 +185,7 @@ const Registerv: FunctionComponent = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                maxLength={80}
               />
             </div>
           </div>
@@ -231,8 +244,11 @@ const Registerv: FunctionComponent = () => {
           correoElectrnico={t.register.emailLabel}
           ingresaTuEmailPlaceholder={t.register.emailPlaceholder}
           name="email"
+          type="email"
           value={formData.email}
           onChange={handleChange}
+          maxLength={254}
+          autoComplete="email"
         />
         <InputFieldsContainer
           correoElectrnico={t.register.cityLabel}
@@ -240,6 +256,8 @@ const Registerv: FunctionComponent = () => {
           name="city"
           value={formData.city}
           onChange={handleChange}
+          maxLength={100}
+          autoComplete="address-level2"
           propPadding="0rem 1.25rem"
           propGap="0.375rem"
           propPadding1="0rem 0.437rem 0rem 0.812rem"
@@ -252,6 +270,9 @@ const Registerv: FunctionComponent = () => {
           type="password"
           value={formData.password}
           onChange={handleChange}
+          minLength={8}
+          maxLength={128}
+          autoComplete="new-password"
           propPadding="0rem 1.25rem"
           propGap="0.375rem"
           propPadding1="0rem 0rem 0rem 0.75rem"
@@ -264,11 +285,46 @@ const Registerv: FunctionComponent = () => {
           type="password"
           value={formData.confirmPassword}
           onChange={handleChange}
+          minLength={8}
+          maxLength={128}
+          autoComplete="new-password"
           propPadding="0rem 1.25rem 0.625rem"
           propGap="0.312rem"
           propPadding1="0rem 0rem 0rem 0.75rem"
           propMinWidth="12.438rem"
         />
+
+        <label className="w-[21.625rem] max-w-full flex items-start gap-3 text-left text-sm text-black font-titulo-2">
+          <input
+            type="checkbox"
+            checked={formData.acceptTerms}
+            onChange={(event) =>
+              setFormData({ ...formData, acceptTerms: event.target.checked })
+            }
+            className="mt-1"
+          />
+          <span>
+            {t.register.acceptPrefix}{" "}
+            <a
+              className="underline"
+              href="/terminos"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.register.termsLink}
+            </a>{" "}
+            {t.register.andThe}{" "}
+            <a
+              className="underline"
+              href="/privacidad"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.register.privacyLink}
+            </a>
+            .
+          </span>
+        </label>
 
         <div className="flex flex-row items-center justify-center pb-[1.25rem] box-border max-w-full w-full">
           <Button
@@ -280,6 +336,7 @@ const Registerv: FunctionComponent = () => {
             button1Width1="5.75rem"
             button1FontSize="1.125rem"
             type="submit"
+            disabled={loading}
           />
         </div>
 

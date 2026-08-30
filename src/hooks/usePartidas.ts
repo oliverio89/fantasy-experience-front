@@ -93,12 +93,15 @@ export const usePartidas = (filtros?: FiltrosPartida) => {
     filtros?.tipo,
     filtros?.sistemaJuego,
     filtros?.masterId,
-    filtros?.ratingMin,
     filtros?.limit,
     filtros?.page,
     filtros?.busqueda,
+    filtros?.tags,
     filtros?.fechaInicio,
     filtros?.fechaFin,
+    filtros?.status,
+    filtros?.ordenarPor,
+    filtros?.ordenAscendente,
   ]);
 
   const recargar = useCallback(async () => {

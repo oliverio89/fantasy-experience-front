@@ -27,3 +27,7 @@ export const PRESET_TAGS = [
   "Monster of the Week",
   "Savage Worlds",
 ];
+
+export const FALLBACK_AVATAR_URL = "/user.svg";
+export const FALLBACK_GAME_IMAGE_URL =
+  "/konradkollerlctjo2d9-2cunsplash-1@2x.png";

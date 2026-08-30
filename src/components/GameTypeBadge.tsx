@@ -26,7 +26,7 @@ const GameTypeBadge: FunctionComponent<GameTypeBadgeType> = memo(
 
     return (
       <div
-        className={`self-stretch rounded-t-xl rounded-b-none flex flex-row items-start justify-end pt-[7px] px-6 pb-[133px] box-border bg-[url('/public/frame-5@3x.png')] bg-cover bg-no-repeat bg-[top] max-w-full z-[1] text-center text-base text-black font-texto ${className}`}
+        className={`self-stretch rounded-t-xl rounded-b-none flex flex-row items-start justify-end pt-[7px] px-6 pb-[133px] box-border bg-[url('/konradkollerlctjo2d9-2cunsplash-1@2x.png')] bg-cover bg-no-repeat bg-[top] max-w-full z-[1] text-center text-base text-black font-texto ${className}`}
         style={frameDiv1Style}
       >
         <img

@@ -6,44 +6,16 @@ import {
   useState,
 } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Master,
-  ExperienciaMaster,
-  DisponibilidadMaster,
-  RangoPrecio,
-  SistemaJuego,
-} from "../types/masters";
-import { ProfileService, Profile } from "../services/profileService";
+import { Master } from "../types/masters";
+import { mapProfileToMaster, ProfileService } from "../services/profileService";
 import PartidaCard, { Partida } from "../components/PartidaCard";
 import PartidasService from "../services/partidasService";
 import { useTranslation } from "../i18n";
+import ReviewService, { PublicMasterReview } from "../services/reviewService";
 
 export type MasterDetailType = {
   className?: string;
 };
-
-const mapProfileToMaster = (profile: Profile): Master => ({
-  id: profile.id,
-  username: profile.fullName?.toLowerCase().replace(/\s+/g, "") || profile.id,
-  displayName: profile.fullName || "Master",
-  email: "hidden",
-  avatar: profile.avatarUrl || "/default-avatar.png",
-  bio: profile.bio || "Sin biografía.",
-  experiencia: (profile.experiencia as ExperienciaMaster) || "Intermedio",
-  sistemas: (profile.sistemas as SistemaJuego[]) || [],
-  tiposPartida: (profile.tiposPartida as any[]) || [],
-  disponibilidad: (profile.disponibilidad as DisponibilidadMaster) || "Disponible",
-  estilos: (profile.estilos as any[]) || [],
-  idiomas: (profile.idiomas as any[]) || [],
-  precioPorSesion: (profile.precioPorSesion as RangoPrecio) || "Gratis",
-  duracionSesion: (profile.duracionSesion as any[]) || [],
-  numeroJugadores: (profile.numeroJugadores as any[]) || [],
-  rating: profile.rating || 0,
-  totalReviews: profile.totalReviews || 0,
-  timezone: profile.timezone || "Europe/Madrid",
-  createdAt: new Date(profile.updatedAt || Date.now()),
-  lastActive: new Date(),
-});
 
 const MasterDetail: FunctionComponent<MasterDetailType> = memo(
   ({ className = "" }) => {
@@ -53,12 +25,14 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
     const [master, setMaster] = useState<Master | null>(null);
     const [partidas, setPartidas] = useState<Partida[]>([]);
     const [loadingPartidas, setLoadingPartidas] = useState(false);
+    const [reviews, setReviews] = useState<PublicMasterReview[]>([]);
+    const [loadingReviews, setLoadingReviews] = useState(false);
 
     useEffect(() => {
       if (!masterId) return;
       ProfileService.getProfile(masterId)
         .then((profile) => {
-          if (profile) {
+          if (profile && (profile.role === "master" || profile.role === "admin")) {
             setMaster(mapProfileToMaster(profile));
           } else {
             navigate("/ourmasters");
@@ -76,17 +50,22 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
         .finally(() => setLoadingPartidas(false));
     }, [masterId]);
 
+    useEffect(() => {
+      if (!masterId) return;
+      setLoadingReviews(true);
+      ReviewService.getPublicMasterReviews(masterId)
+        .then(setReviews)
+        .catch(() => setReviews([]))
+        .finally(() => setLoadingReviews(false));
+    }, [masterId]);
+
     const handleBackClick = useCallback(() => {
       navigate("/ourmasters");
     }, [navigate]);
 
     const handleGameClick = useCallback(
-      (partidaId?: string) => {
-        if (partidaId) {
-          navigate(`/partidasdetalles-v12/${partidaId}`);
-        } else {
-          navigate("/partidasdetalles-v12");
-        }
+      (partidaId: string) => {
+        navigate(`/detailsgame/${partidaId}`);
       },
       [navigate]
     );
@@ -259,6 +238,11 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
             <section className="flex-1 flex flex-col items-start justify-start gap-[35.7px] min-w-[476px] max-w-full text-center text-21xl text-dark-gold font-texto-2 mq700:min-w-full mq900:gap-[18px]">
               {/* Nombre del Master y Rating */}
               <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-end justify-start p-6 gap-0.5">
+                {master.isFeatured && (
+                  <span className="self-center mb-2 rounded-full bg-dark-gold px-4 py-1 text-xs font-bold uppercase tracking-wider text-black">
+                    Máster destacado
+                  </span>
+                )}
                 <h1 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-5xl mq900:text-13xl text-light-gold">
                   {master.displayName}
                 </h1>
@@ -270,6 +254,32 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                     {renderStars(master.rating)}
                   </div>
                 </div>
+                <p className="self-center m-0 mt-2 text-sm text-nude/70">
+                  {master.totalReviews} valoraciones verificadas
+                </p>
+              </div>
+
+              <div className="self-stretch rounded-xl bg-darkslategray p-6 text-left">
+                <h2 className="m-0 mb-4 text-2xl text-nude">Trayectoria verificada</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    [master.completedSessions, "Partidas jugadas"],
+                    [master.publishedSessions, "Partidas publicadas"],
+                    [master.playersServed, "Jugadores dirigidos"],
+                    [master.totalReviews, "Valoraciones"],
+                    [master.digitalProducts, "Aventuras digitales"],
+                    [master.digitalSales, "Ventas digitales"],
+                  ].map(([value, label]) => (
+                    <div key={String(label)} className="rounded-lg border border-white/10 bg-black/20 p-3 text-center">
+                      <strong className="block text-2xl text-light-gold">{value}</strong>
+                      <span className="text-xs leading-tight text-nude/70">{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="m-0 mt-4 text-sm leading-5 text-nude/60">
+                  El distintivo se obtiene con al menos 3 partidas finalizadas, 3 opiniones,
+                  una media mínima de 4/5 y una tasa de cancelación no superior al 25 %.
+                </p>
               </div>
 
               {/* Bio */}
@@ -309,7 +319,7 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
               {/* Próximas partidas */}
               <div className="self-stretch rounded-xl bg-darkslategray flex flex-col items-start justify-start p-6 box-border gap-[27px] max-w-full text-15xl text-nude mq700:p-4 mq700:box-border">
                 <h2 className="m-0 self-stretch relative text-inherit font-bold font-[inherit] z-[1] mq450:text-xl mq900:text-8xl">
-                  {t.masterDetail.upcomingGames}
+                  Partidas y aventuras disponibles
                 </h2>
                 {loadingPartidas ? (
                   <div className="flex items-center justify-center w-full py-6">
@@ -329,6 +339,38 @@ const MasterDetail: FunctionComponent<MasterDetailType> = memo(
                         onClick={() => handleGameClick(String(partida.id))}
                         className="flex-1 min-w-[211px] max-w-full"
                       />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="self-stretch rounded-xl bg-darkslategray p-6 text-left text-nude mq700:p-4">
+                <h2 className="m-0 text-3xl">Opiniones de jugadores</h2>
+                <p className="mt-2 mb-5 text-sm text-nude/60">
+                  Solo pueden opinar jugadores que participaron en una partida finalizada.
+                </p>
+                {loadingReviews ? (
+                  <div className="flex justify-center py-6"><div className="loader" /></div>
+                ) : reviews.length === 0 ? (
+                  <p className="text-base text-nude/60">Todavía no hay opiniones verificadas.</p>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {reviews.map((review) => (
+                      <article key={review.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <strong className="text-lg text-light-gold">{review.gameTitle}</strong>
+                          <span className="text-dark-gold" aria-label={`${review.rating} de 5 estrellas`}>
+                            {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+                          </span>
+                        </div>
+                        <p className="my-3 text-base leading-6">{review.comment}</p>
+                        <div className="flex justify-between gap-3 text-xs text-nude/50">
+                          <span>Jugador verificado</span>
+                          <time dateTime={review.createdAt}>
+                            {new Intl.DateTimeFormat("es-ES", { dateStyle: "medium" }).format(new Date(review.createdAt))}
+                          </time>
+                        </div>
+                      </article>
                     ))}
                   </div>
                 )}

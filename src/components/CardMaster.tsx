@@ -5,6 +5,10 @@ export type SlideType = {
   masterCard?: string;
   MasterName?: string;
   rate?: number; // Rating del 1 al 5
+  totalReviews?: number;
+  completedSessions?: number;
+  publishedSessions?: number;
+  isFeatured?: boolean;
   Sistema?: string;
   Preferencia?: string;
 
@@ -19,6 +23,10 @@ const CardMaster: FunctionComponent<SlideType> = memo(
     masterCard,
     MasterName,
     rate = 0,
+    totalReviews = 0,
+    completedSessions = 0,
+    publishedSessions = 0,
+    isFeatured = false,
     Sistema,
     Preferencia,
   }) => {
@@ -94,7 +102,7 @@ const CardMaster: FunctionComponent<SlideType> = memo(
 
     return (
       <div
-        className={`h-[409px] w-[360px] relative shrink-0 max-w-full cursor-pointer text-center text-13xl text-dark-gold font-titulo-2 ${className}`}
+        className={`h-[445px] w-[360px] relative shrink-0 max-w-full cursor-pointer text-center text-13xl text-dark-gold font-titulo-2 ${className}`}
         onClick={handleClick}
         role="button"
         tabIndex={0}
@@ -107,6 +115,11 @@ const CardMaster: FunctionComponent<SlideType> = memo(
           alt={MasterName ? `Foto de perfil de ${MasterName}` : "Foto de perfil del Máster"}
           src={masterCard}
         />
+        {isFeatured && (
+          <span className="absolute top-3 right-3 z-[3] rounded-full bg-dark-gold px-3 py-1 text-xs font-bold uppercase tracking-wide text-black shadow-lg">
+            Máster destacado
+          </span>
+        )}
         <div className="absolute top-[49px] left-[0px] shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black border-dark-gold border-[1px] border-solid box-border w-full flex flex-col items-end justify-start pt-40 px-0 pb-3.5 gap-4">
           <div className="self-stretch h-[360px] relative shadow-[0px_6px_10px_4px_rgba(0,_0,_0,_0.15),_0px_2px_3px_rgba(0,_0,_0,_0.3)] rounded-xl bg-black border-dark-gold border-[1px] border-solid box-border hidden" />
           <h2 className="m-0 self-stretch h-[18px] relative text-inherit font-bold font-[inherit] flex items-center justify-center shrink-0 z-[1] mq1050:text-7xl mq450:text-lgi">
@@ -126,6 +139,21 @@ const CardMaster: FunctionComponent<SlideType> = memo(
             </b>
             <div className="self-stretch relative text-base z-[1] text-nude leading-normal font-medium flex items-center justify-center">
               {Preferencia}
+            </div>
+          </div>
+
+          <div className="self-stretch grid grid-cols-3 gap-2 px-4 text-nude">
+            <div className="rounded-lg bg-white/5 px-2 py-2">
+              <strong className="block text-lg text-light-gold">{completedSessions}</strong>
+              <span className="block text-[11px] leading-tight">jugadas</span>
+            </div>
+            <div className="rounded-lg bg-white/5 px-2 py-2">
+              <strong className="block text-lg text-light-gold">{publishedSessions}</strong>
+              <span className="block text-[11px] leading-tight">publicadas</span>
+            </div>
+            <div className="rounded-lg bg-white/5 px-2 py-2">
+              <strong className="block text-lg text-light-gold">{totalReviews}</strong>
+              <span className="block text-[11px] leading-tight">opiniones</span>
             </div>
           </div>
 

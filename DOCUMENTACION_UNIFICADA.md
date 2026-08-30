@@ -1,5 +1,9 @@
 # 📘 Documentación Unificada — Fantasy Experience Front
 
+> **Documento histórico.** Parte de esta guía describe el prototipo anterior.
+> Para el estado real del MVP, puesta en marcha y arquitectura de seguridad,
+> consulta `README.md`, `SECURITY.md` y `supabase/migrations/`.
+
 Última actualización: 25 Oct 2025 — Versión 1.1.0
 
 ---
