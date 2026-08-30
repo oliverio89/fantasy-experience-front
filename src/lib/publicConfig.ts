@@ -1,4 +1,5 @@
 export const publicConfig = {
+  paymentsEnabled: import.meta.env.VITE_ENABLE_PAYMENTS === "true",
   web3FormsAccessKey: import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "",
   legalOwner:
     import.meta.env.VITE_LEGAL_OWNER ||

@@ -880,7 +880,7 @@ AS $$
             THEN (metrics.cancelled_sessions::NUMERIC / metrics.published_sessions) * 20
             ELSE 0
           END
-      ),
+      )::NUMERIC,
       2
     ) AS ranking_score,
     (

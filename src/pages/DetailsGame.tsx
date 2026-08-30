@@ -14,6 +14,7 @@ import ReviewForm from "../components/ReviewForm";
 import { FALLBACK_GAME_IMAGE_URL } from "../constants";
 import { getErrorMessage } from "../lib/errors";
 import PaymentService from "../services/paymentService";
+import { publicConfig } from "../lib/publicConfig";
 
 const DetailsGame: FunctionComponent = () => {
   const navigate = useNavigate();
@@ -167,6 +168,12 @@ const DetailsGame: FunctionComponent = () => {
           const download = await PaymentService.obtenerDescargaDigital(partidaId);
           window.location.assign(download.url);
         } else {
+          if (!publicConfig.paymentsEnabled) {
+            navigate("/en-desarrollo", {
+              state: { feature: "El pago seguro de aventuras digitales" },
+            });
+            return;
+          }
           const checkoutUrl = await PaymentService.iniciarPago(partidaId);
           window.location.assign(checkoutUrl);
         }
@@ -183,6 +190,12 @@ const DetailsGame: FunctionComponent = () => {
           throw new Error(t.detailsGame.gameFull);
         }
         if (isPaidGame) {
+          if (!publicConfig.paymentsEnabled) {
+            navigate("/en-desarrollo", {
+              state: { feature: "La reserva de partidas de pago" },
+            });
+            return;
+          }
           const checkoutUrl = await PaymentService.iniciarPago(partidaId);
           window.location.assign(checkoutUrl);
           return;

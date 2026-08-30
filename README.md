@@ -53,9 +53,10 @@ Variables necesarias:
 Las migraciones versionadas son la fuente de verdad:
 
 1. `supabase/migrations/20260830180000_initial_schema.sql`
-2. `supabase/migrations/20260830190000_mvp_core_hardening.sql`
-3. `supabase/migrations/20260830200000_stripe_payments_security.sql`
-4. `supabase/migrations/20260830210000_master_ranking_digital_products.sql`
+2. `supabase/migrations/20260830185000_legacy_schema_compatibility.sql`
+3. `supabase/migrations/20260830190000_mvp_core_hardening.sql`
+4. `supabase/migrations/20260830200000_stripe_payments_security.sql`
+5. `supabase/migrations/20260830210000_master_ranking_digital_products.sql`
 
 En un proyecto nuevo, enlaza Supabase CLI y ejecuta:
 

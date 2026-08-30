@@ -55,6 +55,7 @@ jobs:
           VITE_PUBLIC_SUPABASE_URL: ${{ secrets.VITE_PUBLIC_SUPABASE_URL }}
           VITE_ANON_KEY: ${{ secrets.VITE_ANON_KEY }}
           VITE_WEB3FORMS_ACCESS_KEY: ${{ secrets.VITE_WEB3FORMS_ACCESS_KEY }}
+          VITE_ENABLE_PAYMENTS: ${{ vars.VITE_ENABLE_PAYMENTS }}
           VITE_LEGAL_OWNER: ${{ vars.VITE_LEGAL_OWNER }}
           VITE_LEGAL_TAX_ID: ${{ vars.VITE_LEGAL_TAX_ID }}
           VITE_LEGAL_ADDRESS: ${{ vars.VITE_LEGAL_ADDRESS }}
